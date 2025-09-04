@@ -10,7 +10,8 @@ EXCLUDE_DIRS = ['.git', '.idea', 'soft', 'plugins/pvideo', 'plugins/req-proxy', 
                 'vod_cache', 'data/mv']
 
 # 要排除的文件列表
-EXCLUDE_FILES = ['config/env.json', '.env', '.claude', '.plugins.js', 'yarn.lock', 't4_daemon.pid',
+EXCLUDE_FILES = ['config/env.json', '.env', '.claude', 'clipboard.txt', 'clipboard.txt.bak', '.plugins.js', 'yarn.lock',
+                 't4_daemon.pid',
                  'spider/js/UC分享.js', 'spider/js/百忙无果[官].js',
                  'json/UC分享.json',
                  'jx/奇奇.js', 'jx/芒果关姐.js', 'data/settings/link_data.json', 'index.json', 'custom.json']

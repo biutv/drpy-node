@@ -152,3 +152,5 @@ dist
 /plugins/
 /.claude
 /.plugins.js
+/clipboard.txt
+/clipboard.txt.bak

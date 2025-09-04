@@ -12,3 +12,11 @@
 ### hipy
 
 - 检查python环境 [/health](/health)
+
+### 自定义插件
+
+#### 智能剪切板
+
+- 读取当前剪切板数据(get) [/clipboard/read](/clipboard/read)
+- 往剪切板写数据(post) [/clipboard/add](/clipboard/add)
+- 清空剪切板数据(post) [/clipboard/clear](/clipboard/clear)
