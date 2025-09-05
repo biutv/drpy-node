@@ -1,5 +1,25 @@
 # drpyS更新记录
 
+### 20250905
+
+更新至V1.2.25
+
+1. 更新 `百度盘` 插件及相关资源
+2. 增加几个ds源
+3. 增加一个Hipy模板
+4. 修复设置中心扫码类动作错误
+5. 完善hipy测试用例文件: `base_test.py`
+6. 全部T4本地代理接口传入`extend` 参数保证模板源可以正常代理
+7. 修复猫爪兼容性问题，完美支持hipy t4
+8. 制定新Hipy标准-所有模板类hipy源(即map.txt传参源)，重新规范所有hipy模板源代码。
+   必须写下面代码，禁止直接定义类共享变量防止多个实例同时使用出问题,其他非模板源允许定义类共享变量:
+
+```python
+def __init__(self, query_params=None, t4_api=None):
+    super().__init__(query_params=query_params, t4_api=t4_api)
+    self.自定义变量 = {}
+```
+
 ### 20250903
 
 更新至V1.2.24

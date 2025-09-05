@@ -27,9 +27,18 @@ sys.path.append('..')
 
 
 class Spider(BaseSpider):
-    xurl, key, iv, init_data, search_verify = '', '', '', '', ''
-    username, password, device_id = '', '', ''
-    header = {'User-Agent': 'okhttp/3.14.9'}
+
+    def __init__(self, query_params=None, t4_api=None):
+        super().__init__(query_params=query_params, t4_api=t4_api)
+        self.xurl = ''
+        self.key = ''
+        self.iv = ''
+        self.init_data = ''
+        self.search_verify = ''
+        self.username = ''
+        self.password = ''
+        self.device_id = ''
+        self.header = {'User-Agent': 'okhttp/3.14.9'}
 
     def init(self, extend=''):
         ext = json.loads(self.extend.strip())

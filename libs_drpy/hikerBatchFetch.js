@@ -1,10 +1,9 @@
 import DsQueue from './dsQueue.js';
 import fastq from "fastq";
-import http from 'http';
-import https from 'https';
-import axios from 'axios';
+import createAxiosInstance from "../utils/createAxiosAgent.js";
 
-const batchSockets = 16;
+const maxSockets = 16;
+const _axios = createAxiosInstance({maxSockets: maxSockets});
 
 async function sleep(ms) {
     // 模拟异步请求
@@ -17,16 +16,6 @@ async function sleep(ms) {
 
 export const batchFetch3 = async (items, maxWorkers = 16, timeoutConfig = 5000, batchSize = 16) => {
     let t1 = (new Date()).getTime();
-
-    const AgentOption = {keepAlive: true, maxSockets: batchSockets, timeout: 30000}; // 最大连接数64,30秒定期清理空闲连接
-    const httpAgent = new http.Agent(AgentOption);
-    const httpsAgent = new https.Agent({rejectUnauthorized: false, ...AgentOption});
-
-    // 配置 axios 使用代理
-    const _axios = axios.create({
-        httpAgent,  // 用于 HTTP 请求的代理
-        httpsAgent, // 用于 HTTPS 请求的代理
-    });
 
     // 获取全局 timeout 设置
     const timeout = timeoutConfig;
@@ -80,16 +69,6 @@ export const batchFetch3 = async (items, maxWorkers = 16, timeoutConfig = 5000, 
 
 export const batchFetch4 = async (items, maxWorkers = 5, timeoutConfig = 5000) => {
     let t1 = (new Date()).getTime();
-
-    const AgentOption = {keepAlive: true, maxSockets: batchSockets, timeout: 30000}; // 最大连接数64,30秒定期清理空闲连接
-    const httpAgent = new http.Agent(AgentOption);
-    const httpsAgent = new https.Agent({rejectUnauthorized: false, ...AgentOption});
-
-    // 配置 axios 使用代理
-    const _axios = axios.create({
-        httpAgent,  // 用于 HTTP 请求的代理
-        httpsAgent, // 用于 HTTPS 请求的代理
-    });
 
     // 获取全局 timeout 设置
     const timeout = timeoutConfig;

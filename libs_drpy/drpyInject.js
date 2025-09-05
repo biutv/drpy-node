@@ -1,9 +1,7 @@
 import axios, {toFormData} from 'axios';
 import axiosX from './axios.min.js';
-import {createInstance} from './fetchAxios.js';
+import {createHttpsInstance, httpsAgent} from './fetchAxios.js';
 import crypto from 'crypto';
-import http from "http";
-import https from 'https';
 import fs from 'fs';
 import qs from 'qs';
 import _ from './underscore-esm.min.js'
@@ -18,6 +16,7 @@ import {ENV} from '../utils/env.js';
 
 // import {batchFetch1, batchFetch2, batchFetch3} from './drpyBatchFetch.js';
 import {batchFetch3} from './hikerBatchFetch.js';
+import createAxiosInstance from "../utils/createAxiosAgent.js";
 
 globalThis.batchFetch = batchFetch3;
 globalThis.axios = axios;
@@ -25,33 +24,23 @@ globalThis.axiosX = axiosX;
 globalThis.hlsParser = hlsParser;
 globalThis.qs = qs;
 
-const AgentOption = {keepAlive: true, maxSockets: 64, timeout: 30000}; // 最大连接数64,30秒定期清理空闲连接
-const httpAgent = new http.Agent(AgentOption);
-let httpsAgent = new https.Agent({rejectUnauthorized: false, ...AgentOption});
+const maxSockets = 64;
+const _axios = createAxiosInstance({maxSockets: maxSockets});
+let $axios;
 const dsReqLib = Number(process.env.DS_REQ_LIB) || 0;
 console.log('DS/CAT源底层req实现 DS_REQ_LIB (0 fetch 1 axios):', dsReqLib);
-let _axios;
 // 配置 axios 使用代理
 
 if (dsReqLib === 0) {
-    _axios = createInstance({
-        headers: {'User-Agent': 'Mozilla/5.0'},
-        timeout: 10000,
-        responseType: 'text',
-        httpsAgent: new https.Agent({rejectUnauthorized: false}), // 忽略 HTTPS 证书错误
-    });
-
-// 请求拦截器
-    _axios.useRequestInterceptor(RequestInterceptor, (error) => {
+    $axios = createHttpsInstance();
+    // 请求拦截器
+    $axios.useRequestInterceptor(RequestInterceptor, (error) => {
         return Promise.reject(error);
     });
 } else {
-    _axios = axios.create({
-        httpAgent,  // 用于 HTTP 请求的代理
-        httpsAgent, // 用于 HTTPS 请求的代理
-    });
+    $axios = _axios;
     // 请求拦截器
-    _axios.interceptors.request.use(RequestInterceptor, (error) => {
+    $axios.interceptors.request.use(RequestInterceptor, (error) => {
         return Promise.reject(error);
     });
 }
@@ -188,7 +177,7 @@ async function request(url, opt = {}) {
     }
     try {
         // 发送请求
-        const resp = await _axios({
+        const resp = await $axios({
             url: typeof url === 'object' ? url.url : url,
             method,
             headers,

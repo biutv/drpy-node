@@ -3,22 +3,14 @@ import '../utils/random-http-ua.js'
 import {keysToLowerCase} from '../utils/utils.js';
 import {ENV} from "../utils/env.js";
 import chunkStream, {testSupport} from '../utils/chunk.js';
-import http from 'http';
-import https from 'https';
-import axios from 'axios';
+import createAxiosInstance from '../utils/createAxiosAgent.js';
 
-const AgentOption = {keepAlive: true, maxSockets: 64, timeout: 30000}; // 最大连接数64,30秒定期清理空闲连接
-// const AgentOption = {keepAlive: true};
-const httpAgent = new http.Agent(AgentOption);
-// const httpsAgent = new https.Agent({rejectUnauthorized: false, ...AgentOption});
-// 代理媒体还是保证一下证书正确
-const httpsAgent = new https.Agent(AgentOption);
-
-// 配置 axios 使用代理
-const _axios = axios.create({
-    httpAgent,  // 用于 HTTP 请求的代理
-    httpsAgent, // 用于 HTTPS 请求的代理
-});
+const maxSockets = 64;
+const _axios = createAxiosInstance({
+        maxSockets: maxSockets,
+        rejectUnauthorized: true // 不忽略证书错误
+    },
+);
 
 export default (fastify, options, done) => {
     // 用法同 https://github.com/Zhu-zi-a/mediaProxy

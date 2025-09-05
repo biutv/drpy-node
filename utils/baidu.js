@@ -22,8 +22,7 @@ class BaiduHandler {
         this.saveDirName = 'drpy';
         this.saveDirId = null;
         this.subtitleExts = ['.srt', '.ass', '.scc', '.stl', '.ttml'];
-        this.subvideoExts = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.3gp', '.mpeg', '.mpg'];
-
+        this.subvideoExts = ['.mp4', '.mkv', '.avi', '.rmvb', '.mov', '.flv', '.wmv', '.webm', '.3gp', '.mpeg', '.mpg', '.ts', '.mts', '.m2ts', '.vob', '.divx', '.xvid', '.m4v', '.ogv', '.f4v', '.rm', '.asf', '.dat', '.dv', '.m2v'];
         // 2小时自动清理
         this.cleanupInterval = setInterval(() => {
             this.clearSaveDir();
@@ -41,10 +40,10 @@ class BaiduHandler {
     }
 
     getShareData(url) {
-        this.clearSaveDir();
         // 解析分享链接获取分享ID和密码
         try {
             url = decodeURIComponent(url).replace(/\s+/g, '');
+
             let shareId = '';
             let sharePwd = '';
             const match = url.match(/pan\.baidu\.com\/(s\/|wap\/init\?surl=)([^?&#]+)/);
@@ -244,7 +243,7 @@ class BaiduHandler {
         await this.getShareToken(shareData);
         if (!this.shareTokenCache[shareData.shareId]) return {videos: []};
 
-        const cachedData = this.shareTokenCache[shareData.shareId];
+        const cachedData = await this.shareTokenCache[shareData.shareId];
         const videos = [];
         const subtitles = [];
 
@@ -260,7 +259,6 @@ class BaiduHandler {
                 num: 100,
                 dir: shareDir
             }, headers, 'get');
-
             if (dirListData.errno !== 0 || !dirListData.list) {
                 return;
             }
@@ -334,7 +332,6 @@ class BaiduHandler {
             ...video,
             subtitles: subtitleMap.get(getBaseName(video.file_name)) || []
         }));
-
         return {videos: videosWithSubtitles};
     }
 
@@ -367,7 +364,7 @@ class BaiduHandler {
                 const mediaInfo = await this.api(`api/mediainfo`, {
                     type: 'M3U8_FLV_264_480', path: fullPath, clienttype: 80, origin: 'dlna'
                 }, headers, 'get');
-                if (mediaInfo.errno === 133 && mediaInfo.info?.dlink) {
+                if (mediaInfo.info?.dlink) {
                     return {
                         dlink: mediaInfo.info.dlink,
                         headers,
@@ -378,10 +375,9 @@ class BaiduHandler {
                 const downloadInfo = await this.api(`api/download`, {
                     type: 'download', path: fullPath, app_id: 250528
                 }, headers, 'get');
-
-                if (downloadInfo.errno === 0 && downloadInfo.dlink) {
+                if (downloadInfo.info?.dlink) {
                     return {
-                        dlink: downloadInfo.dlink,
+                        dlink: downloadInfo.info.dlink,
                         headers,
                         is_direct: true,
                         full_path: fullPath
@@ -426,7 +422,7 @@ class BaiduHandler {
             Cookie: this.cookie || ''
         };
 
-        const tokenData = this.shareTokenCache[shareData.shareId];
+        const tokenData = await this.shareTokenCache[shareData.shareId];
 
         try {
             const transferResp = await this.api(`share/transfer?shareid=${tokenData.shareid}&from=${tokenData.uk}&sekey=${tokenData.randsk}&ondup=newcopy&async=1&channel=chunlei&web=1&app_id=250528`, {
@@ -435,7 +431,6 @@ class BaiduHandler {
             }, {
                 headers
             }, 'post');
-
             if (transferResp.errno === 0) {
                 return true;
             } else if (transferResp.errno === 113) {

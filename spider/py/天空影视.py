@@ -258,7 +258,7 @@ class Spider(BaseSpider):
                         play_url = j
                         break
         if 'play_url' in locals() and play_url:
-            return {'jx': jx, 'parse': '0', 'url': play_url, 'header': play_header}
+            return {'jx': jx, 'parse': 0, 'url': play_url, 'header': play_header}
         try:
             if parse_url:
                 parse_data = self.fetch(parse_url, headers={'User-Agent': "okhttp/3.10.0", 'Accept-Encoding': "gzip"}, timeout=self.timeout, verify=False).text
@@ -293,7 +293,7 @@ class Spider(BaseSpider):
         play_url = data2['video'][0]['url']
         if play_url.startswith('http'):
             url = play_url
-        return {'jx': jx, 'parse': '0', 'url': url, 'header': play_header}
+        return {'jx': jx, 'parse': 0, 'url': url, 'header': play_header}
 
     def timestamp(self):
         timestamp = time.time()

@@ -147,7 +147,7 @@ class Spider(BaseSpider):
                 url, ua = raw_url, default_ua
         else:
             url,ua = raw_url,default_ua
-        return {'jx': '0','parse': '0','url': url,'header': {'User-Agent': ua}}
+        return {'jx': 0,'parse': 0,'url': url,'header': {'User-Agent': ua}}
 
     def decrypt(self, str):
         key = self.key.ljust(32, '0')

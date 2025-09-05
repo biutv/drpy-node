@@ -63,3 +63,6 @@ getapp3.4.4@@{"host": "https://sykjw.xyz", "key": "sicnagduxbSfisnz", "api": 2}@
 getapp3.4.4@@{"host": "https://guowaiju.com", "key": "7xv16h7qgkrs9b1p"}@@外剧[AG³]
 getapp3.4.4@@{"host": "https://appcms.xy4k.com", "key": "7SDWjknU34zqFbVr"}@@小野[AG³]
 getapp3.4.4@@{"host": "http://tvb.yy-fun.cc", "key": "jcTz6Jda2aKrH8Tk"}@@掌上追剧[AG³]
+AppHs@@{"host": "https://dy.jmzp.net.cn", "app_id": "shiguang", "deviceid": "", "versionCode": "10000", "UMENG_CHANNEL": "guan"}@@拾光视频[Hs]
+AppHs@@{"host": "https://dy.jszdzs.com", "app_id": "xuebao", "deviceid": "", "versionCode": "21300", "UMENG_CHANNEL": "share"}@@雪豹视频[Hs]
+AppHs@@{"host": "https://dy.stxbed.com", "app_id": "haigou", "deviceid": "", "versionCode": "20100", "UMENG_CHANNEL": "zhuan"}@@海狗视频[Hs]

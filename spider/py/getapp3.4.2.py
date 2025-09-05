@@ -11,20 +11,30 @@
 # coding = utf-8
 # !/usr/bin/python
 # 新时代青年 2025.06.25 getApp第三版
-import re,sys,uuid,json,base64,urllib3
+import re, sys, uuid, json, base64, urllib3
 from Crypto.Cipher import AES
+
 try:
     # from base.spider import Spider as BaseSpider
     from base.spider import BaseSpider
 except ImportError:
     from t4.base.spider import BaseSpider
-from Crypto.Util.Padding import pad,unpad
+from Crypto.Util.Padding import pad, unpad
+
 sys.path.append('..')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 class Spider(BaseSpider):
-    xurl,key,iv,init_data,search_verify = '','','','',''
-    header = {'User-Agent': 'okhttp/3.14.9'}
+
+    def __init__(self, query_params=None, t4_api=None):
+        super().__init__(query_params=query_params, t4_api=t4_api)
+        self.xurl = ''
+        self.key = ''
+        self.iv = ''
+        self.init_data = ''
+        self.search_verify = ''
+        self.header = {'User-Agent': 'okhttp/3.14.9'}
 
     def getName(self):
         return "getapp3.4.1"
@@ -54,7 +64,7 @@ class Spider(BaseSpider):
         kjson = self.init_data
         result = {"class": [], "filters": {}}
         for i in kjson['type_list']:
-            if not(i['type_name'] in {'全部', 'QQ', 'juo.one'} or '企鹅群' in i['type_name']):
+            if not (i['type_name'] in {'全部', 'QQ', 'juo.one'} or '企鹅群' in i['type_name']):
                 result['class'].append({
                     "type_id": i['type_id'],
                     "type_name": i['type_name']
@@ -100,13 +110,13 @@ class Spider(BaseSpider):
     def categoryContent(self, cid, pg, filter, ext):
         videos = []
         payload = {
-            'area': ext.get('area','全部'),
-            'year': ext.get('year','全部'),
+            'area': ext.get('area', '全部'),
+            'year': ext.get('year', '全部'),
             'type_id': cid,
             'page': str(pg),
-            'sort': ext.get('sort','最新'),
-            'lang': ext.get('lang','全部'),
-            'class': ext.get('class','全部')
+            'sort': ext.get('sort', '最新'),
+            'lang': ext.get('lang', '全部'),
+            'class': ext.get('class', '全部')
         }
         url = f'{self.xurl}.index/typeFilterVodList'
         res = self.post(url=url, headers=self.header, data=payload, verify=False).json()
@@ -195,14 +205,17 @@ class Spider(BaseSpider):
         player_parse_type = aid[3]
         parse_type = aid[4]
         if parse_type == '0':
-            res =  {"parse": 0, "url": kurl, "header": {'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
+            res = {"parse": 0, "url": kurl,
+                   "header": {'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
         elif parse_type == '2':
-            res = {"parse": 1, "url": uid+kurl, "header": {'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
+            res = {"parse": 1, "url": uid + kurl,
+                   "header": {'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
         elif player_parse_type == '2':
-            response = self.fetch(url=f'{uid}{kurl}',headers=self.header, verify=False)
+            response = self.fetch(url=f'{uid}{kurl}', headers=self.header, verify=False)
             if response.status_code == 200:
                 kjson1 = response.json()
-                res = {"parse": 0, "url": kjson1['url'], "header": {'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
+                res = {"parse": 0, "url": kjson1['url'], "header": {
+                    'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
         else:
             id1 = self.encrypt(kurl)
             payload = {
@@ -221,7 +234,8 @@ class Spider(BaseSpider):
                 kjson2 = kjson1['json']
                 kjson3 = json.loads(kjson2)
                 url = kjson3['url']
-            res = {"parse": 0, "playUrl": '', "url": url, "header": {'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
+            res = {"parse": 0, "playUrl": '', "url": url,
+                   "header": {'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 14; 23113RK12C Build/SKQ1.231004.001)'}}
         return res
 
     def searchContent(self, key, quick, pg="1"):
@@ -244,13 +258,13 @@ class Spider(BaseSpider):
             if self.search_verify:
                 verifi = self.verification()
                 if verifi is None:
-                    return {'list':[]}
+                    return {'list': []}
                 payload['code'] = verifi['code']
                 payload['key'] = verifi['uuid']
             url = f'{self.xurl}.index/searchList'
             res = self.post(url=url, data=payload, headers=self.header, verify=False).json()
             if not res.get('data'):
-                return {'list':[] ,'msg': res.get('msg')}
+                return {'list': [], 'msg': res.get('msg')}
             encrypted_data = res['data']
             kjson = self.decrypt(encrypted_data)
             kjson1 = json.loads(kjson)
@@ -323,7 +337,8 @@ class Spider(BaseSpider):
         return {'uuid': random_uuid, 'code': code}
 
     def replace_code(self, text):
-        replacements = {'y': '9', '口': '0', 'q': '0', 'u': '0', 'o': '0', '>': '1', 'd': '0', 'b': '8', '已': '2','D': '0', '五': '5'}
+        replacements = {'y': '9', '口': '0', 'q': '0', 'u': '0', 'o': '0', '>': '1', 'd': '0', 'b': '8', '已': '2',
+                        'D': '0', '五': '5'}
         if len(text) == 3:
             text = text.replace('566', '5066')
             text = text.replace('066', '1666')

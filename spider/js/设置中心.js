@@ -621,24 +621,26 @@ var rule = {
 
         if (action === '夸克扫码') {
             if (rule.quarkScanCheck) {
-                console.log('请等待上个扫码任务完成：' + rule.quarkScanCheck);
+                log('请等待上个扫码任务完成：' + rule.quarkScanCheck);
                 return '请等待上个扫码任务完成';
             }
             let requestId = generateUUID();
-            log('httpUrl:', httpUrl);
-            log('request_id:', requestId);
-            let data = await post('https://uop.quark.cn/cas/ajax/getTokenForQrcodeLogin', {
+            log(`[夸克扫码] httpUrl: ${httpUrl} | request_id: ${requestId}`);
+            let data = (await axios({
+                url: 'https://uop.quark.cn/cas/ajax/getTokenForQrcodeLogin',
+                responseType: 'text',
+                method: "POST",
                 headers: {Referer: '', ...QRCodeHandler.HEADERS},
                 data: {
                     request_id: requestId,
                     client_id: "532",
                     v: "1.2"
                 }
-            });
-            console.log('data:', data);
+            })).data;
+            log('[夸克扫码] data:', data);
             let qcToken = JSON.parse(data).data.members.token;
             let qrcodeUrl = `https://su.quark.cn/4_eMHBJ?token=${qcToken}&client_id=532&ssb=weblogin&uc_param_str=&uc_biz_str=S%3Acustom%7COPT%3ASAREA%400%7COPT%3AIMMERSIVE%401%7COPT%3ABACK_BTN_STYLE%400`;
-            // log('qrcodeUrl:', qrcodeUrl);
+            log('[夸克扫码] qrcodeUrl:', qrcodeUrl);
             qrcode.platformStates[QRCodeHandler.PLATFORM_QUARK] = {
                 token: qcToken,
                 request_id: requestId
@@ -671,10 +673,10 @@ var rule = {
             if (state) { // 生成二维码的时候设置了扫码id
                 for (let i = 1; i <= 15; i++) {
                     if (!rule.quarkScanCheck) {
-                        console.log('退出扫码检测：' + value);
+                        log('退出扫码检测：' + value);
                         return '扫码取消';
                     }
-                    console.log('[quarkScanCheck]等待用户扫码，第' + i + '次');
+                    log('[quarkScanCheck]等待用户扫码，第' + i + '次');
                     const scanResult = await _checkQuarkStatus(state, httpUrl);
                     log('scanResult:', scanResult);
                     if (scanResult.status === 'CONFIRMED') {
@@ -709,7 +711,7 @@ var rule = {
             });
         }
         if (action === 'quarkScanCancel') {
-            console.log('用户取消扫码：' + value);
+            log('用户取消扫码：' + value);
             rule.quarkScanCheck = null;
             qrcode.platformStates[QRCodeHandler.PLATFORM_QUARK] = null;
             return;
@@ -721,17 +723,19 @@ var rule = {
                 return '请等待上个扫码任务完成';
             }
             let requestId = generateUUID();
-            log('httpUrl:', httpUrl);
-            log('request_id:', requestId);
-            let data = await post('https://api.open.uc.cn/cas/ajax/getTokenForQrcodeLogin', {
+            log(`UC扫码] httpUrl: ${httpUrl} | request_id: ${requestId}`);
+            let data = (await axios({
+                url: 'https://api.open.uc.cn/cas/ajax/getTokenForQrcodeLogin',
+                responseType: 'text',
+                method: "POST",
                 headers: {Referer: '', ...QRCodeHandler.HEADERS},
                 data: {
                     request_id: requestId,
                     client_id: "381",
                     v: "1.2",
                 }
-            });
-            log('data:', data);
+            })).data;
+            log('[UC扫码] data:', data);
             let qcToken = JSON.parse(data).data.members.token;
             let qrcodeUrl = `https://su.uc.cn/1_n0ZCv?token=${qcToken}&client_id=381&uc_param_str=&uc_biz_str=S%3Acustom%7CC%3Atitlebar_fix`;
             // log('qrcodeUrl:', qrcodeUrl);
@@ -767,10 +771,10 @@ var rule = {
             if (state) { // 生成二维码的时候设置了扫码id
                 for (let i = 1; i <= 15; i++) {
                     if (!rule.UCScanCheck) {
-                        console.log('退出扫码检测：' + value);
+                        log('退出扫码检测：' + value);
                         return '扫码取消';
                     }
-                    console.log('[UCScanCheck]等待用户扫码，第' + i + '次');
+                    log('[UCScanCheck]等待用户扫码，第' + i + '次');
                     const scanResult = await _checkUCStatus(state, httpUrl);
                     log('scanResult:', scanResult);
                     if (scanResult.status === 'CONFIRMED') {
@@ -805,7 +809,7 @@ var rule = {
             });
         }
         if (action === 'UCScanCancel') {
-            console.log('用户取消扫码：' + value);
+            log('用户取消扫码：' + value);
             rule.UCScanCheck = null;
             qrcode.platformStates[QRCodeHandler.PLATFORM_UC] = null;
             return;
@@ -816,11 +820,13 @@ var rule = {
                 log('请等待上个扫码任务完成：' + rule.aliScanCheck);
                 return '请等待上个扫码任务完成';
             }
-            log('httpUrl:', httpUrl);
-            let data = await post('https://passport.aliyundrive.com/newlogin/qrcode/generate.do', {
+            log(`[阿里扫码] httpUrl: ${httpUrl}`);
+            let data = (await axios({
+                url: 'https://passport.aliyundrive.com/newlogin/qrcode/generate.do',
+                responseType: 'text',
+                method: "POST",
                 headers: {
-                    Referer: '',
-                    ...QRCodeHandler.HEADERS
+                    Referer: '', ...QRCodeHandler.HEADERS
                 },
                 data: {
                     appName: "aliyun_drive",
@@ -832,11 +838,12 @@ var rule = {
                     bizParams: "",
                     _bx_v: "2.2.3"
                 }
-            });
-            log('data:', data);
+            })).data;
+
+            log('[阿里扫码] data:', data);
             const contentData = JSON.parse(data).content.data;
             let qrcodeUrl = contentData.codeContent;
-            log('qrcodeUrl:', qrcodeUrl);
+            log('[阿里扫码] qrcodeUrl:', qrcodeUrl);
             qrcode.platformStates[QRCodeHandler.PLATFORM_ALI] = {
                 ck: contentData.ck,
                 t: contentData.t
@@ -869,10 +876,10 @@ var rule = {
             if (state) { // 生成二维码的时候设置了扫码id
                 for (let i = 1; i <= 15; i++) {
                     if (!rule.aliScanCheck) {
-                        console.log('退出扫码检测：' + value);
+                        log('退出扫码检测：' + value);
                         return '扫码取消';
                     }
-                    console.log('[aliScanCheck]等待用户扫码，第' + i + '次');
+                    log('[aliScanCheck]等待用户扫码，第' + i + '次');
                     const scanResult = await _checkAliStatus(state, httpUrl);
                     log('scanResult:', scanResult);
                     if (scanResult.status === 'CONFIRMED') {
@@ -907,7 +914,7 @@ var rule = {
             });
         }
         if (action === 'aliScanCancel') {
-            console.log('用户取消扫码：' + value);
+            log('用户取消扫码：' + value);
             rule.aliScanCheck = null;
             qrcode.platformStates[QRCodeHandler.PLATFORM_ALI] = null;
             return;
@@ -918,7 +925,7 @@ var rule = {
                 log('请等待上个扫码任务完成：' + rule.biliScanCheck);
                 return '请等待上个扫码任务完成';
             }
-            log('httpUrl:', httpUrl);
+            log(`UC扫码] httpUrl: ${httpUrl}`);
             const res = await axios({
                 url: httpUrl,
                 method: "POST",
@@ -970,10 +977,10 @@ var rule = {
             if (state) { // 生成二维码的时候设置了扫码id
                 for (let i = 1; i <= 15; i++) {
                     if (!rule.biliScanCheck) {
-                        console.log('退出扫码检测：' + value);
+                        log('退出扫码检测：' + value);
                         return '扫码取消';
                     }
-                    console.log('[biliScanCheck]等待用户扫码，第' + i + '次');
+                    log('[biliScanCheck]等待用户扫码，第' + i + '次');
                     const scanResult = await _checkBiliStatus(state, httpUrl);
                     log('scanResult:', scanResult);
                     if (scanResult.status === 'CONFIRMED') {
@@ -1008,7 +1015,7 @@ var rule = {
             });
         }
         if (action === 'biliScanCancel') {
-            console.log('用户取消扫码：' + value);
+            log('用户取消扫码：' + value);
             rule.biliScanCheck = null;
             qrcode.platformStates[QRCodeHandler.PLATFORM_BILI] = null;
             return;

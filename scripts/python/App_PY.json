@@ -275,5 +275,37 @@
         "key": "jcTz6Jda2aKrH8Tk"
       }
     }
+  },
+  {
+    "key": "Py_AppHs",
+    "name": "Hs",
+    "type": 3,
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "api": "clan://sites/lib/AppHs.py",
+    "exts": {
+      "拾光视频": {
+        "host": "https://dy.jmzp.net.cn",
+        "app_id": "shiguang",
+        "deviceid": "",
+        "versionCode": "10000",
+        "UMENG_CHANNEL": "guan"
+      },
+      "雪豹视频": {
+        "host": "https://dy.jszdzs.com",
+        "app_id": "xuebao",
+        "deviceid": "",
+        "versionCode": "21300",
+        "UMENG_CHANNEL": "share"
+      },
+      "海狗视频": {
+        "host": "https://dy.stxbed.com",
+        "app_id": "haigou",
+        "deviceid": "",
+        "versionCode": "20100",
+        "UMENG_CHANNEL": "zhuan"
+      }
+    }
   }
 ]

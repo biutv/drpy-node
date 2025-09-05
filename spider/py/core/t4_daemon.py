@@ -22,6 +22,7 @@ import time
 import traceback
 from collections import OrderedDict
 from pathlib import Path
+from urllib.parse import quote
 from socketserver import ThreadingMixIn, TCPServer, StreamRequestHandler
 import sys
 
@@ -49,7 +50,7 @@ PORT = 57570
 
 MAX_MSG_SIZE = 10 * 1024 * 1024  # 10MB
 MAX_CACHED_INSTANCES = 100  # 最大缓存实例数
-INIT_TIMEOUT = 10  # init 超时（秒）
+INIT_TIMEOUT = 100  # init 超时（秒）
 REQUEST_TIMEOUT = 30  # 单次请求 socket 超时（秒）
 IDLE_EXPIRE = 30 * 60  # 实例空闲过期（秒）
 CLEAN_INTERVAL = 5 * 60  # 清理间隔（秒）
@@ -246,20 +247,35 @@ class SpiderManager:
 
     # ---------- Env 解析（严格：仅从 JSON 的 ext 字段读取 ext） ----------
     @staticmethod
-    def _parse_env(env_str: str):
-        proxy_url = ""
-        ext = ""
-        if isinstance(env_str, str) and env_str.strip():
+    def _parse_env(env_str):
+        """
+        解析 env 配置字符串或字典，返回 (proxyUrl, ext)
+        """
+        if not env_str:
+            return "", ""
+
+        # 标准化为 dict
+        if isinstance(env_str, str):
             try:
                 data = ujson.loads(env_str)
-                proxy_url = data.get("proxyUrl", "") or ""
-                # 仅从解析出的字典取 ext 字段，若不存在则为空字符串
-                ext = data.get("ext", "") or ""
-            except Exception:
-                # 解析失败：不把整个 env_str 当作 ext，保持 ext 为空字符串
-                proxy_url = ""
-                ext = ""
-        return proxy_url, ext
+            except (ujson.JSONDecodeError, TypeError):
+                return "", ""
+        elif isinstance(env_str, dict):
+            data = env_str
+        else:
+            return "", ""
+
+        proxy_url = str(data.get("proxyUrl") or "")
+        ext = data.get("ext", "")
+
+        # 如果 ext 是 dict 或 list，转为 JSON 字符串
+        if isinstance(ext, (dict, list)):
+            ext = ujson.dumps(ext, ensure_ascii=False)
+
+        if proxy_url and not '&extend=' in proxy_url:
+            proxy_url += f'&extend={quote(ext)}'
+
+        return proxy_url, str(ext or "")
 
     # ---------- 生成唯一实例 key ----------
     def _instance_key(self, script_path: str, env_str: str) -> str:
@@ -276,12 +292,15 @@ class SpiderManager:
         return hash_func.hexdigest()
 
     # ---------- 动态导入：返回 (module, module_name 或 None) ----------
-    def _load_module_from_file(self, file_path: Path):
+    def _load_module_from_file_old(self, file_path: Path):
         """从文件加载模块，使用基于绝对路径哈希的唯一 module_name 避免冲突
         并将文件所在目录加入 sys.path，保证模块内部的 package/relative import 能成功
         """
         abs_path = str(file_path.resolve())
         module_name = "t4_spider_" + hashlib.sha256(abs_path.encode("utf-8")).hexdigest()[:16]
+        # 使用时间戳确保模块名唯一,如果不唯一会存在共享类变量问题,但是会产生很多副本不合理，所以最好确保被调用的模块写法规范不存在类共享变量
+        timestamp = str(time.time()).replace('.', '')
+        module_name = "t4_spider_" + hashlib.sha256((abs_path + timestamp).encode("utf-8")).hexdigest()[:16]
         # 下面没用，导入的时候即使按文件hash来算，也不会重新导入
         # module_name = "t4_spider_" + hashlib.sha256(self.compute_file_hash(abs_path).encode("utf-8")).hexdigest()[:16]
         # 确保项目根目录（文件所在目录）在 sys.path 中，支持 import base.xxx 之类的包导入
@@ -301,6 +320,33 @@ class SpiderManager:
         # 把 module 注册到 sys.modules，避免后续重复加载产生多个副本
         sys.modules[module_name] = module
         spec.loader.exec_module(module)
+        return module, module_name
+
+    def _load_module_from_file(self, file_path: Path):
+        """从文件加载模块，每次实时导入避免模块状态共享问题"""
+        abs_path = str(file_path.resolve())
+
+        # 确保项目根目录在 sys.path 中
+        project_root = file_path.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+            logger.info("Added %s to sys.path", project_root)
+
+        # 使用时间戳确保模块名唯一，避免缓存问题
+        timestamp = str(time.time()).replace('.', '')
+        module_name = f"t4_spider_{hashlib.sha256((abs_path + timestamp).encode('utf-8')).hexdigest()[:16]}"
+
+        # 直接从文件加载模块，不检查缓存
+        spec = importlib.util.spec_from_file_location(module_name, abs_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Failed to load module from {file_path}")
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        # 不将模块注册到 sys.modules，避免缓存
+        # 这样每次都会创建新的模块实例，确保状态隔离
+        # return module, None  # 返回 None 作为 module_name，表示不需要缓存
         return module, module_name
 
     def _import_spider_module(self, script_path: str):
@@ -427,8 +473,8 @@ class SpiderManager:
             cache_count = len(self._instances)
             approx_mem = self._estimated_total_bytes
             self.logger.info(
-                "New Spider instance: %s | cache_count=%d | approx_cache_mem=%s",
-                key[:16], cache_count, _format_bytes(approx_mem)
+                "New Spider instance: %s | cache_count=%d | approx_cache_mem=%s | extend=%s",
+                key[:16], cache_count, _format_bytes(approx_mem), spider.extend
             )
         return inst
 
@@ -467,6 +513,7 @@ class SpiderManager:
                         self.logger.info(f'call init with ext:{init_ext}, env:{env_str}')
                         # init 由实例自身的 lock 串行保护（锁外 init 操作）
                         ret = self._spider_init(inst.spider, init_ext)
+                        print('self._spider_init: 482')
                         inst.last_used = time.time()
                         return ret
                     except Exception as e:
@@ -515,6 +562,7 @@ class SpiderManager:
                         init_ext = (args_list[0] if args_list else ext) or ""
                         self.logger.info(f'[created_by_me] sync init_ext:{init_ext}')
                         ret = self._spider_init(spider, init_ext)
+                        print('self._spider_init: 531')
                         # commit 成功（只要 inflight 未被主线程取消）
                         with self._lock:
                             # it's possible that inflight.timed_out was set by waiters; check it
@@ -561,6 +609,7 @@ class SpiderManager:
                             return
                         try:
                             self._spider_init(spider, ext)
+                            print('self._spider_init: 576')
                             # commit only if not timed out/abandoned
                             with self._lock:
                                 if not inflight.timed_out:
@@ -652,7 +701,11 @@ class SpiderManager:
                             break
                 except Exception:
                     pass
+            # self.logger.info('invoke method %s with extend: %s' % (invoke, inst.spider.extend))
+            # self.logger.info('invoke method %s with host: %s' % (invoke, inst.spider.host))
+            # self.logger.info('invoke method %s with parsed_args: %s' % (invoke, parsed_args))
             result = getattr(inst.spider, invoke)(*parsed_args)
+            # self.logger.info('result:%s' % result)
             if result is not None and hasattr(inst.spider, "json2str"):
                 try:
                     return inst.spider.json2str(result)
@@ -689,7 +742,7 @@ class T4Handler(StreamRequestHandler):
             method_name = req.get("method_name", "")
             env = req.get("env", "") or ""
             args = req.get("args", []) or []
-            # logger.info("T4Handler start: script_path:%s method_name:%s", script_path, method_name)
+            logger.info("T4Handler start: script_path:%s method_name:%s", script_path, method_name)
             result = _manager.call(script_path, method_name, env, args)
             # 统一外层返回格式
             resp = {

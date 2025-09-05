@@ -54,7 +54,7 @@ export default (fastify, options, done) => {
 
             // console.log(`proxyUrl:${proxyUrl}`);
             function getEnv(moduleName) {
-                const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do||'ds'}`;
+                const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do||'ds'}&extend=${encodeURIComponent(moduleExt)}`;
                 const getProxyUrl = function () {
                     return proxyUrl
                 };
@@ -227,7 +227,7 @@ export default (fastify, options, done) => {
         const fServer = fastify.server;
 
         function getEnv(moduleName) {
-            const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do||'ds'}`;
+            const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do||'ds'}&extend=${encodeURIComponent(moduleExt)}`;
             const getProxyUrl = function () {
                 return proxyUrl
             };
@@ -332,7 +332,7 @@ export default (fastify, options, done) => {
         const fServer = fastify.server;
 
         function getEnv(moduleName) {
-            const proxyUrl = `${protocol}://${hostname}${request.url}`.split('?')[0].replace('/parse/', '/proxy/') + `/?do=${query.do||"ds"}`;
+            const proxyUrl = `${protocol}://${hostname}${request.url}`.split('?')[0].replace('/parse/', '/proxy/') + `/?do=${query.do||"ds"}&extend=${encodeURIComponent(moduleExt)}`;
             const getProxyUrl = function () {
                 return proxyUrl
             };

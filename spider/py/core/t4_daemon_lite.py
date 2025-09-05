@@ -195,18 +195,32 @@ class SpiderManager:
 
     # ---------- Env 解析 ----------
     @staticmethod
-    def _parse_env(env_str: str):
-        """env 环境一定是 JSON 字符串"""
-        proxy_url = ""
-        ext = ""
-        if isinstance(env_str, str) and env_str.strip():
+    def _parse_env(env_str):
+        """
+        解析 env 配置字符串或字典，返回 (proxyUrl, ext)
+        """
+        if not env_str:
+            return "", ""
+
+        # 标准化为 dict
+        if isinstance(env_str, str):
             try:
                 data = ujson.loads(env_str)
-                proxy_url = data.get("proxyUrl", "") or ""
-                ext = data.get("ext", "") or ""
-            except Exception:
-                pass
-        return proxy_url, ext
+            except (ujson.JSONDecodeError, TypeError):
+                return "", ""
+        elif isinstance(env_str, dict):
+            data = env_str
+        else:
+            return "", ""
+
+        proxy_url = str(data.get("proxyUrl") or "")
+        ext = data.get("ext", "")
+
+        # 如果 ext 是 dict 或 list，转为 JSON 字符串
+        if isinstance(ext, (dict, list)):
+            ext = ujson.dumps(ext, ensure_ascii=False)
+
+        return proxy_url, str(ext or "")
 
     def _instance_key(self, script_path: str, env_str: str) -> str:
         proxy_url, ext = self._parse_env(env_str)

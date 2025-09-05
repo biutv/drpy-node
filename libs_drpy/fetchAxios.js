@@ -1,4 +1,5 @@
 import FormData from 'form-data';
+import https from "https";
 
 class FetchAxios {
     constructor(defaultConfig = {}) {
@@ -124,4 +125,16 @@ export function createInstance(defaultConfig) {
     });
 
     return instance;
+}
+
+// 忽略 HTTPS 证书错误
+export const httpsAgent = new https.Agent({rejectUnauthorized: false});
+
+export function createHttpsInstance() {
+    return createInstance({
+        headers: {'User-Agent': 'Mozilla/5.0'},
+        timeout: 10000,
+        responseType: 'text',
+        httpsAgent: httpsAgent
+    });
 }

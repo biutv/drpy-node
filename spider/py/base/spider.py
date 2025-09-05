@@ -92,7 +92,7 @@ class BaseSpider(metaclass=ABCMeta):  # 元类 默认的元类 type
         pass
 
     @abstractmethod
-    def playerContent(self, flag, id, vipFlags):
+    def playerContent(self, flag, id, vipFlags=None):
         pass
 
     @abstractmethod
@@ -114,14 +114,14 @@ class BaseSpider(metaclass=ABCMeta):  # 元类 默认的元类 type
     def init_api_ext_file(self):
         pass
 
-    def getProxyUrl(self):
+    def getProxyUrl(self, flag=False):
         """
         获取本地代理地址
         @return:
         """
         if self.ENV.lower() == 't3':
             # return getProxy(True)
-            return PyUtil.getProxy(False)
+            return PyUtil.getProxy(flag)
             # return 'http://127.0.0.1:9978/proxy?do=py'
         elif self.ENV.lower() == 't4':
             return self.t4_api
@@ -209,7 +209,7 @@ class BaseSpider(metaclass=ABCMeta):  # 元类 默认的元类 type
         rsp.encoding = 'utf-8'
         return rsp
 
-    def post(self, url, data, headers=None, cookies=None, timeout=5, verify=True, allow_redirects=True):
+    def post(self, url, data=None, headers=None, cookies=None, timeout=5, verify=True, allow_redirects=True):
         rsp = requests.post(url, data=data, headers=headers, cookies=cookies, timeout=timeout, verify=verify,
                             allow_redirects=allow_redirects)
         rsp.encoding = 'utf-8'

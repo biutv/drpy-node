@@ -79,6 +79,7 @@ function formatCookie(cookies) {
 
 async function _checkQuarkStatus(state, httpUrl) {
     try {
+        console.log(`[_checkQuarkStatus] httpUrl: ${httpUrl}`);
         const res = await axios({
             url: httpUrl,
             method: "POST",
