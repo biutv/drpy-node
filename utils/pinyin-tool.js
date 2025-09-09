@@ -1,4 +1,4 @@
-import pinyin from 'pinyin';
+import {pinyin} from 'pinyin';
 
 export function getFirstLetter(text) {
     const pinyinArray = pinyin(text, {

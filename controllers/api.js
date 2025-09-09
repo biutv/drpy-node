@@ -18,6 +18,31 @@ const ENGINES = {
     catvod,
 };
 
+// 创建带超时的Promise包装函数
+function withTimeout(promise, timeoutMs = null, operation = 'API操作', invokeMethod = null) {
+    let defaultTimeout;
+
+    // 根据invokeMethod确定超时时间
+    if (invokeMethod === 'action') {
+        // action接口使用专用超时时间，默认60秒
+        defaultTimeout = parseInt(process.env.API_ACTION_TIMEOUT || '60') * 1000;
+    } else {
+        // 其他接口使用默认超时时间，默认20秒
+        defaultTimeout = parseInt(process.env.API_TIMEOUT || '20') * 1000;
+    }
+
+    const actualTimeout = timeoutMs || defaultTimeout;
+
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            setTimeout(() => {
+                reject(new Error(`${operation}超时 (${actualTimeout}ms)`));
+            }, actualTimeout);
+        })
+    ]);
+}
+
 export default (fastify, options, done) => {
     // 启动JSON监听  
     startJsonWatcher(ENGINES, options.jsonDir);
@@ -54,7 +79,7 @@ export default (fastify, options, done) => {
 
             // console.log(`proxyUrl:${proxyUrl}`);
             function getEnv(moduleName) {
-                const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do||'ds'}&extend=${encodeURIComponent(moduleExt)}`;
+                const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do || 'ds'}&extend=${encodeURIComponent(moduleExt)}`;
                 const getProxyUrl = function () {
                     return proxyUrl
                 };
@@ -79,7 +104,11 @@ export default (fastify, options, done) => {
                     return null;
                 }
                 const _env = getEnv(_moduleName);
-                const RULE = await apiEngine.getRule(_modulePath, _env);
+                const RULE = await withTimeout(
+                    apiEngine.getRule(_modulePath, _env),
+                    null,
+                    `获取规则[${_moduleName}]`
+                );
                 RULE.callRuleFn = async function (_method, _args) {
                     let invokeMethod = null;
                     switch (_method) {
@@ -112,10 +141,19 @@ export default (fastify, options, done) => {
                         if (typeof RULE[_method] !== 'function') {
                             return null
                         } else {
-                            return await RULE[_method]
+                            return await withTimeout(
+                                RULE[_method],
+                                null,
+                                `规则方法[${_method}]`
+                            )
                         }
                     }
-                    return await apiEngine[invokeMethod](_modulePath, _env, ..._args)
+                    return await withTimeout(
+                        apiEngine[invokeMethod](_modulePath, _env, ..._args),
+                        null,
+                        `规则调用[${_method}]`,
+                        invokeMethod
+                    )
                 };
                 return RULE
             };
@@ -125,7 +163,11 @@ export default (fastify, options, done) => {
                 if ('play' in query) {
                     // 处理播放逻辑
                     // console.log('play query:', query);
-                    const result = await apiEngine.play(modulePath, env, query.flag, query.play);
+                    const result = await withTimeout(
+                        apiEngine.play(modulePath, env, query.flag, query.play),
+                        null,
+                        `播放接口[${moduleName}]`
+                    );
                     return reply.send(result);
                 }
 
@@ -141,7 +183,11 @@ export default (fastify, options, done) => {
                         }
                     }
                     // 分类逻辑
-                    const result = await apiEngine.category(modulePath, env, query.t, pg, 1, extend);
+                    const result = await withTimeout(
+                        apiEngine.category(modulePath, env, query.t, pg, 1, extend),
+                        null,
+                        `分类接口[${moduleName}]`
+                    );
                     return reply.send(result);
                 }
 
@@ -150,13 +196,22 @@ export default (fastify, options, done) => {
                         fastify.log.info(`[${moduleName}] 二级已接收post数据: ${query.ids}`);
                     }
                     // 详情逻辑
-                    const result = await apiEngine.detail(modulePath, env, query.ids.split(','));
+                    const result = await withTimeout(
+                        apiEngine.detail(modulePath, env, query.ids.split(',')),
+                        null,
+                        `详情接口[${moduleName}]`
+                    );
                     return reply.send(result);
                 }
 
                 if ('ac' in query && 'action' in query) {
                     // 处理动作逻辑
-                    const result = await apiEngine.action(modulePath, env, query.action, query.value);
+                    const result = await withTimeout(
+                        apiEngine.action(modulePath, env, query.action, query.value),
+                        null,
+                        `动作接口[${moduleName}]`,
+                        'action'
+                    );
                     return reply.send(result);
                 }
 
@@ -164,13 +219,21 @@ export default (fastify, options, done) => {
                 if ('wd' in query) {
                     // 搜索逻辑
                     const quick = 'quick' in query ? query.quick : 0;
-                    const result = await apiEngine.search(modulePath, env, query.wd, quick, pg);
+                    const result = await withTimeout(
+                        apiEngine.search(modulePath, env, query.wd, quick, pg),
+                        null,
+                        `搜索接口[${moduleName}]`
+                    );
                     return reply.send(result);
                 }
 
                 if ('refresh' in query) {
                     // 强制刷新初始化逻辑
-                    const refreshedObject = await apiEngine.init(modulePath, env, true);
+                    const refreshedObject = await withTimeout(
+                        apiEngine.init(modulePath, env, true),
+                        null,
+                        `初始化接口[${moduleName}]`
+                    );
                     return reply.send(refreshedObject);
                 }
                 if (!('filter' in query)) {
@@ -178,8 +241,16 @@ export default (fastify, options, done) => {
                 }
                 // 默认逻辑，返回 home + homeVod 接口
                 const filter = 'filter' in query ? query.filter : 1;
-                const resultHome = await apiEngine.home(modulePath, env, filter);
-                const resultHomeVod = await apiEngine.homeVod(modulePath, env);
+                const resultHome = await withTimeout(
+                    apiEngine.home(modulePath, env, filter),
+                    null,
+                    `首页接口[${moduleName}]`
+                );
+                const resultHomeVod = await withTimeout(
+                    apiEngine.homeVod(modulePath, env),
+                    null,
+                    `推荐接口[${moduleName}]`
+                );
                 let result = {
                     ...resultHome,
                     // list: resultHomeVod,
@@ -227,7 +298,7 @@ export default (fastify, options, done) => {
         const fServer = fastify.server;
 
         function getEnv(moduleName) {
-            const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do||'ds'}&extend=${encodeURIComponent(moduleExt)}`;
+            const proxyUrl = `${protocol}://${hostname}/proxy/${moduleName}/?do=${query.do || 'ds'}&extend=${encodeURIComponent(moduleExt)}`;
             const getProxyUrl = function () {
                 return proxyUrl
             };
@@ -248,7 +319,11 @@ export default (fastify, options, done) => {
 
         const env = getEnv(moduleName);
         try {
-            const backRespList = await apiEngine.proxy(modulePath, env, query);
+            const backRespList = await withTimeout(
+                apiEngine.proxy(modulePath, env, query),
+                null,
+                `代理接口[${moduleName}]`
+            );
             const statusCode = backRespList[0];
             const mediaType = backRespList[1] || 'application/octet-stream';
             let content = backRespList[2] || '';
@@ -332,7 +407,7 @@ export default (fastify, options, done) => {
         const fServer = fastify.server;
 
         function getEnv(moduleName) {
-            const proxyUrl = `${protocol}://${hostname}${request.url}`.split('?')[0].replace('/parse/', '/proxy/') + `/?do=${query.do||"ds"}&extend=${encodeURIComponent(moduleExt)}`;
+            const proxyUrl = `${protocol}://${hostname}${request.url}`.split('?')[0].replace('/parse/', '/proxy/') + `/?do=${query.do || "ds"}&extend=${encodeURIComponent(moduleExt)}`;
             const getProxyUrl = function () {
                 return proxyUrl
             };
@@ -352,7 +427,11 @@ export default (fastify, options, done) => {
 
         const env = getEnv('');
         try {
-            const backResp = await drpyS.jx(jxPath, env, query);
+            const backResp = await withTimeout(
+                drpyS.jx(jxPath, env, query),
+                null,
+                `解析接口[${jxName}]`
+            );
             const statusCode = 200;
             const mediaType = 'application/json; charset=utf-8';
             if (typeof backResp === 'object') {

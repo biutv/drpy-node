@@ -562,8 +562,8 @@ export async function initJx(filePath, env, refresh) {
         const fileContent = await readFile(filePath, 'utf-8');
         // 计算文件的 hash 值
         const fileHash = computeHash(fileContent);
-
-        let hashMd5 = md5(filePath + '#pAq#' + (env === {} ? 0 : 1));
+        // env一定传的object。这里只有两种情况 1: 获取配置的时候env传的空{} 2:实际解析传的真实环境，所以hash值只需要0和1
+        let hashMd5 = md5(filePath + '#pAq#' + (Object.keys(env).length === 0 ? 0 : 1));
 
         // 检查缓存：是否有文件且未刷新且文件 hash 未变化
         if (jxCache.has(hashMd5) && !refresh) {
@@ -930,6 +930,87 @@ async function commonSearchListParse(moduleObject, method, injectVars, args) {
 }
 
 /**
+ * 通用分类解析函数
+ * @param moduleObject
+ * @param method
+ * @param injectVars
+ * @param args
+ * @returns {Promise<*>}
+ */
+async function commonClassParse(moduleObject, method, injectVars, args) {
+    // class_parse字符串p
+    let p = moduleObject[method].trim();
+    const request = moduleObject.request;
+    const tmpFunction = async function () {
+        const {input, MY_URL, pdfa, pdfh, pd, pjfa, pjfh, pj} = this;
+        let classes = [];
+
+        // 处理class_parse字符串解析
+        p = p.split(';');
+        let p0 = p[0];
+        let is_json = p0.startsWith('json:');
+        p0 = p0.replace(/^(jsp:|json:|jq:)/, '');
+
+        let html = await request(input);
+        if (html) {
+            let $pdfa;
+            let $pdfh;
+            let $pd;
+            if (is_json) {
+                html = dealJson(html);
+                $pdfa = pjfa;
+                $pdfh = pjfh;
+                $pd = pj;
+            } else {
+                $pdfa = pdfa;
+                $pdfh = pdfh;
+                $pd = pd;
+            }
+
+            if (is_json) {
+                try {
+                    let list = $pdfa(html, p0);
+                    if (list && list.length > 0) {
+                        classes = list;
+                    }
+                } catch (e) {
+                    log(`json分类解析失败:${e.message}`);
+                }
+            } else if (p.length >= 3) { // 可以不写正则
+                try {
+                    let list = $pdfa(html, p0);
+                    if (list && list.length > 0) {
+                        for (const it of list) {
+                            try {
+                                let name = $pdfh(it, p[1]);
+                                let url = $pd(it, p[2]);
+                                if (p.length > 3 && p[3]) {
+                                    let exp = new RegExp(p[3]);
+                                    let match = url.match(exp);
+                                    if (match && match[1]) {
+                                        url = match[1];
+                                    }
+                                }
+                                classes.push({
+                                    'type_id': url.trim(),
+                                    'type_name': name.trim()
+                                });
+                            } catch (e) {
+                                log(`分类列表解析元素失败:${e.message}`);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    log(`分类列表解析失败:${e.message}`);
+                }
+            }
+        }
+        return {class: classes};
+    };
+    return await invokeWithInjectVars(moduleObject, tmpFunction, injectVars, args);
+}
+
+/**
  * 通用推荐字符串解析函数
  * @param moduleObject
  * @param method
@@ -1179,6 +1260,10 @@ async function invokeMethod(filePath, env, method, args = [], injectVars = {}) {
         };
         return await invokeWithInjectVars(moduleObject, tmpClassFunction, injectVars, args);
     }
+    // 特殊处理class_parse字符串
+    else if (method === 'class_parse' && moduleObject[method] && typeof moduleObject[method] === 'string') {
+        return await commonClassParse(moduleObject, method, injectVars, args);
+    }
     // 函数直接执行
     else if (moduleObject[method] && typeof moduleObject[method] === 'function') {
         // console.log('injectVars:', injectVars);
@@ -1195,6 +1280,10 @@ async function invokeMethod(filePath, env, method, args = [], injectVars = {}) {
     // 特殊处理推荐字符串
     else if (method === '推荐' && moduleObject[method] && typeof moduleObject[method] === 'string') {
         return await commonHomeListParse(moduleObject, method, injectVars, args);
+    }
+    // 特殊处理二级字符串或对象
+    else if (method === '二级' && (moduleObject[method] === '*' || (moduleObject[method] && typeof moduleObject[method] === 'object'))) {
+        return await commonDetailListParse(moduleObject, method, injectVars, args);
     } else {
         // 其他未知函数或者函数属性是字符串
         if (['推荐', '一级', '搜索'].includes(method)) {
@@ -1282,7 +1371,6 @@ async function initParse(rule, env, vm, context) {
             for (let k of header_keys) {
                 if (k.toLowerCase() === 'user-agent') {
                     let v = rule.headers[k];
-                    console.log(v);
                     if (['MOBILE_UA', 'PC_UA', 'UC_UA', 'IOS_UA', 'UA'].includes(v)) {
                         rule.headers[k] = eval(v);
                         log(rule.headers[k])
@@ -1290,10 +1378,8 @@ async function initParse(rule, env, vm, context) {
                 } else if (k.toLowerCase() === 'cookie') {
                     let v = rule.headers[k];
                     if (v && v.startsWith('http')) {
-                        console.log(v);
                         try {
                             v = fetch(v);
-                            console.log(v);
                             rule.headers[k] = v;
                         } catch (e) {
                             console.log(`从${v}获取cookie发生错误:${e.message}`);
@@ -1545,6 +1631,598 @@ async function detailParse(rule, ids) {
     } else {
         url = detailUrl
     }
+    // 处理二级为对象的情况
+    if (rule.二级 && typeof rule.二级 === 'object') {
+        return await detailParseObject(rule, url, vid, orId, fyclass);
+    }
+
+    const jsp = new jsoup(url);
+    return {
+        TYPE: 'detail',
+        input: url,
+        vid: vid,
+        orId: orId,
+        fyclass: fyclass,
+        MY_URL: url,
+        detailUrl: detailUrl,
+        HOST: rule.host,
+        fetch_params: deepCopy(rule.rule_fetch_params),
+        jsp: jsp,
+        pdfh: jsp.pdfh.bind(jsp),
+        pdfa: jsp.pdfa.bind(jsp),
+        pd: jsp.pd.bind(jsp),
+        pdfl: jsp.pdfl.bind(jsp), // 二级绑定pdfl函数
+        pjfh: jsp.pjfh.bind(jsp),
+        pjfa: jsp.pjfa.bind(jsp),
+        pj: jsp.pj.bind(jsp),
+    }
+}
+
+/**
+ * 通用二级字符串/对象解析函数
+ * @param moduleObject
+ * @param method
+ * @param injectVars
+ * @param args
+ * @returns {Promise<*>}
+ */
+async function commonDetailListParse(moduleObject, method, injectVars, args) {
+    // 二级字符串或对象p
+    let p = moduleObject[method];
+    const request = moduleObject.request;
+    const tmpFunction = async function () {
+        const {input, vid, orId, fyclass, MY_URL, HOST, fetch_params, jsp, pdfh, pdfa, pd, pdfl, pjfh, pjfa, pj} = this;
+
+        let vod_name = '片名';
+        let vod_pic = '';
+        let vod_id = orId;
+
+        if (p === '*') {
+            let extra = orId.split('@@');
+            vod_name = extra.length > 1 ? extra[1] : vod_name;
+            vod_pic = extra.length > 2 ? extra[2] : vod_pic;
+        }
+
+        let vod = {
+            vod_id: vod_id,
+            vod_name: vod_name,
+            vod_pic: vod_pic,
+            type_name: '类型',
+            vod_year: '年份',
+            vod_area: '地区',
+            vod_remarks: '更新信息',
+            vod_actor: '主演',
+            vod_director: '导演',
+            vod_content: '简介',
+        };
+
+        let html = '';
+
+        // 执行二级访问前代码
+        if (moduleObject.二级访问前 && typeof moduleObject.二级访问前 === 'function') {
+            log('开始执行二级访问前代码');
+            try {
+                const result = await moduleObject.二级访问前.call(this);
+                // 如果二级访问前返回了新的URL，需要重新构建解析环境
+                if (result && result !== this.MY_URL) {
+                    log(`二级访问前返回新URL: ${result}`);
+                    this.MY_URL = result;
+                    this.input = result;
+                    // 重新创建jsp对象和绑定解析函数
+                    const newJsp = new jsoup(result);
+                    this.jsp = newJsp;
+                    this.pdfh = newJsp.pdfh.bind(newJsp);
+                    this.pdfa = newJsp.pdfa.bind(newJsp);
+                    this.pd = newJsp.pd.bind(newJsp);
+                    this.pdfl = newJsp.pdfl.bind(newJsp);
+                    this.pjfh = newJsp.pjfh.bind(newJsp);
+                    this.pjfa = newJsp.pjfa.bind(newJsp);
+                    this.pj = newJsp.pj.bind(newJsp);
+                    // 清空html，强制重新获取
+                    html = '';
+                }
+            } catch (e) {
+                log(`二级访问前执行失败:${e.message}`);
+            }
+        }
+
+        if (p === '*') {
+            vod.vod_play_from = '道长在线';
+            vod.vod_remarks = input;
+            vod.vod_actor = '没有二级,只有一级链接直接嗅探播放';
+            vod.vod_content = MY_URL;
+            vod.vod_play_url = '嗅探播放$' + MY_URL.split('@@')[0];
+        } else if (typeof p === 'object' && p !== null) {
+            // 如果没有html，需要获取源码
+            if (!html) {
+                html = await request(this.input);
+            }
+
+            // 根据解析模式选择对应的解析函数
+            let $pdfa;
+            let $pdfh;
+            let $pd;
+            if (p.is_json) {
+                log('二级是json');
+                html = dealJson(html);
+                $pdfa = this.pjfa;
+                $pdfh = this.pjfh;
+                $pd = this.pj;
+            } else {
+                log('二级默认jq');
+                $pdfa = this.pdfa;
+                $pdfh = this.pdfh;
+                $pd = this.pd;
+            }
+
+            // 解析title字段
+            if (p.title) {
+                try {
+                    let p1 = p.title.split(';');
+                    vod.vod_name = $pdfh(html, p1[0]).replace(/\n|\t/g, '').trim();
+                    let type_name = p1.length > 1 ? $pdfh(html, p1[1]).replace(/\n|\t/g, '').replace(/ /g, '').trim() : '';
+                    vod.type_name = type_name || vod.type_name;
+                } catch (e) {
+                    log(`解析title失败:${e.message}`);
+                }
+            }
+
+            // 解析desc字段
+            if (p.desc) {
+                try {
+                    let p1 = p.desc.split(';');
+                    vod.vod_remarks = $pdfh(html, p1[0]).replace(/\n|\t/g, '').trim();
+                    vod.vod_year = p1.length > 1 ? $pdfh(html, p1[1]).replace(/\n|\t/g, '').trim() : '';
+                    vod.vod_area = p1.length > 2 ? $pdfh(html, p1[2]).replace(/\n|\t/g, '').trim() : '';
+                    vod.vod_actor = p1.length > 3 ? $pdfh(html, p1[3]).replace(/\n|\t/g, '').trim() : '';
+                    vod.vod_director = p1.length > 4 ? $pdfh(html, p1[4]).replace(/\n|\t/g, '').trim() : '';
+                } catch (e) {
+                    log(`解析desc失败:${e.message}`);
+                }
+            }
+
+            // 解析content字段
+            if (p.content) {
+                try {
+                    let p1 = p.content.split(';');
+                    vod.vod_content = $pdfh(html, p1[0]).replace(/\n|\t/g, '').trim();
+                } catch (e) {
+                    log(`解析content失败:${e.message}`);
+                }
+            }
+
+            // 解析img字段
+            if (p.img) {
+                try {
+                    let p1 = p.img.split(';');
+                    vod.vod_pic = $pd(html, p1[0], this.MY_URL);
+                } catch (e) {
+                    log(`解析img失败:${e.message}`);
+                }
+            }
+
+            let vod_play_from = '$$$';
+            let playFrom = [];
+
+            // 处理重定向
+            if (p.重定向 && typeof p.重定向 === 'function') {
+                log('开始执行重定向代码');
+                try {
+                    html = await p.重定向.call(this);
+                } catch (e) {
+                    log(`重定向执行失败:${e.message}`);
+                }
+            }
+
+            // 处理tabs
+            if (p.tabs) {
+                if (typeof p.tabs === 'function') {
+                    log('开始执行tabs代码');
+                    try {
+                        const TABS = await p.tabs.call(this);
+                        playFrom = TABS;
+                    } catch (e) {
+                        log(`tabs执行失败:${e.message}`);
+                    }
+                } else {
+                    let p_tab = p.tabs.split(';')[0];
+                    let vHeader = $pdfa(html, p_tab);
+                    let tab_text = p.tab_text || 'body&&Text';
+                    let new_map = {};
+                    for (let v of vHeader) {
+                        let v_title = $pdfh(v, tab_text).trim();
+                        if (!v_title) {
+                            v_title = '线路空';
+                        }
+                        if (moduleObject.tab_exclude && (new RegExp(moduleObject.tab_exclude)).test(v_title)) {
+                            continue;
+                        }
+                        if (!new_map.hasOwnProperty(v_title)) {
+                            new_map[v_title] = 1;
+                        } else {
+                            new_map[v_title] += 1;
+                        }
+                        if (new_map[v_title] > 1) {
+                            v_title += Number(new_map[v_title] - 1);
+                        }
+                        playFrom.push(v_title);
+                    }
+                }
+            } else {
+                playFrom = ['道长在线'];
+            }
+            vod.vod_play_from = playFrom.join(vod_play_from);
+
+            // 处理lists
+            let vod_play_url = '$$$';
+            let vod_tab_list = [];
+            if (p.lists) {
+                if (typeof p.lists === 'function') {
+                    log('开始执行lists代码');
+                    try {
+                        const LISTS = await p.lists.call(this);
+                        for (let i in LISTS) {
+                            if (LISTS.hasOwnProperty(i)) {
+                                try {
+                                    LISTS[i] = LISTS[i].map(it => it.split('$').slice(0, 2).join('$'));
+                                } catch (e) {
+                                    log(`格式化LISTS发生错误:${e.message}`);
+                                }
+                            }
+                        }
+                        vod_play_url = LISTS.map(it => it.join('#')).join(vod_play_url);
+                    } catch (e) {
+                        log(`lists执行失败:${e.message}`);
+                    }
+                } else {
+                    let list_text = p.list_text || 'body&&Text';
+                    let list_url = p.list_url || 'a&&href';
+                    let list_url_prefix = p.list_url_prefix || '';
+                    let is_tab_js = typeof p.tabs === 'function';
+
+                    for (let i = 0; i < playFrom.length; i++) {
+                        let tab_name = playFrom[i];
+                        let tab_ext = '';
+                        if (typeof p.tabs === 'string' && p.tabs.split(';').length > 1 && !is_tab_js) {
+                            tab_ext = p.tabs.split(';')[1];
+                        }
+                        let p1 = p.lists.replaceAll('#idv', tab_name).replaceAll('#id', i);
+                        if (tab_ext) {
+                            tab_ext = tab_ext.replaceAll('#idv', tab_name).replaceAll('#id', i);
+                        }
+                        let tabName = tab_ext ? $pdfh(html, tab_ext) : tab_name;
+
+                        let new_vod_list = [];
+                        if (typeof this.pdfl2 === 'function') { // pdfl函数有问题
+                            new_vod_list = this.pdfl(html, p1, list_text, list_url, this.MY_URL);
+                            if (list_url_prefix) {
+                                new_vod_list = new_vod_list.map(it => it.split('$')[0] + '$' + list_url_prefix + it.split('$').slice(1).join('$'));
+                            }
+                        } else {
+                            let vodList = [];
+                            try {
+                                vodList = $pdfa(html, p1);
+                            } catch (e) {
+                                log(`解析vodList失败:${e.message}`);
+                            }
+                            for (let j = 0; j < vodList.length; j++) {
+                                let it = vodList[j];
+                                new_vod_list.push($pdfh(it, list_text).trim() + '$' + list_url_prefix + $pd(it, list_url, this.MY_URL));
+                            }
+                        }
+
+                        if (new_vod_list.length > 0) {
+                            new_vod_list = forceOrder(new_vod_list, '', x => x.split('$')[0]);
+                        }
+
+                        let vlist = new_vod_list.join('#');
+                        vod_tab_list.push(vlist);
+                    }
+                    vod_play_url = vod_tab_list.join(vod_play_url);
+                }
+            }
+            vod.vod_play_url = vod_play_url;
+        }
+
+        // 处理图片替换和来源
+        if (moduleObject.图片替换) {
+            if (typeof moduleObject.图片替换 === 'function') {
+                // 异步函数处理
+                try {
+                    vod.vod_pic = await moduleObject.图片替换.call(this, vod.vod_pic);
+                } catch (e) {
+                    log(`图片替换函数执行失败:${e.message}`);
+                }
+            } else if (typeof moduleObject.图片替换 === 'string' && moduleObject.图片替换.includes('=>')) {
+                // 字符串替换处理
+                let replace_from = moduleObject.图片替换.split('=>')[0];
+                let replace_to = moduleObject.图片替换.split('=>')[1];
+                vod.vod_pic = vod.vod_pic.replace(replace_from, replace_to);
+            }
+        }
+        if (moduleObject.图片来源 && vod.vod_pic && vod.vod_pic.startsWith('http')) {
+            vod.vod_pic = vod.vod_pic + moduleObject.图片来源;
+        }
+
+        // 处理vodDeal
+        try {
+            vod = vodDeal(vod, moduleObject);
+        } catch (e) {
+            log(`vodDeal发生错误:${e.message}`);
+        }
+
+        return vod;
+    };
+    return await invokeWithInjectVars(moduleObject, tmpFunction, injectVars, args);
+}
+
+async function detailParseObject(rule, url, vid, orId, fyclass) {
+    let vod_name = '片名';
+    let vod_pic = '';
+    let vod_id = orId;
+
+    if (rule.二级 === '*') {
+        let extra = orId.split('@@');
+        vod_name = extra.length > 1 ? extra[1] : vod_name;
+        vod_pic = extra.length > 2 ? extra[2] : vod_pic;
+    }
+
+    let vod = {
+        vod_id: vod_id,
+        vod_name: vod_name,
+        vod_pic: vod_pic,
+        type_name: '类型',
+        vod_year: '年份',
+        vod_area: '地区',
+        vod_remarks: '更新信息',
+        vod_actor: '主演',
+        vod_director: '导演',
+        vod_content: '简介',
+    };
+
+    let p = rule.二级;
+    let html = '';
+
+    // 执行二级访问前代码
+    if (rule.二级访问前) {
+        try {
+            log(`尝试在二级访问前执行代码:${rule.二级访问前}`);
+            // 这里需要在沙箱环境中执行，暂时跳过
+        } catch (e) {
+            log(`二级访问前执行代码出现错误:${e.message}`);
+        }
+    }
+
+    if (p === '*') {
+        vod.vod_play_from = '道长在线';
+        vod.vod_remarks = url;
+        vod.vod_play_url = url + '$' + vod.vod_name;
+    } else if (typeof p === 'object' && p !== null) {
+        // 检查对象中是否有二级等于'*'的情况
+        if (p['*']) {
+            vod.vod_play_from = '道长在线';
+            vod.vod_remarks = url;
+            vod.vod_play_url = url + '$' + vod.vod_name;
+            // 如果对象中只有'*'属性，直接返回
+            if (Object.keys(p).length === 1) {
+                const jsp = new jsoup(url);
+                return {
+                    TYPE: 'detail',
+                    input: url,
+                    vid: vid,
+                    orId: orId,
+                    fyclass: fyclass,
+                    MY_URL: url,
+                    HOST: rule.host,
+                    fetch_params: deepCopy(rule.rule_fetch_params),
+                    jsp: jsp,
+                    pdfh: jsp.pdfh.bind(jsp),
+                    pdfa: jsp.pdfa.bind(jsp),
+                    pd: jsp.pd.bind(jsp),
+                    pdfl: jsp.pdfl.bind(jsp),
+                    pjfh: jsp.pjfh.bind(jsp),
+                    pjfa: jsp.pjfa.bind(jsp),
+                    pj: jsp.pj.bind(jsp),
+                    vod: vod
+                };
+            }
+        }
+        let is_json = p.is_json;
+        let is_jsp = p.is_jsp;
+        let is_jq = p.is_jq;
+
+        // 如果没有html，需要获取源码
+        if (!html) {
+            try {
+                // 使用rule中的request方法
+                html = await rule.request(url);
+                if (!html) {
+                    html = '';
+                }
+            } catch (e) {
+                log(`获取二级页面源码失败:${e.message}`);
+                html = '';
+            }
+        }
+
+        const jsp = new jsoup(url);
+
+        // 处理各种解析模式
+        if (is_json) {
+            try {
+                html = dealJson(html);
+                let json = JSON.parse(html);
+                // 使用jsonpath进行解析
+                if (p.title) {
+                    let titleResult = jsonpath.query(json, p.title);
+                    if (titleResult && titleResult.length > 0) {
+                        vod.vod_name = titleResult[0] || vod.vod_name;
+                    }
+                }
+                if (p.desc) {
+                    let descResult = jsonpath.query(json, p.desc);
+                    if (descResult && descResult.length > 0) {
+                        vod.vod_content = descResult[0] || vod.vod_content;
+                    }
+                }
+                if (p.content) {
+                    let contentResult = jsonpath.query(json, p.content);
+                    if (contentResult && contentResult.length > 0) {
+                        vod.vod_content = contentResult[0] || vod.vod_content;
+                    }
+                }
+                if (p.img) {
+                    let imgResult = jsonpath.query(json, p.img);
+                    if (imgResult && imgResult.length > 0) {
+                        vod.vod_pic = imgResult[0] || vod.vod_pic;
+                    }
+                }
+            } catch (e) {
+                log(`JSON解析失败:${e.message}`);
+            }
+        } else {
+            // 普通HTML解析
+            if (p.title) {
+                try {
+                    vod.vod_name = jsp.pdfh(html, p.title) || vod.vod_name;
+                } catch (e) {
+                    log(`解析title失败:${e.message}`);
+                }
+            }
+            if (p.desc) {
+                try {
+                    vod.vod_content = jsp.pdfh(html, p.desc) || vod.vod_content;
+                } catch (e) {
+                    log(`解析desc失败:${e.message}`);
+                }
+            }
+            if (p.content) {
+                try {
+                    vod.vod_content = jsp.pdfh(html, p.content) || vod.vod_content;
+                } catch (e) {
+                    log(`解析content失败:${e.message}`);
+                }
+            }
+            if (p.img) {
+                try {
+                    vod.vod_pic = jsp.pd(html, p.img, url) || vod.vod_pic;
+                } catch (e) {
+                    log(`解析img失败:${e.message}`);
+                }
+            }
+        }
+
+        // 处理播放线路和播放列表
+        let playFrom = [];
+        let vod_play_from = '$$$';
+
+        if (p.tabs) {
+            try {
+                if (is_json) {
+                    // JSON模式下的tabs处理
+                    let json = JSON.parse(html);
+                    playFrom = jsonpath.query(json, p.tabs) || [];
+                } else {
+                    // HTML模式下的tabs处理
+                    let tabs_list = jsp.pdfa(html, p.tabs);
+                    playFrom = tabs_list.map(it => jsp.pdfh(it, 'Text'));
+                }
+            } catch (e) {
+                log(`解析tabs失败:${e.message}`);
+                playFrom = ['道长在线'];
+            }
+        } else {
+            playFrom = ['道长在线'];
+        }
+
+        vod.vod_play_from = playFrom.join(vod_play_from);
+
+        // 处理播放列表
+        let vod_play_url = '$$$';
+        let vod_tab_list = [];
+
+        if (p.lists) {
+            let list_text = p.list_text || 'body&&Text';
+            let list_url = p.list_url || 'a&&href';
+            let list_url_prefix = p.list_url_prefix || '';
+
+            for (let i = 0; i < playFrom.length; i++) {
+                let tab_name = playFrom[i];
+                let p1 = p.lists.replaceAll('#idv', tab_name).replaceAll('#id', i);
+                let new_vod_list = [];
+
+                try {
+                    if (is_json) {
+                        // JSON模式下的lists处理
+                        let json = JSON.parse(html);
+                        let vodList = jsonpath.query(json, p1) || [];
+                        for (let item of vodList) {
+                            let name = jsonpath.query(item, list_text)[0] || '';
+                            let link = jsonpath.query(item, list_url)[0] || '';
+                            if (name && link) {
+                                new_vod_list.push(name.trim() + '$' + list_url_prefix + link);
+                            }
+                        }
+                    } else {
+                        // HTML模式下的lists处理
+                        let vodList = jsp.pdfa(html, p1);
+                        for (let it of vodList) {
+                            let name = jsp.pdfh(it, list_text).trim();
+                            let link = jsp.pd(it, list_url, url);
+                            if (name && link) {
+                                new_vod_list.push(name + '$' + list_url_prefix + link);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    log(`解析lists失败:${e.message}`);
+                }
+
+                if (new_vod_list.length > 0) {
+                    new_vod_list = forceOrder(new_vod_list, '', x => x.split('$')[0]);
+                }
+
+                let vlist = new_vod_list.join('#');
+                vod_tab_list.push(vlist);
+            }
+
+            vod_play_url = vod_tab_list.join(vod_play_url);
+        }
+
+        vod.vod_play_url = vod_play_url;
+    }
+
+    // 处理图片替换和来源
+    if (rule.图片替换) {
+        if (typeof rule.图片替换 === 'function') {
+            // 异步函数处理
+            try {
+                vod.vod_pic = await rule.图片替换.call(this, vod.vod_pic);
+            } catch (e) {
+                log(`图片替换函数执行失败:${e.message}`);
+            }
+        } else if (typeof rule.图片替换 === 'string' && rule.图片替换.includes('=>')) {
+            // 字符串替换处理
+            let replace_from = rule.图片替换.split('=>')[0];
+            let replace_to = rule.图片替换.split('=>')[1];
+            vod.vod_pic = vod.vod_pic.replace(replace_from, replace_to);
+        }
+    }
+    if (rule.图片来源 && vod.vod_pic && vod.vod_pic.startsWith('http')) {
+        vod.vod_pic = vod.vod_pic + rule.图片来源;
+    }
+
+    if (!vod.vod_id || (orId.includes('$') && vod.vod_id !== orId)) {
+        vod.vod_id = orId;
+    }
+
+    // 处理vodDeal
+    try {
+        vod = vodDeal(vod, rule);
+    } catch (e) {
+        log(`vodDeal发生错误:${e.message}`);
+    }
+
     const jsp = new jsoup(url);
     return {
         TYPE: 'detail',
@@ -1559,11 +2237,12 @@ async function detailParse(rule, ids) {
         pdfh: jsp.pdfh.bind(jsp),
         pdfa: jsp.pdfa.bind(jsp),
         pd: jsp.pd.bind(jsp),
-        pdfl: jsp.pdfl.bind(jsp), // 二级绑定pdfl函数
+        pdfl: jsp.pdfl.bind(jsp),
         pjfh: jsp.pjfh.bind(jsp),
         pjfa: jsp.pjfa.bind(jsp),
         pj: jsp.pj.bind(jsp),
-    }
+        vod: vod // 添加解析好的vod对象
+    };
 }
 
 async function detailParseAfter(vod) {
@@ -2053,4 +2732,138 @@ export function clearAllCache() {
     }
 
     console.log(`已清理 ${clearedCount} 个模块缓存，排除了 ${excludeList.join(', ')} 相关缓存`);
+}
+
+/**
+ * 强制正序算法
+ * @param lists  待正序列表
+ * @param key 正序键
+ * @param option 单个元素处理函数
+ * @returns {*}
+ */
+function forceOrder(lists, key, option) {
+    let start = Math.floor(lists.length / 2);
+    let end = Math.min(lists.length - 1, start + 1);
+    if (start >= end) {
+        return lists;
+    }
+    let first = lists[start];
+    let second = lists[end];
+    if (option && typeof (option) === 'function') {
+        try {
+            first = option(first);
+            second = option(second);
+        } catch (e) {
+        }
+    }
+    if (key && typeof (key) === 'string' && key.trim()) {
+        if (first.hasOwnProperty(key)) {
+            first = first[key];
+        }
+        if (second.hasOwnProperty(key)) {
+            second = second[key];
+        }
+    }
+    // console.log(first,second);
+    if (first && second) {
+        if (/^\d+$/.test(first) && /^\d+$/.test(second)) {
+            // 数字字符串转数字比较
+            first = parseInt(first);
+            second = parseInt(second);
+        }
+        // console.log(first,second,first>second);
+        if (first > second) {
+            return lists.reverse();
+        }
+    }
+    return lists;
+}
+
+/**
+ * vodDeal函数 - 处理播放源排序和重命名
+ * @param vod
+ * @param rule
+ * @returns {*}
+ */
+function vodDeal(vod, rule) {
+    if (!vod || !rule) return vod;
+
+    try {
+        // 线路排序
+        if (rule.tab_order && rule.tab_order.length > 0 && vod.vod_play_from) {
+            let froms = vod.vod_play_from.split('$$$');
+            let urls = vod.vod_play_url ? vod.vod_play_url.split('$$$') : [];
+
+            let orderedFroms = [];
+            let orderedUrls = [];
+
+            // 按照tab_order顺序排列
+            rule.tab_order.forEach((orderItem) => {
+                let index = froms.findIndex(from => from.includes(orderItem));
+                if (index !== -1) {
+                    orderedFroms.push(froms[index]);
+                    if (urls[index]) {
+                        orderedUrls.push(urls[index]);
+                    }
+                    froms.splice(index, 1);
+                    urls.splice(index, 1);
+                }
+            });
+
+            // 添加剩余的
+            orderedFroms = orderedFroms.concat(froms);
+            orderedUrls = orderedUrls.concat(urls);
+
+            vod.vod_play_from = orderedFroms.join('$$$');
+            vod.vod_play_url = orderedUrls.join('$$$');
+        }
+
+        // 线路重命名
+        if (rule.tab_rename && Object.keys(rule.tab_rename).length > 0 && vod.vod_play_from) {
+            let froms = vod.vod_play_from.split('$$$');
+            const renameEntries = Object.entries(rule.tab_rename);
+            froms = froms.map(from => {
+                for (const [key, value] of renameEntries) {
+                    if (from.includes(key)) {
+                        return from.replace(key, value);
+                    }
+                }
+                return from;
+            });
+            vod.vod_play_from = froms.join('$$$');
+        }
+
+        // 线路移除
+        if (rule.tab_remove && rule.tab_remove.length > 0 && vod.vod_play_from) {
+            let froms = vod.vod_play_from.split('$$$');
+            let urls = vod.vod_play_url ? vod.vod_play_url.split('$$$') : [];
+
+            let filteredFroms = [];
+            let filteredUrls = [];
+
+            froms.forEach((from, index) => {
+                let shouldRemove = false;
+                for (const removeItem of rule.tab_remove) {
+                    if (from.includes(removeItem)) {
+                        shouldRemove = true;
+                        break;
+                    }
+                }
+                if (!shouldRemove) {
+                    filteredFroms.push(from);
+                    if (urls[index]) {
+                        filteredUrls.push(urls[index]);
+                    }
+                }
+            });
+
+            vod.vod_play_from = filteredFroms.join('$$$');
+            vod.vod_play_url = filteredUrls.join('$$$');
+        }
+
+    } catch (e) {
+        log(`vodDeal处理失败: ${e.message}`);
+    }
+
+    return vod;
 }

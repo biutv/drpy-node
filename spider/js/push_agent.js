@@ -21,6 +21,16 @@ var rule = {
     class_url: 'push',
     url: '',
     play_parse: true,
+    推荐: async function () {
+        let {publicUrl} = this;
+        let icon = urljoin(publicUrl, './images/icon_cookie/推送.jpg');
+        return [{
+            vod_id: 'https://vdse.bdstatic.com//628ca08719cef5987ea2ae3c6f0d2386.mp4',
+            vod_name: '测试推送直链',
+            vod_pic: icon,
+            vod_remarks: '纯二级源'
+        }]
+    },
     一级: async function (tid, pg, filter, extend) {
         let {MY_CATE, MY_PAGE, input} = this;
         return []
@@ -136,7 +146,7 @@ var rule = {
                             playurls.push(urls);
                         })
                     }
-                    if(/www.123684.com|www.123865.com|www.123912.com/.test(list[i])) {
+                    if (/www.123684.com|www.123865.com|www.123912.com/.test(list[i])) {
                         playPans.push(list[i]);
                         let shareData = await Pan.getShareData(list[i])
                         let videos = await Pan.getFilesByShareUrl(shareData)
@@ -224,7 +234,7 @@ var rule = {
                     playurls.push(urls);
                 })
             }
-            if(/www.123684.com|www.123865.com|www.123912.com|www.123pan.com|www.123pan.cn|www.123592.com/.test(input)) {
+            if (/www.123684.com|www.123865.com|www.123912.com|www.123pan.com|www.123pan.cn|www.123592.com/.test(input)) {
                 playPans.push(input);
                 let shareData = await Pan.getShareData(input)
                 let videos = await Pan.getFilesByShareUrl(shareData)
@@ -338,13 +348,13 @@ var rule = {
                     url: url
                 }
             }
-            if(flag.startsWith('Pan123-')) {
+            if (flag.startsWith('Pan123-')) {
                 log('盘123解析开始')
-                const url = await Pan.getDownload(ids[0],ids[1],ids[2],ids[3],ids[4])
-                urls.push("原画",url)
-                let data = await Pan.getLiveTranscoding(ids[0],ids[1],ids[2],ids[3],ids[4])
+                const url = await Pan.getDownload(ids[0], ids[1], ids[2], ids[3], ids[4])
+                urls.push("原画", url)
+                let data = await Pan.getLiveTranscoding(ids[0], ids[1], ids[2], ids[3], ids[4])
                 data.forEach((item) => {
-                    urls.push(item.name,item.url)
+                    urls.push(item.name, item.url)
                 })
                 return {
                     parse: 0,

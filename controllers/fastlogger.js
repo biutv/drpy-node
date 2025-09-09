@@ -94,6 +94,21 @@ export const fastify = Fastify({
     logger: _logger,
 });
 
+// 添加CORS支持的钩子
+fastify.addHook('onRequest', async (request, reply) => {
+    // 设置CORS头部
+    reply.header('Access-Control-Allow-Origin', '*');
+    reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    reply.header('Access-Control-Allow-Credentials', 'true');
+
+    // 处理预检请求
+    if (request.method === 'OPTIONS') {
+        reply.status(200).send();
+        return;
+    }
+});
+
 // 安全的轮转测试端点
 // if (LOG_WITH_FILE && logStream) {
 //     fastify.get('/test-rotate', async (request, reply) => {

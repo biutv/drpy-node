@@ -7,7 +7,8 @@ class FileHeaderManager {
         '.js': {
             start: '/*',
             end: '*/',
-            regex: /^\s*\/\*([\s\S]*?)\*\/\s*/,
+            // 修改正则表达式，确保只匹配文件开头的注释块
+            regex: /^(\s*\/\*[\s\S]*?\*\/)/,
             headerRegex: /@header\(([\s\S]*?)\)/,
             createComment: (content) => `/*\n${content}\n*/`,
             topCommentsRegex: /^(\s*(\/\/[^\n]*\n|\/\*[\s\S]*?\*\/)\s*)+/
@@ -15,7 +16,8 @@ class FileHeaderManager {
         '.py': {
             start: '"""',
             end: '"""',
-            regex: /^\s*"""([\s\S]*?)"""\s*/,
+            // 修改正则表达式，确保只匹配文件开头的注释块
+            regex: /^(\s*"""[\s\S]*?""")/,
             headerRegex: /@header\(([\s\S]*?)\)/,
             createComment: (content) => `"""\n${content}\n"""`,
             topCommentsRegex: /^(\s*(#[^\n]*\n|'''[\s\S]*?'''|"""[\s\S]*?""")\s*)+/
@@ -69,12 +71,63 @@ class FileHeaderManager {
     }
 
     /**
+     * 创建文件备份
+     * @param {string} filePath 原文件路径
+     * @returns {string} 备份文件路径
+     */
+    static async createBackup(filePath) {
+        const backupPath = `${filePath}.backup.${Date.now()}`;
+        try {
+            const content = await fs.readFile(filePath, 'utf8');
+            await fs.writeFile(backupPath, content);
+            return backupPath;
+        } catch (error) {
+            throw new Error(`Failed to create backup: ${error.message}`);
+        }
+    }
+
+    /**
+     * 从备份恢复文件
+     * @param {string} filePath 目标文件路径
+     * @param {string} backupPath 备份文件路径
+     */
+    static async restoreFromBackup(filePath, backupPath) {
+        try {
+            const backupContent = await fs.readFile(backupPath, 'utf8');
+            await fs.writeFile(filePath, backupContent);
+            // 删除备份文件
+            await fs.unlink(backupPath);
+        } catch (error) {
+            throw new Error(`Failed to restore from backup: ${error.message}`);
+        }
+    }
+
+    /**
      * 写入/更新文件头信息
      * @param {string} filePath 文件路径
      * @param {Object} headerObj 头信息对象
+     * @param {Object} [options] 配置选项
+     * @param {boolean} [options.createBackup=true] 是否创建备份
      */
-    static async writeHeader(filePath, headerObj) {
-        let content = await fs.readFile(filePath, 'utf8');
+    static async writeHeader(filePath, headerObj, options = {}) {
+        const {createBackup = false} = options;
+        // 添加参数验证
+        if (!filePath || typeof filePath !== 'string') {
+            throw new Error('Invalid file path');
+        }
+        if (!headerObj || typeof headerObj !== 'object') {
+            throw new Error('Invalid header object');
+        }
+
+        let content;
+        try {
+            content = await fs.readFile(filePath, 'utf8');
+        } catch (error) {
+            throw new Error(`Failed to read file: ${error.message}`);
+        }
+
+        // 备份原始内容
+        const originalContent = content;
         const ext = path.extname(filePath);
         const config = this.COMMENT_CONFIG[ext];
 
@@ -85,29 +138,109 @@ class FileHeaderManager {
             .replace(/"/g, "'")})`;
 
         const match = content.match(config.regex);
+        let newContent;
 
         if (match) {
             const [fullComment] = match;
+            const commentStartIndex = content.indexOf(fullComment);
+            const commentEndIndex = commentStartIndex + fullComment.length;
 
-            if (config.headerRegex.test(fullComment)) {
-                content = content.replace(
-                    config.headerRegex,
-                    headerStr
-                );
+            // 确保匹配的注释块确实在文件开头（允许前面有空白字符）
+            const beforeComment = content.substring(0, commentStartIndex);
+            if (beforeComment.trim() !== '') {
+                // 如果注释块前面有非空白内容，说明这不是文件头注释，创建新的头注释
+                const newComment = config.createComment(headerStr) + '\n\n';
+                newContent = newComment + content;
             } else {
-                const updatedComment = fullComment
-                        .replace(config.end, '')
-                        .trim()
-                    + `\n${headerStr}\n${config.end}`;
-
-                content = content.replace(fullComment, updatedComment);
+                // 这是文件头注释，进行更新
+                if (config.headerRegex.test(fullComment)) {
+                    // 已存在@header，替换它
+                    const updatedComment = fullComment.replace(config.headerRegex, headerStr);
+                    newContent = content.substring(0, commentStartIndex) +
+                        updatedComment +
+                        content.substring(commentEndIndex);
+                } else {
+                    // 不存在@header，添加到注释块中
+                    const updatedComment = fullComment
+                            .replace(config.end, '')
+                            .trim()
+                        + `\n${headerStr}\n${config.end}`;
+                    newContent = content.substring(0, commentStartIndex) +
+                        updatedComment +
+                        content.substring(commentEndIndex);
+                }
             }
         } else {
+            // 没有找到注释块，在文件开头创建新的
             const newComment = config.createComment(headerStr) + '\n\n';
-            content = newComment + content;
+            newContent = newComment + content;
         }
 
-        await fs.writeFile(filePath, content);
+        // 确保新内容不只包含文件头
+        const contentWithoutHeader = newContent.replace(config.regex, '').trim();
+        if (!contentWithoutHeader) {
+            throw new Error('写入失败：内容不能只包含文件头而无原始内容');
+        }
+
+        // 验证新内容不为空且包含原始内容的主要部分
+        if (!newContent || newContent.trim().length === 0) {
+            throw new Error('Generated content is empty, operation aborted');
+        }
+
+        // 简单的内容完整性检查：确保新内容包含原始内容的大部分非注释代码
+        const originalCodeLines = originalContent.split('\n').filter(line => {
+            const trimmed = line.trim();
+            return trimmed && !trimmed.startsWith('//') && !trimmed.startsWith('/*') &&
+                !trimmed.startsWith('*') && !trimmed.startsWith('*/') &&
+                !trimmed.startsWith('#') && !trimmed.startsWith('"""') && !trimmed.startsWith("'''");
+        });
+
+        const newCodeLines = newContent.split('\n').filter(line => {
+            const trimmed = line.trim();
+            return trimmed && !trimmed.startsWith('//') && !trimmed.startsWith('/*') &&
+                !trimmed.startsWith('*') && !trimmed.startsWith('*/') &&
+                !trimmed.startsWith('#') && !trimmed.startsWith('"""') && !trimmed.startsWith("'''") &&
+                !trimmed.includes('@header(');
+        });
+
+        // 如果新内容的代码行数比原始内容少了很多，可能出现了问题
+        if (originalCodeLines.length > 5 && newCodeLines.length < originalCodeLines.length * 0.8) {
+            throw new Error('Content integrity check failed: significant code loss detected, operation aborted');
+        }
+
+        // 创建备份（如果启用）
+        let backupPath = null;
+        if (createBackup) {
+            try {
+                backupPath = await this.createBackup(filePath);
+            } catch (error) {
+                console.warn(`Warning: Failed to create backup for ${filePath}: ${error.message}`);
+            }
+        }
+
+        try {
+            await fs.writeFile(filePath, newContent);
+
+            // 写入成功后，删除备份文件
+            if (backupPath) {
+                try {
+                    await fs.unlink(backupPath);
+                } catch (error) {
+                    console.warn(`Warning: Failed to delete backup file ${backupPath}: ${error.message}`);
+                }
+            }
+        } catch (error) {
+            // 写入失败，尝试从备份恢复
+            if (backupPath) {
+                try {
+                    await this.restoreFromBackup(filePath, backupPath);
+                    console.log(`File restored from backup: ${filePath}`);
+                } catch (restoreError) {
+                    console.error(`Failed to restore from backup: ${restoreError.message}`);
+                }
+            }
+            throw new Error(`Failed to write file: ${error.message}`);
+        }
     }
 
     /**
@@ -121,7 +254,7 @@ class FileHeaderManager {
      * @returns {Promise<string>|string} 移除头信息后的内容
      */
     static async removeHeader(input, options = {}) {
-        const { mode = 'header-only', fileType } = options;
+        const {mode = 'header-only', fileType} = options;
 
         // 判断输入类型：文件路径 or 文件内容
         const isFilePath = !input.includes('\n') && input.length < 256 &&

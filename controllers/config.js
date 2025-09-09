@@ -739,6 +739,7 @@ export default (fastify, options, done) => {
         const query = request.query; // 获取 query 参数
         const pwd = query.pwd || '';
         const sub_code = query.sub || '';
+        const healthy = query.healthy || ''; // 新增healthy参数
         const cat_sub_code = ENV.get('cat_sub_code', 'all');
         const must_sub_code = Number(ENV.get('must_sub_code', '0')) || 0;
         const cfg_path = request.params['*']; // 捕获整个路径
@@ -756,28 +757,28 @@ export default (fastify, options, done) => {
             //     if (cfg_path.includes('index.js')) {
             //         // return reply.sendFile('index.js', path.join(options.rootDir, 'data/cat'));
             //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.js'), 'utf-8');
-            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`)});
-            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`));
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
             //         return reply.type('application/javascript;charset=utf-8').send(content);
             //     } else if (cfg_path.includes('index.config.js')) {
             //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.config.js'), 'utf-8');
-            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`)});
-            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`));
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
             //         return reply.type('application/javascript;charset=utf-8').send(content);
             //     }
             // }
             // if (cfg_path.endsWith('.js.md5')) {
             //     if (cfg_path.includes('index.js')) {
             //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.js'), 'utf-8');
-            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`)});
-            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`));
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
             //         let contentHash = md5(content);
             //         console.log('index.js contentHash:', contentHash);
             //         return reply.type('text/plain;charset=utf-8').send(contentHash);
             //     } else if (cfg_path.includes('index.config.js')) {
             //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.config.js'), 'utf-8');
-            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`)});
-            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&pwd=${process.env.API_PWD || ''}`));
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
             //         let contentHash = md5(content);
             //         console.log('index.config.js contentHash:', contentHash);
             //         return reply.type('text/plain;charset=utf-8').send(contentHash);
@@ -785,7 +786,7 @@ export default (fastify, options, done) => {
             // }
             const getFilePath = (cfgPath, rootDir, fileName) => path.join(rootDir, `data/cat/${fileName}`);
             const processContent = (content, cfgPath, requestUrl, requestHost) => {
-                const $config_url = requestUrl.replace(cfgPath, `/1?sub=${cat_sub_code}&pwd=${process.env.API_PWD || ''}`);
+                const $config_url = requestUrl.replace(cfgPath, `/1?sub=${cat_sub_code}&healthy=1&pwd=${process.env.API_PWD || ''}`);
                 return content.replaceAll('$config_url', $config_url).replaceAll('$host', requestHost);
             }
 
@@ -844,7 +845,37 @@ export default (fastify, options, done) => {
                 return reply.status(500).send({error: `缺少订阅码参数`});
             }
 
-            const siteJSON = await generateSiteJSON(options, requestHost, sub, pwd);
+            let siteJSON = await generateSiteJSON(options, requestHost, sub, pwd);
+
+            // 处理healthy参数，过滤失效源
+            if (healthy === '1') {
+                const reportPath = path.join(options.rootDir, 'data', 'source-checker', 'report.json');
+                if (existsSync(reportPath)) {
+                    try {
+                        const reportContent = readFileSync(reportPath, 'utf-8');
+                        const reportData = JSON.parse(reportContent);
+
+                        // 获取失效源的key列表
+                        const failedKeys = new Set();
+                        if (reportData.sources && Array.isArray(reportData.sources)) {
+                            reportData.sources.forEach(source => {
+                                if (source.status === 'error') {
+                                    failedKeys.add(source.key);
+                                }
+                            });
+                        }
+
+                        // 过滤掉失效的源
+                        if (failedKeys.size > 0) {
+                            siteJSON.sites = siteJSON.sites.filter(site => !failedKeys.has(site.key));
+                            console.log(`Filtered out ${failedKeys.size} failed sources, remaining: ${siteJSON.sites.length}`);
+                        }
+                    } catch (error) {
+                        console.error('Failed to process health report:', error.message);
+                    }
+                }
+            }
+
             const parseJSON = await generateParseJSON(options.jxDir, requestHost);
             const livesJSON = generateLivesJSON(requestHost);
             const playerJSON = generatePlayerJSON(options.configDir, requestHost);

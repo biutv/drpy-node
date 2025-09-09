@@ -12,6 +12,7 @@ import httpController from './http.js';
 import clipboardPusherController from './clipboard-pusher.js';
 // import taskController from './tasker.js';
 import cronTaskerController from './cron-tasker.js';
+import sourceCheckerController from './source-checker.js';
 
 export const registerRoutes = (fastify, options) => {
     fastify.register(staticController, options);
@@ -28,4 +29,5 @@ export const registerRoutes = (fastify, options) => {
     fastify.register(clipboardPusherController, options);
     // fastify.register(taskController, options);
     fastify.register(cronTaskerController, options);
+    fastify.register(sourceCheckerController, options);
 };

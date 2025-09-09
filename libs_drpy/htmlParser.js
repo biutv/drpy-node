@@ -149,6 +149,7 @@ class Jsoup {
     }
 
     pdfl(html, parse, list_text, list_url, url_key) {
+        // fixme
         if (!html || !parse) return [];
         parse = this.parseHikerToJq(parse, false);
         const new_vod_list = [];
@@ -162,7 +163,14 @@ class Jsoup {
         }
 
         ret.each((_, element) => {
-            new_vod_list.push(`${doc(element)}`);
+            const _html = `${doc(element)}`;
+            // new_vod_list.push(`${doc(element)}`);
+            let _doc = cheerio.load(_html);
+            let _ret1 = null;
+            let _title = this.parseOneRule(_doc, list_text, _ret1);
+            let _ret2 = null;
+            let _url = this.parseOneRule(_doc, list_url, _ret2);
+            new_vod_list.push(`${_title}${_url}`);
         });
 
         return new_vod_list;
@@ -230,8 +238,7 @@ class Jsoup {
                         if (ret) break;
                     }
             }
-        }
-        else { // 增加返回字符串，禁止直接返回pq对象
+        } else { // 增加返回字符串，禁止直接返回pq对象
             ret = `${ret}`;
         }
 

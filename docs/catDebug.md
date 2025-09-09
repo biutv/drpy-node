@@ -18,7 +18,7 @@ index.js file:///E:/_gitwork_drpy-node_index.js
 1. 在 `devTools` 控制台可以看到输出，在源代码来源标签页可以看到运行的js文件。
    找到对应的源如 `spider/catvod` 里面的猫测试，进去打断点
 2. 确保 在 `config/env.json` 里有 `"enable_cat": "2"`,猫源用T4方式运行
-3. 浏览器访问 `http://127.0.0.1:5757/api/猫测试?do=cat&pwd=dzyyds` 这样的链接就可以访问触发程序的断点
+3. 浏览器访问 `http://127.0.0.1:5757/api/猫测试?do=cat&healthy=1&pwd=dzyyds` 这样的链接就可以访问触发程序的断点
 
 ## 其它说明
 

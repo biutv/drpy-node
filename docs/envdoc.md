@@ -30,4 +30,6 @@
 | CLIPBOARD_SECURITY_CODE   | 剪切板接口请求头安全码                    | drpys                                                             |
 | CLIPBOARD_ALLOWED_CHARSET | 允许字符集，默认utf-8                  | utf-8                                                             |
 | CLIPBOARD_MAX_READ_SIZE   | 最大可读取问文本体积，默认2mb               | 2048000                                                           |
+| API_TIMEOUT               | 默认API超时时间                      | 20                                                                |
+| API_ACTION_TIMEOUT        | action接口专用超时时间                 | 60                                                                |
 
