@@ -40,11 +40,6 @@ export function getApiEngine(engines, moduleName, query, options) {
     let _ext;
 
     switch (adapt) {
-        case 'dr':
-            apiEngine = engines.drpy2;
-            moduleDir = options.dr2Dir;
-            _ext = '.js';
-            break;
         case 'py':
             apiEngine = engines.hipy;
             moduleDir = options.pyDir;

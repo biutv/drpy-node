@@ -4,11 +4,12 @@
   filterable: 0,
   quickSearch: 1,
   title: '凤凰FM',
-  lang: 'dr2'
+  '类型': '影视',
+  lang: 'ds'
 })
 */
 
-globalThis.h_ost = 'https://s.fm.renbenai.com';
+const h_ost = 'https://s.fm.renbenai.com';
 var rule = {
     title: '凤凰FM',
     host: h_ost,
@@ -25,8 +26,9 @@ var rule = {
     },
     play_parse: true,
     search_match: true,
-    class_parse: $js.toString(() => {
-        let html = request(input);
+    class_parse: async function () {
+        let {input} = this;
+        let html = await request(input);
         let classes = [];
         let data = JSON.parse(html).data.list[0].channelContent;
         data.forEach((it) => {
@@ -37,11 +39,14 @@ var rule = {
                 type_id: typeId,
             });
         });
-        input = classes;
-    }),
-    一级: $js.toString(() => {
+        return {
+            class: classes,
+        }
+    },
+    一级: async function () {
+        let {input} = this;
         let d = [];
-        let html = request(input);
+        let html = await request(input);
         let data = JSON.parse(html).data.hotList;
         data.forEach(item => {
             let title = item.programName;
@@ -54,12 +59,13 @@ var rule = {
                 });
             }
         });
-        setResult(d);
-    }),
-    二级: $js.toString(() => {
-        let html = request(input);
+        return setResult(d);
+    },
+    二级: async function () {
+        let {input} = this;
+        let html = await request(input);
         let list = JSON.parse(html).data.list;
-        VOD = {
+        let VOD = {
             vod_name: list[0]['title'] || '暂无名称',
             type_name: list[0]['vod_class'] || '暂无类型',
             vod_pic: list[0]['img370_370'] || '暂无图片',
@@ -76,10 +82,12 @@ var rule = {
         });
         VOD.vod_play_from = '凤凰FM';
         VOD.vod_play_url = playUrls.join('#');
-    }),
-    搜索: $js.toString(() => {
+        return VOD
+    },
+    搜索: async function () {
+        let {input, KEY} = this;
         let d = [];
-        let html = request(input);
+        let html = await request(input);
         let data = JSON.parse(html).data.program;
         if (rule.search_match) {
             data = data.filter(it => {
@@ -98,12 +106,12 @@ var rule = {
                 });
             }
         });
-        setResult(d);
-    }),
-    lazy: $js.toString(() => {
-        input = {
+        return setResult(d);
+    },
+    lazy: async function () {
+        return {
             parse: 0,
             url: input
         };
-    }),
+    },
 }

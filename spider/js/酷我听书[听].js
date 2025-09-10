@@ -4,7 +4,8 @@
   filterable: 1,
   quickSearch: 0,
   title: '酷我听书[听]',
-  lang: 'dr2'
+  '类型': '听书',
+  lang: 'ds'
 })
 */
 
@@ -23,15 +24,17 @@ var rule = {
     class_name: '有声小说&音乐&相声评书&影视原声',
     class_url: '2&37&5&62',
     play_parse: true,
-    lazy: $js.toString(() => {
-        let html = request(input);
+    lazy: async function () {
+        let {input} = this;
+        let html = await request(input);
         let url = JSON.parse(html).data.url;
-        input = {url: url, parse: 0};
-    }),
+        return {url: url, parse: 0};
+    },
     double: true,
-    一级: $js.toString(() => {
+    一级: async function () {
+        let {input} = this;
         let d = [];
-        let html = request(input);
+        let html = await request(input);
         let data = JSON.parse(html).data.data;
         data.forEach(it => {
             let id = 'http://search.kuwo.cn/r.s?stype=albuminfo&user=8d378d72qw28f5f4&uid=2511552006&loginUid=540129516&loginSid=958467960&prod=kwplayer_ar_9.1.8.1&bkprod=kwbook_ar_9.1.8.1&source=kwplayer_ar_9.1.8.1_tvivo.apk&bksource=kwbook_ar_9.1.8.1_tvivo.apk&corp=kuwo&albumid=' + it.albumId + '&pn=0&rn=5000&show_copyright_off=1&vipver=MUSIC_8.2.0.0_BCS17&mobi=1&iskwbook=1';
@@ -42,24 +45,27 @@ var rule = {
                 desc: it.title,
             });
         });
-        setResult(d);
-    }),
-    二级: $js.toString(() => {
+        return setResult(d);
+    },
+    二级: async function () {
+        let {input} = this;
         let urls = [];
-        let html = request(input);
+        let html = await request(input);
         let data = JSON.parse(html).musiclist;
         data.forEach(it => {
             urls.push(it.name + '$' + 'http://mobi.kuwo.cn/mobi.s?f=web&source=kwplayerhd_ar_4.3.0.8_tianbao_T1A_qirui.apk&type=convert_url_with_sign&rid=' + it.musicrid + '&br=320kmp3');
         });
-        VOD = {
+        let VOD = {
             vod_play_from: '球球啦',
             vod_play_url: urls.join('#')
         };
-    }),
-    搜索: $js.toString(() => {
+        return VOD;
+    },
+    搜索: async function () {
+        let {input} = this;
         let d = [];
         // log(input);
-        let html = request(input);
+        let html = await request(input);
         let data = JSON5.parse(html).albumlist;
         // log(data);
         data.forEach(it => {
@@ -70,6 +76,6 @@ var rule = {
                 img: it.img,
             });
         });
-        setResult(d);
-    })
+        return setResult(d);
+    }
 }

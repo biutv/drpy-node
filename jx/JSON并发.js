@@ -32,7 +32,7 @@ const jx = {
 
 async function lazy(input, params) {
     log('input:', input);
-    let jx_dict = getParsesDict();
+    let jx_dict = getParsesDict(requestHost);
     // log(jx_dict);
     if (jx_dict.length > 0) {
         jx_dict = jx_dict.filter(it => it.type === 1);

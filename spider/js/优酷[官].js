@@ -4,7 +4,8 @@
   filterable: 1,
   quickSearch: 0,
   title: '优酷[官]',
-  lang: 'dr2'
+  '类型': '影视',
+  lang: 'ds'
 })
 */
 
@@ -30,14 +31,16 @@ var rule = {
     class_url: '电视剧&电影&综艺&动漫&少儿&纪录片&文化&亲子&教育&搞笑&生活&体育&音乐&游戏',
     limit: 20,
     play_parse: true,
-    lazy: $js.toString(() => {
-        input = {
+    lazy: async function () {
+        let {input} = this;
+        return {
             parse: 1,
             jx: 1,
             url: input
-        };
-    }),
-    一级: $js.toString(() => {
+        }
+    },
+    一级: async function () {
+        let {input, MY_CATE, MY_FL, MY_PAGE, fetch_params} = this;
         let d = [];
         MY_FL.type = MY_CATE;
         let fl = stringify(MY_FL);
@@ -51,7 +54,7 @@ var rule = {
                 input = input.replace("optionRefresh=1", "session=" + encodeUrl(old_session))
             }
         }
-        let html = fetch(input, fetch_params);
+        let html = await request(input, fetch_params);
         try {
             html = JSON.parse(html);
             let lists = html.data.filterData.listData;
@@ -78,23 +81,24 @@ var rule = {
         } catch (e) {
             log("一级列表解析发生错误:" + e.message)
         }
-        setResult(d);
-    }),
-    二级: $js.toString(() => {
-        var d = [];
-        VOD = {};
-        let html = request(input);
+        return setResult(d);
+    },
+    二级: async function () {
+        let {input, fetch_params, MY_URL} = this;
+        let d = [];
+        let VOD = {};
+        let html = await request(input);
         let json = JSON.parse(html);
         if (/keyword/.test(input)) {
             input = "https://search.youku.com/api/search?appScene=show_episode&showIds=" + json.pageComponentList[0].commonData.showId;
-            json = JSON.parse(fetch(MY_URL, fetch_params))
+            json = JSON.parse(await request(MY_URL, fetch_params))
         }
         let video_lists = json.serisesList;
-        var name = json.sourceName;
+        let name = json.sourceName;
         if (/优酷/.test(name) && video_lists.length > 0) {
             let ourl = "https://v.youku.com/v_show/id_" + video_lists[0].videoId + ".html";
             let _img = video_lists[0].thumbUrl;
-            let html = fetch(ourl, {
+            let html = await request(ourl, {
                 headers: {
                     Referer: "https://v.youku.com/",
                     "User-Agent": PC_UA
@@ -126,7 +130,7 @@ var rule = {
                     VOD.vod_content = JJ
                 } catch (e) {
                     log("海报渲染发生错误:" + e.message);
-                    print(json);
+                    // print(json);
                     VOD.vod_remarks = name
                 }
             }
@@ -139,6 +143,8 @@ var rule = {
         function adhead(url) {
             return urlencode(url)
         }
+
+        let play_url = '';
 
         play_url = play_url.replace("&play_url=", "&type=json&play_url=");
         video_lists.forEach(function (it) {
@@ -162,11 +168,14 @@ var rule = {
             return it.title + "$" + it.url
         })
             .join("#");
-    }),
 
-    搜索: $js.toString(() => {
-        var d = [];
-        let html = request(input);
+        return VOD;
+    },
+
+    搜索: async function () {
+        let {input} = this;
+        let d = [];
+        let html = await request(input);
         let json = JSON.parse(html);
         json.pageComponentList.forEach(function (it) {
             if (it.hasOwnProperty("commonData")) {
@@ -180,6 +189,6 @@ var rule = {
                 })
             }
         });
-        setResult(d)
-    }),
+        return setResult(d)
+    },
 }

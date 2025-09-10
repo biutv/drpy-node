@@ -4,7 +4,8 @@
   filterable: 0,
   quickSearch: 0,
   title: '博看听书',
-  lang: 'dr2'
+  '类型': '听书',
+  lang: 'ds'
 })
 */
 
@@ -23,9 +24,10 @@ var rule = {
     headers: {'User-Agent': 'MOBILE_UA'},
     推荐: '*',
     一级: 'json:data.list;name;cover;extra.author;id',
-    二级: `js:
+    二级: async function () {
+        let {input} = this;
         let d = [];
-        VOD = {
+        let VOD = {
             vod_url: input,
             vod_name: "",
             vod_actor: "",
@@ -33,7 +35,7 @@ var rule = {
             vod_director: ""
         };
         let playlists = [];
-        let data = JSON.parse(request(input)).data;
+        let data = JSON.parse(await request(input)).data;
         VOD.vod_name = data.list[0].id;
         VOD.vod_actor = "▶️创建于" + data.list[0].created_at;
         VOD.vod_year = data.list[0].created_at.split("-")[0];
@@ -43,20 +45,21 @@ var rule = {
         if (total > 200) {
             for (let i = 2; i < total / 200 + 1; i++) {
                 let listUrl = input.split("&")[0] + "&page=" + i + "&num=200&order=1";
-                let data = JSON.parse(request(listUrl)).data;
+                let data = JSON.parse(await request(listUrl)).data;
                 playlists = playlists.concat(data.list)
             }
         }
-        playlists.forEach(function(it) {
+        playlists.forEach(function (it) {
             d.push({
                 title: it.title,
                 url: it.file
             })
         });
         VOD.vod_play_from = "bookan";
-        VOD.vod_play_url = d.map(function(it) {
+        VOD.vod_play_url = d.map(function (it) {
             return it.title + "$" + it.url
         }).join("#");
-    `,
+        return VOD
+    },
     搜索: '*',
 }

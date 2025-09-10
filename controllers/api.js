@@ -5,14 +5,12 @@ import {ENV} from "../utils/env.js";
 import {validatePwd} from "../utils/api_validate.js";
 import {startJsonWatcher, getApiEngine} from "../utils/api_helper.js";
 import * as drpyS from '../libs/drpyS.js';
-import drpy2 from '../libs/drpy2.js';
 import hipy from '../libs/hipy.js';
 import xbpq from '../libs/xbpq.js';
 import catvod from '../libs/catvod.js';
 
 const ENGINES = {
     drpyS,
-    drpy2,
     hipy,
     xbpq,
     catvod,
@@ -70,6 +68,7 @@ export default (fastify, options, done) => {
             // console.log('moduleExt:', typeof moduleExt, moduleExt);
             const protocol = request.headers['x-forwarded-proto'] || (request.socket.encrypted ? 'https' : 'http');
             const hostname = request.hostname;
+            const requestHost = `${protocol}://${hostname}`;
             const publicUrl = `${protocol}://${hostname}/public/`;
             const jsonUrl = `${protocol}://${hostname}/json/`;
             const httpUrl = `${protocol}://${hostname}/http`;
@@ -84,6 +83,7 @@ export default (fastify, options, done) => {
                     return proxyUrl
                 };
                 return {
+                    requestHost,
                     proxyUrl,
                     publicUrl,
                     jsonUrl,
@@ -289,12 +289,13 @@ export default (fastify, options, done) => {
         const moduleExt = query.extend || '';
         const protocol = request.headers['x-forwarded-proto'] || (request.socket.encrypted ? 'https' : 'http');
         const hostname = request.hostname;
-
+        const requestHost = `${protocol}://${hostname}`;
         const publicUrl = `${protocol}://${hostname}/public/`;
         const jsonUrl = `${protocol}://${hostname}/json/`;
         const httpUrl = `${protocol}://${hostname}/http`;
         const mediaProxyUrl = `${protocol}://${hostname}/mediaProxy`;
         const hostUrl = `${hostname.split(':')[0]}`;
+
         const fServer = fastify.server;
 
         function getEnv(moduleName) {
@@ -303,6 +304,7 @@ export default (fastify, options, done) => {
                 return proxyUrl
             };
             return {
+                requestHost,
                 proxyUrl,
                 proxyPath,
                 publicUrl,
@@ -398,7 +400,7 @@ export default (fastify, options, done) => {
         const moduleExt = query.extend || '';
         const protocol = request.headers['x-forwarded-proto'] || (request.socket.encrypted ? 'https' : 'http');
         const hostname = request.hostname;
-
+        const requestHost = `${protocol}://${hostname}`;
         const publicUrl = `${protocol}://${hostname}/public/`;
         const jsonUrl = `${protocol}://${hostname}/json/`;
         const httpUrl = `${protocol}://${hostname}/http`;
@@ -412,6 +414,7 @@ export default (fastify, options, done) => {
                 return proxyUrl
             };
             return {
+                requestHost,
                 proxyUrl,
                 publicUrl,
                 jsonUrl,

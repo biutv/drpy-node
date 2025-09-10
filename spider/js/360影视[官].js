@@ -4,7 +4,8 @@
   filterable: 1,
   quickSearch: 0,
   title: '360影视[官]',
-  lang: 'dr2'
+  '类型': '影视',
+  lang: 'ds'
 })
 */
 
@@ -29,18 +30,17 @@ var rule = {
     multi: 1,
     searchable: 2,
     play_parse: true,
-    lazy: 'js:input=input.split("?")[0];log(input);',
-    // 疑似t4专用的
-    // lazy:'js:input={parse: 1, playUrl: "", jx: 1, url: input.split("?")[0]}',
-    // 手动调用解析请求json的url,此lazy不方便
-    // lazy:'js:input="https://cache.json.icu/home/api?type=ys&uid=292796&key=fnoryABDEFJNPQV269&url="+input.split("?")[0];log(input);let html=JSON.parse(request(input));log(html);input=html.url||input',
+    lazy: async function () {
+        let {input} = this;
+        return input.split("?")[0];
+    },
     推荐: 'json:data;title;cover;comment;cat+ent_id;description',
     一级: 'json:data.movies;title;cover;pubdate;id;description',
-    二级: '',
-    二级: $js.toString(() => {
-        let html = JSON.parse(fetch(input, fetch_params));
+    二级: async function () {
+        let {input, fetch_params} = this;
+        let html = JSON.parse(await request(input, fetch_params));
         let data = html.data;
-        let tilte = data.title;
+        let title = data.title;
         let img = data.cdncover;
         let vod_type = data.moviecategory.join(",");
         let area = data.area.join(",");
@@ -49,29 +49,29 @@ var rule = {
         let content = data.description;
         let base_vod = {
             vod_id: input,
-            vod_name: tilte,
+            vod_name: title,
             type_name: vod_type,
             vod_actor: actor,
             vod_director: director,
             vod_content: content,
             vod_remarks: area,
-            vod_pic: urljoin2(input, img)
+            vod_pic: urljoin(input, img)
         };
         let delta = 50;
         let vod_play = {};
         let sites = data.playlink_sites;
-        sites.forEach(function (site) {
+        for (const site of sites) {
             let playList = "";
             let vodItems = [];
-            print(data)
+            // print(data)
             if (data.allupinfo) {
                 let total = parseInt(data.allupinfo[site]);
-                print(total)
+                // print(total)
                 for (let j = 1; j < total; j += delta) {
                     let end = Math.min(total, j + delta - 1);
-                    print(end)
-                    let url2 = buildUrl(input, { start: j, end: end, site: site });
-                    let vod_data = JSON.parse(fetch(url2), fetch_params).data;
+                    // print(end)
+                    let url2 = buildUrl(input, {start: j, end: end, site: site});
+                    let vod_data = JSON.parse(await request(url2), fetch_params).data;
                     if (vod_data != null) {
                         if (vod_data.allepidetail) {
                             vod_data = vod_data.allepidetail[site];
@@ -89,21 +89,28 @@ var rule = {
             } else {
                 let item = data.playlinksdetail[site];
                 vodItems.push((item.sort || "") + "$" + urlDeal(item.default_url || ""))
-            } if (vodItems.length > 0) {
+            }
+            if (vodItems.length > 0) {
                 playList = vodItems.join("#")
-            } if (playList.length < 1) {
-                return
-            } vod_play[site] = playList
-        });
+            }
+            if (playList.length < 1) {
+                continue;
+            }
+            vod_play[site] = playList
+        }
         let tabs = Object.keys(vod_play);
-        let playUrls = []; for (let id in tabs) {
-            print("id:" + id); playUrls.push(vod_play[tabs[id]])
-        } if (tabs.length > 0) {
-            let vod_play_from = tabs.join("$$$"); let vod_play_url = playUrls.join("$$$");
+        let playUrls = [];
+        for (let id in tabs) {
+            // print("id:" + id);
+            playUrls.push(vod_play[tabs[id]])
+        }
+        if (tabs.length > 0) {
+            let vod_play_from = tabs.join("$$$");
+            let vod_play_url = playUrls.join("$$$");
             base_vod.vod_play_from = vod_play_from;
             base_vod.vod_play_url = vod_play_url
         }
-        VOD = base_vod;
-    }),
+        return base_vod;
+    },
     搜索: 'json:data.longData.rows;titleTxt||titlealias;cover;cat_name;cat_id+en_id;description',
 }

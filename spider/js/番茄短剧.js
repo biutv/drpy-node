@@ -5,10 +5,9 @@
   quickSearch: 0,
   title: '番茄短剧',
   '类型': '影视',
-  lang: 'dr2'
+  lang: 'ds'
 })
 */
-
 
 //搜索结果为书籍
 var rule = {
@@ -16,7 +15,7 @@ var rule = {
     host: 'http://fqgo.52dns.cc',
     url: '/catalog?book_id=fyclass',
     searchUrl: '/search?query=**&tab_type=12&offset=fypage',
-    detailUrl:'/catalog?book_id=fyid',
+    detailUrl: '/catalog?book_id=fyid',
     searchable: 2,
     quickSearch: 0,
     filterable: 0,
@@ -29,22 +28,24 @@ var rule = {
     class_url: 'videoseries_hot&firstonlinetime_new&cate_739&cate_29&cate_3&cate_1051&cate_266&cate_1053&cate_261&cate_20',
     play_parse: true,
     double: true,
-    lazy: $js.toString(() => {
+    lazy: async function () {
+        let {input, MY_URL} = this;
         let id = MY_URL;
         let api_url = rule.host + '/video?item_ids=' + id;
-        let html = request(api_url, { headers: rule.headers });
+        let html = await request(api_url, {headers: rule.headers});
         let data = JSON.parse(html);
         let videoModel = JSON.parse(data.data[id].video_model);
         let videoUrl = atob(videoModel.video_list.video_1.main_url);
-        input = {
+        return {
             parse: 0,
             url: videoUrl,
             js: ''
         };
-    }),
-    推荐: $js.toString(() => {
+    },
+    推荐: async function () {
+        let {input, MY_URL} = this;
         let url = 'https://reading.snssdk.com/reading/bookapi/bookmall/cell/change/v?change_type=0&selected_items=videoseries_hot&tab_type=8&cell_id=6952850996422770718&version_tag=video_feed_refactor&device_id=1423244030195267&aid=1967&app_name=novelapp&ssmix=a';
-        let html = request(url, {headers: rule.headers});
+        let html = await request(url, {headers: rule.headers});
         let data = JSON.parse(html);
         let items = [];
         if (data.data?.cell_view?.cell_data) {
@@ -61,7 +62,7 @@ var rule = {
         } else {
             items = [data];
         }
-        VODS = items.map(item => {
+        let VODS = items.map(item => {
             return {
                 vod_id: item.series_id || item.book_id || item.id || (item.video_data?.[0]?.series_id) || '',
                 vod_name: item.title || (item.video_data?.[0]?.title) || (item.data?.[0]?.title) || '未知短剧',
@@ -70,8 +71,10 @@ var rule = {
                 vod_content: item.video_desc || (item.video_data?.[0]?.video_desc) || (item.data?.[0]?.video_desc) || ''
             };
         });
-    }),
-    一级: $js.toString(() => {
+        return VODS
+    },
+    一级: async function () {
+        let {input, MY_URL, MY_CATE, MY_PAGE} = this;
         let classList = rule.class_url.split('&');
         let cateId = classList[MY_CATE.class_index] || classList[0];
         let now = new Date();
@@ -86,7 +89,7 @@ var rule = {
             let offset = (page - 1) * 12;
             baseUrl += `&offset=${offset}`;
         }
-        let html = request(baseUrl, {headers: rule.headers});
+        let html = await request(baseUrl, {headers: rule.headers});
         let data = JSON.parse(html);
         let items = [];
         if (data.data?.cell_view?.cell_data) {
@@ -103,7 +106,7 @@ var rule = {
         } else {
             items = [data];
         }
-        VODS = items.map(item => {
+        let VODS = items.map(item => {
             let videoData = item.video_data?.[0] || {};
             return {
                 vod_id: item.series_id || item.book_id || item.id || videoData.series_id || '',
@@ -112,15 +115,17 @@ var rule = {
                 vod_remarks: videoData.sub_title || videoData.rec_text || ''
             };
         });
-    }),
-    二级: $js.toString(() => {
-        let html = request(input);
+        return VODS
+    },
+    二级: async function () {
+        let {input, MY_URL} = this;
+        let html = await request(input);
         let data = JSON.parse(html).data;
         let bookInfo = data.book_info;
         let playList = data.item_data_list.map(item => {
             return `${item.title}$${item.item_id}`;
         }).join('#');
-        VOD = {
+        let VOD = {
             vod_id: bookInfo.book_id,
             vod_name: bookInfo.book_name,
             vod_type: bookInfo.tags,
@@ -131,13 +136,15 @@ var rule = {
             vod_play_from: '番茄短剧',
             vod_play_url: playList
         };
-    }),
-    搜索: $js.toString(() => {
+        return VOD
+    },
+    搜索: async function () {
+        let {input, MY_URL, MY_PAGE} = this;
         let KEY = input;
         let page = MY_PAGE;
         let offset = (page - 1) * 12;
         let searchUrl = rule.host + '/search?query=' + KEY + '&tab_type=12&offset=' + offset;
-        let html = request(searchUrl, {headers: rule.headers});
+        let html = await request(searchUrl, {headers: rule.headers});
         let data = JSON.parse(html);
         let items = [];
         if (data.search_tabs && data.search_tabs.length > 0) {
@@ -151,11 +158,11 @@ var rule = {
                 }
             }
         }
-        VODS = items.map(item => {
-            let bookData = item.book_data && item.book_data.length > 0
-                ? item.book_data[0]
+        let VODS = items.map(item => {
+            let bookData = item.video_data && item.video_data.length > 0
+                ? item.video_data[0]
                 : {};
-            let title = bookData.book_name || '';
+            let title = bookData.title || '';
             if (item.search_high_light?.title?.rich_text) {
                 title = item.search_high_light.title.rich_text
                     .replace(/<em>/g, '')
@@ -164,9 +171,10 @@ var rule = {
             return {
                 vod_id: bookData.book_id || item.book_id || '',
                 vod_name: title || '未知短剧',
-                vod_pic: bookData.thumb_url || '',
-                vod_remarks: bookData.sub_info || bookData.read_cnt_text || ''
+                vod_pic: bookData.cover || '',
+                vod_remarks: bookData.sub_title || bookData.rec_text || ''
             };
         });
-    }),
+        return VODS
+    },
 }

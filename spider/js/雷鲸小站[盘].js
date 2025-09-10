@@ -1,12 +1,14 @@
 /*
 @header({
-  searchable: 0,
+  searchable: 1,
   filterable: 0,
-  quickSearch: 0,
+  quickSearch: 1,
   title: '雷鲸小站[盘]',
+  '类型': '影视',
   lang: 'ds'
 })
 */
+
 
 const {req_, req_proxy} = $.require('./_lib.request.js')
 const {
@@ -19,6 +21,9 @@ var rule = {
     detailUrl: '/fyid',
     searchUrl: '/search?keyword=**&page=fypage',
     play_parse: true,
+    searchable: 1,
+    quickSearch: 1,
+    天翼_img: 'https://pan.losfer.cn/view.php/89c5e491dfd3178ea80e7f1fe35c6336.png',
     class_parse: async () => {
         let classes = [{
             type_id: '42204681950354',
@@ -55,6 +60,7 @@ var rule = {
         let {MY_CATE, input} = this;
         let html = await req_(input, 'get', {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
+            'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7'
         })
         const $ = pq(html)
         let videos = []
@@ -63,7 +69,7 @@ var rule = {
             videos.push({
                 "vod_name": a.children[0].data,
                 "vod_id": a.attribs.href,
-                "vod_pic": ''
+                "vod_pic": rule.天翼_img
             })
         })
         return videos
@@ -72,11 +78,13 @@ var rule = {
         let {input} = this;
         let html = await req_(input, 'get', {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
+            'accept-language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7'
         })
         const $ = pq(html)
         let vod = {
             "vod_name": $('.title').text().trim(),
             "vod_id": input,
+            "vod_pic": rule.天翼_img,
             "vod_content": $('div.topicContent p:nth-child(1)').text()
         }
         let content_html = $('.topicContent').html()

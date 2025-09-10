@@ -1,10 +1,11 @@
 /*
 @header({
-  searchable: 2,
+  searchable: 0,
   filterable: 1,
   quickSearch: 0,
   title: '清风DJ[听]',
-  lang: 'dr2'
+  '类型': '影视',
+  lang: 'ds'
 })
 */
 
@@ -30,5 +31,5 @@ var rule = {
     推荐: '#recs-list&&li;h2&&Text;*;i&&Text;a&&href',
     一级: '.isgood_list;a&&title;img&&src;.sc_1&&Text;a&&href',
     二级: '*',
-    搜索: '*',
+    // 搜索: '*',
 }
