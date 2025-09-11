@@ -35,7 +35,7 @@ export const ENV = {
             const content = readFileSync(this._envPath, "utf-8");
             return JSON.parse(content);
         } catch (e) {
-            console.error(`Failed to read or parse env file: ${e.message}`);
+            console.error(`[_readEnvFile] Failed to read or parse env file: ${e.message}`);
             return {};
         }
     },
@@ -48,7 +48,7 @@ export const ENV = {
     _writeEnvFile(envObj) {
         // 尝试创建锁文件
         if (existsSync(this._lockPath)) {
-            console.error("Another process is currently writing to the env file.");
+            console.error("[_writeEnvFile] Another process is currently writing to the env file.");
             throw new Error("File is locked. Please retry later.");
         }
 
@@ -59,7 +59,7 @@ export const ENV = {
             // 写入环境变量文件
             writeFileSync(this._envPath, JSON.stringify(envObj, null, 2), "utf-8");
         } catch (e) {
-            console.error(`Failed to write to env file: ${e.message}`);
+            console.error(`[_writeEnvFile] Failed to write to env file: ${e.message}`);
         } finally {
             // 移除锁文件
             if (existsSync(this._lockPath)) {
@@ -92,7 +92,7 @@ export const ENV = {
             // console.log(`从内存缓存中读取: ${key}`);
             return cache.get(key);
         }
-        console.log(`从文件中读取: ${key}`);
+        console.log(`[get] 从文件中读取: ${key}`);
         const envObj = this._readEnvFile();
         let value = envObj[key] || _value;
 
@@ -102,7 +102,7 @@ export const ENV = {
                 value = JSON.parse(value);
             } catch (e) {
                 value = {};
-                console.error(`Failed to parse value for key "${key}" as object: ${e.message}`);
+                console.error(`[get] Failed to parse value for key "${key}" as object: ${e.message}`);
             }
         }
 
@@ -130,7 +130,7 @@ export const ENV = {
                 value = JSON.parse(value);
             } catch (e) {
                 value = {};
-                console.error(`Failed to parse value for key "${key}" as object: ${e.message}`);
+                console.error(`[set] Failed to parse value for key "${key}" as object: ${e.message}`);
             }
         }
 
@@ -161,7 +161,7 @@ export const ENV = {
             cache.delete(key);
             cache.delete(FULL_ENV_CACHE_KEY);
         } else {
-            console.warn(`Key "${key}" does not exist in env file.`);
+            console.warn(`[delete] Key "${key}" does not exist in env file.`);
         }
     },
 };

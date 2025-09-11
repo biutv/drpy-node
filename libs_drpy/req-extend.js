@@ -1,18 +1,4 @@
-// async function request(url, options) {
-//     try {
-//         log('rule:',typeof rule);
-//         log('headers:',rule.headers);
-//         log('title:',rule.title);
-//         log('getHome:',typeof getHome);
-//         log('gzip',typeof(gzip))
-//         log('fetch_params',typeof(fetch_params))
-//         return (await req(url, options)).content
-//     } catch (e) {
-//         log(`requestHtml error:${e.message}`);
-//         return ''
-//     }
-// }
-
+// 注意:!!!此文件通过获取文本代码然后注入代码形式使用，不包含globalThis导出和export导出
 // var key = '源的唯一ID' // 允许在源里自定义设置key，不设置就自动取title或者host
 const RKEY = typeof (key) !== 'undefined' && key ? key : 'drpyS_' + (rule.title || rule.host); // 源的唯一标识
 
@@ -25,7 +11,7 @@ const RKEY = typeof (key) !== 'undefined' && key ? key : 'drpyS_' + (rule.title 
  */
 async function request(url, obj, ocr_flag) {
     ocr_flag = ocr_flag || false;
-    if (typeof (obj) === 'undefined' || !obj || obj === {}) {
+    if (typeof (obj) === 'undefined' || !obj || (typeof obj === 'object' && obj !== null && Object.keys(obj).length === 0)) {
         let fetch_params = {};
         let headers = {
             'User-Agent': MOBILE_UA,
@@ -77,16 +63,20 @@ async function request(url, obj, ocr_flag) {
     if (obj.headers.hasOwnProperty('Content-Type') || obj.headers.hasOwnProperty('content-type')) {
         let _contentType = obj.headers["Content-Type"] || obj.headers["content-type"] || "";
         if (_contentType.includes("application/x-www-form-urlencoded")) {
-            log("custom body is application/x-www-form-urlencoded");
+            log("[request] custom body is application/x-www-form-urlencoded");
             if (typeof obj.body == "string") {
                 let temp_obj = parseQueryString(obj.body);
-                console.log(JSON.stringify(temp_obj));
+                log(`[request] body:${JSON.stringify(temp_obj)}`);
             }
         }
     }
+    // 注意：POST请求通常需要保留body数据，这里注释掉可能有问题的删除逻辑
+    // if (obj.method === 'POST') {
+    //     delete obj.body
+    // }
 
-    console.log(JSON.stringify(obj.headers));
-    console.log('request:' + url + `  |method:${obj.method || 'GET'}  |body:${obj.body || ''}`);
+    log(`[request] headers: ${JSON.stringify(obj.headers)}`);
+    log('[request] url:' + url + `  |method:${obj.method || 'GET'}  |body:${obj.body || ''}`);
     let res = await req(url, obj);
     let html = res.content || '';
     if (obj.withHeaders) {
@@ -98,7 +88,6 @@ async function request(url, obj, ocr_flag) {
     }
 }
 
-var fetch = request;
 
 /**
  *  快捷post请求
@@ -152,7 +141,7 @@ async function checkHtml(html, url, obj) {
     if (/\?btwaf=/.test(html)) {
         let btwaf = html.match(/btwaf(.*?)"/)[1];
         url = url.split('#')[0] + '?btwaf' + btwaf;
-        log('宝塔验证访问链接:' + url);
+        log('[checkHtml] 宝塔验证访问链接:' + url);
         html = await request(url, obj);
     }
     return html
@@ -166,7 +155,7 @@ async function checkHtml(html, url, obj) {
  */
 async function getCode(url, obj) {
     let html = await request(url, obj);
-    html = checkHtml(html, url, obj);
+    html = await checkHtml(html, url, obj);
     return html
 }
 
@@ -182,23 +171,22 @@ async function getHtml(url) {
     }
     let cookie = getItem(RULE_CK, '');
     if (cookie) {
-        // log('有cookie:'+cookie);
+        log(`[getHtml] ${RULE_CK}: ${cookie}`);
         if (obj.headers && !Object.keys(obj.headers).map(it => it.toLowerCase()).includes('cookie')) {
-            log('历史无cookie,新增过验证后的cookie');
+            log('[getHtml] 历史无cookie,新增过验证后的cookie');
             obj.headers['Cookie'] = cookie;
         } else if (obj.headers && obj.headers.cookie && obj.headers.cookie !== cookie) {
             obj.headers['Cookie'] = cookie;
-            log('历史有小写过期的cookie,更新过验证后的cookie');
+            log('[getHtml] 历史有小写过期的cookie,更新过验证后的cookie');
         } else if (obj.headers && obj.headers.Cookie && obj.headers.Cookie !== cookie) {
             obj.headers['Cookie'] = cookie;
-            log('历史有大写过期的cookie,更新过验证后的cookie');
+            log('[getHtml] 历史有大写过期的cookie,更新过验证后的cookie');
         } else if (!obj.headers) {
             obj.headers = {Cookie: cookie};
-            log('历史无headers,更新过验证后的含cookie的headers');
+            log('[getHtml] 历史无headers,更新过验证后的含cookie的headers');
         }
     }
-    let html = getCode(url, obj);
-    return html
+    return getCode(url, obj);
 }
 
 /**
@@ -214,7 +202,7 @@ async function verifyCode(url) {
         try {
             // let obj = {headers:headers,timeout:timeout};
             let yzm_url = `${host}/index.php/verify/index.html`;
-            console.log(`验证码链接:${yzm_url}`);
+            log(`[verifyCode] 验证码链接:${yzm_url}`);
             let hhtml = await request(yzm_url, {withHeaders: true, toBase64: true}, true);
             let json = JSON.parse(hhtml);
             if (!cookie) {
@@ -223,25 +211,25 @@ async function verifyCode(url) {
                 // cookie = json['set-cookie']?json['set-cookie'].split(';')[0]:'';
                 cookie = setCk ? json[setCk].split(';')[0] : '';
             }
-            // console.log(hhtml);
-            console.log('cookie:' + cookie);
+            // log(hhtml);
+            log(`[verifyCode] cookie:${cookie}`);
             let img = json.body;
-            // console.log(img);
+            // log(img);
             let code = await OcrApi.classification(img);
-            console.log(`第${cnt + 1}次验证码识别结果:${code}`);
+            log(`[verifyCode] 第${cnt + 1}次验证码识别结果:${code}`);
             let submit_url = `${host}/index.php/ajax/verify_check?type=search&verify=${code}`;
-            console.log(submit_url);
+            log(`[verifyCode] 提交验证码链接: ${submit_url}`);
             let html = await request(submit_url, {headers: {Cookie: cookie}, 'method': 'POST'});
-            // console.log(html);
+            // log(`[verifyCode] 提交验证码结果: ${html}`);
             html = JSON.parse(html);
             if (html.msg === 'ok') {
-                console.log(`第${cnt + 1}次验证码提交成功`);
+                log(`[verifyCode] 第${cnt + 1}次验证码提交成功`);
                 return cookie // 需要返回cookie
             } else if (html.msg !== 'ok' && cnt + 1 >= OCR_RETRY) {
                 cookie = ''; // 需要清空返回cookie
             }
         } catch (e) {
-            console.log(`第${cnt + 1}次验证码提交失败:${e.message}`);
+            log(`[verifyCode] 第${cnt + 1}次验证码提交失败:${e.message}`);
             if (cnt + 1 >= OCR_RETRY) {
                 cookie = '';
             }
@@ -258,7 +246,8 @@ async function verifyCode(url) {
  */
 function setItem(k, v) {
     local.set(RKEY, k, v);
-    console.log(`规则${RKEY}设置${k} => ${v}`)
+    log(`[setItem] 规则${RKEY}设置${k} => ${v}`);
+    return true
 }
 
 /**
@@ -277,15 +266,8 @@ function getItem(k, v) {
  */
 function clearItem(k) {
     local.delete(RKEY, k);
+    return true
 }
 
-// jsp系列函数改到drpyS代码中，执行完rule和预处理过后再次注入,可以保证在rule定义范围外也能使用。这里也可以注释掉，没太多必要
-globalThis.jsp = new jsoup(rule.host || '');
-globalThis.pdfh = pdfh;
-globalThis.pd = pd;
-globalThis.pdfa = pdfa;
-globalThis.setItem = setItem;
-globalThis.getItem = getItem;
-globalThis.clearItem = clearItem;
-globalThis.request = request;
-globalThis.fetch = fetch;
+// 定义沙箱里的全局变量alias别名
+var fetch = request;

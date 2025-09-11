@@ -227,7 +227,7 @@ globalThis.decodeStr = function (input, encoding) {
 
 globalThis.getCryptoJS = function () {
     // return request('https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/crypto-hiker.js');
-    return 'console.log("CryptoJS已装载");'
+    return 'log("CryptoJS已装载");'
 }
 
 // 封装的RSA加解密类
@@ -327,7 +327,7 @@ globalThis.fixAdM3u8Ai = async function (m3u8_url, headers) {
     }
     if (last_url.includes(".m3u8") && last_url !== m3u8_url) {
         m3u8_url = urljoin(m3u8_url, last_url);
-        log("嵌套的m3u8_url:" + m3u8_url);
+        log("[fixAdM3u8Ai]嵌套的m3u8_url:" + m3u8_url);
         m3u8 = (await req(m3u8_url, option)).content;
     }
     let s = m3u8.trim().split("\n").filter(it => it.trim()).join("\n");
@@ -375,7 +375,7 @@ globalThis.fixAdM3u8Ai = async function (m3u8_url, headers) {
             return false
         }
     );
-    log("最后一条切片：" + laststr);
+    log("[fixAdM3u8Ai]最后一条切片：" + laststr);
     let ad_urls = [];
     for (let i = 0; i < ss.length; i++) {
         let s = ss[i];
@@ -391,12 +391,12 @@ globalThis.fixAdM3u8Ai = async function (m3u8_url, headers) {
             ss[i] = s.replace(/URI=\"(.*)\"/, 'URI="' + urljoin(m3u8_url, "$1") + '"')
         }
     }
-    log("处理的m3u8地址:" + m3u8_url);
-    log("----广告地址----");
-    log(ad_urls);
+    log("[fixAdM3u8Ai]处理的m3u8地址:" + m3u8_url);
+    log("[fixAdM3u8Ai]----广告地址----");
+    log("[fixAdM3u8Ai]广告地址列表:", ad_urls);
     m3u8 = ss.join("\n");
-    log("处理耗时：" + ((new Date).getTime() - ts).toString());
-    log(m3u8);
+    log("[fixAdM3u8Ai]处理耗时：" + ((new Date).getTime() - ts).toString());
+    log("[fixAdM3u8Ai]处理后的m3u8:", m3u8);
     return m3u8
 }
 
@@ -431,7 +431,7 @@ globalThis.forceOrder = function (lists, key, option) {
     }
     first += '';
     second += '';
-    // console.log(first,second);
+    // log(first,second);
     if (first.match(/(\d+)/) && second.match(/(\d+)/)) {
         let num1 = Number(first.match(/(\d+)/)[1]);
         let num2 = Number(second.match(/(\d+)/)[1]);
@@ -462,7 +462,7 @@ globalThis.getQuery = function (url) {
         });
         return resObj;
     } catch (err) {
-        log(`getQuery发生错误:${e.message}`)
+        log(`[getQuery]getQuery发生错误:${e.message}`)
         return {};
     }
 }
@@ -599,7 +599,7 @@ globalThis.dealJson = function (html) {
         html = JSON.parse(html);
     } catch (e) {
     }
-    // console.log(typeof(html));
+    // log(typeof(html));
     return html;
 }
 
@@ -616,7 +616,7 @@ globalThis.OcrApi = {
             // let html = request(this.api,{data:{img:img},headers:{'User-Agent':PC_UA},'method':'POST'},true);
             // html = JSON.parse(html);
             // code = html.url||'';
-            log('通过drpy_ocr验证码接口过验证...');
+            log('[OcrApi.classification]通过drpy_ocr验证码接口过验证...');
             let html = '';
             if (this.api.endsWith('drpy/text')) {
                 html = (await req(this.api, {
@@ -629,7 +629,7 @@ globalThis.OcrApi = {
             }
             code = html || '';
         } catch (e) {
-            log(`OCR识别验证码发生错误:${e.message}`)
+            log(`[OcrApi.classification]OCR识别验证码发生错误:${e.message}`)
         }
         return code
     }

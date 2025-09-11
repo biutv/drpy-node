@@ -28,7 +28,7 @@ const maxSockets = 64;
 const _axios = createAxiosInstance({maxSockets: maxSockets});
 let $axios;
 const dsReqLib = Number(process.env.DS_REQ_LIB) || 0;
-console.log('DS/CAT源底层req实现 DS_REQ_LIB (0 fetch 1 axios):', dsReqLib);
+console.log('[drpyInject]DS/CAT源底层req实现 DS_REQ_LIB (0 fetch 1 axios):', dsReqLib);
 // 配置 axios 使用代理
 
 if (dsReqLib === 0) {
@@ -226,7 +226,7 @@ async function request(url, opt = {}) {
         return {code: resp.status, headers: resHeader, content: responseData};
     } catch (error) {
         const {response: resp} = error;
-        console.error(`Request error: ${error.message}`);
+        console.error(`[request]Request error: ${error.message}`);
         let responseData = '';
         // console.log('responseData:',responseData);
         try {
@@ -238,7 +238,7 @@ async function request(url, opt = {}) {
                 responseData = buffer.toString('utf-8');
             }
         } catch (e) {
-            console.error(`get error response Text failed: ${e.message}`);
+            console.error(`[request]get error response Text failed: ${e.message}`);
         }
         // console.log('responseData:',responseData);
         return {
@@ -306,7 +306,7 @@ function aes(mode, encrypt, input, inBase64, key, iv, outBase64) {
         const outBuf = Buffer.concat([cipher.update(inBuf), cipher.final()]);
         return outBase64 ? base64EncodeBuf(outBuf) : outBuf.toString('utf8');
     } catch (error) {
-        console.log(error);
+        console.log('[aes]', error);
     }
     return '';
 }
@@ -333,7 +333,7 @@ function des(mode, encrypt, input, inBase64, key, iv, outBase64) {
         const outBuf = Buffer.concat([cipher.update(inBuf), cipher.final()]);
         return outBase64 ? base64EncodeBuf(outBuf) : outBuf.toString('utf8');
     } catch (error) {
-        console.log(error);
+        console.log('[des]', error);
     }
     return '';
 }
@@ -387,7 +387,7 @@ function rsa(mode, pub, encrypt, input, inBase64, key, outBase64) {
         }
         return outBase64 ? base64EncodeBuf(outBuf) : outBuf.toString('utf8');
     } catch (error) {
-        console.log(error);
+        console.log('[rsa]', error);
     }
     return '';
 }

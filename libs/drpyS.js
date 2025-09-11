@@ -63,12 +63,12 @@ globalThis.pathLib = {
         let _file_path = path.join(_data_path, filename);
         const resolvedPath = path.resolve(_data_path, _file_path); // 将路径解析为绝对路径
         if (!resolvedPath.startsWith(_data_path)) {
-            log(`no access for read ${_file_path}`)
+            log(`[pathLib.readFile] no access for read ${_file_path}`)
             return '';
         }
         // 检查文件是否存在
         if (!existsSync(resolvedPath)) {
-            log(`file not found for read ${resolvedPath}`)
+            log(`[pathLib.readFile] file not found for read ${resolvedPath}`)
             return '';
         }
         return readFileSync(resolvedPath, 'utf8')
@@ -77,7 +77,7 @@ globalThis.pathLib = {
         let _file_path = path.join(_data_path, filename);
         const resolvedPath = path.resolve(_data_path, _file_path); // 将路径解析为绝对路径
         if (!resolvedPath.startsWith(_data_path)) {
-            log(`no access for read ${_file_path}`)
+            log(`[pathLib.writeFile] no access for read ${_file_path}`)
             return '';
         }
         try {
@@ -89,7 +89,7 @@ globalThis.pathLib = {
             writeFileSync(resolvedPath, text, 'utf8');
             return true
         } catch (e) {
-            log(`failed for saveFile ${_file_path}　error:${e.message}`);
+            log(`[pathLib.writeFile] failed for saveFile ${_file_path}　error:${e.message}`);
             return false
         }
     },
@@ -97,12 +97,12 @@ globalThis.pathLib = {
         let _file_path = path.join(_lib_path, filename);
         const resolvedPath = path.resolve(_data_path, _file_path); // 将路径解析为绝对路径
         if (!resolvedPath.startsWith(_lib_path)) {
-            log(`no access for read ${_file_path}`)
+            log(`[pathLib.readLib] no access for read ${_file_path}`)
             return '';
         }
         // 检查文件是否存在
         if (!existsSync(resolvedPath)) {
-            log(`file not found for read ${resolvedPath}`)
+            log(`[pathLib.readLib] file not found for read ${resolvedPath}`)
             return '';
         }
         return readFileSync(resolvedPath, 'utf8')
@@ -119,16 +119,25 @@ const req_extend_code = readFileSync(reqJsPath, 'utf8');
 const moduleCache = new Map();
 const ruleObjectCache = new Map();
 const jxCache = new Map();
+// 缓存自动模板匹配时的HOST页面内容，避免重复请求
+const hostHtmlCache = new Map();
+// 缓存页面请求结果，避免在同一次执行中重复请求相同URL
+const pageRequestCache = new Map();
+// 记录当前请求会话的标识，用于判断是否需要清理缓存
+let currentSessionId = null;
+let lastClearTime = 0;
+// 全局会话状态管理，记录正在进行的home会话
+const activeHomeSessions = new Set();
 let pupWebview = null;
 if (typeof fetchByHiker === 'undefined') { // 判断是海阔直接放弃导入puppeteer
     try {
         // 尝试动态导入模块puppeteerHelper
         const {puppeteerHelper} = await import('../utils/headless-util.js');  // 使用动态 import
         pupWebview = new puppeteerHelper();
-        console.log('puppeteerHelper imported successfully');
+        log('[getSandbox] puppeteerHelper imported successfully');
     } catch (error) {
-        // console.log('Failed to import puppeteerHelper:', error);
-        console.log(`Failed to import puppeteerHelper:${error.message}`);
+        // log('Failed to import puppeteerHelper:', error);
+        log(`[getSandbox] Failed to import puppeteerHelper:${error.message}`);
     }
 }
 globalThis.pupWebview = pupWebview;
@@ -141,8 +150,8 @@ try {
     }
     globalThis.CryptoJSW = CryptoJSWasm;
 } catch (error) {
-    // console.log('Failed to import puppeteerHelper:', error);
-    console.log(`Failed to import CryptoJSWasm:${error.message}`);
+    // log('Failed to import puppeteerHelper:', error);
+    log(`[getSandbox] Failed to import CryptoJSWasm:${error.message}`);
     globalThis.CryptoJSW = {
         loadAllWasm: async function () {
         },
@@ -158,10 +167,10 @@ try {
     // 尝试动态导入模块puppeteerHelper
     const simWasm = await import('simplecc-wasm');  // 使用动态 import
     simplecc = simWasm.simplecc;
-    console.log('simplecc imported successfully');
+    log('[getSandbox] simplecc imported successfully');
 } catch (error) {
-    // console.log('Failed to import puppeteerHelper:', error);
-    console.log(`Failed to import simplecc:${error.message}`);
+    // log('Failed to import puppeteerHelper:', error);
+    log(`[getSandbox] Failed to import simplecc:${error.message}`);
 }
 globalThis.simplecc = simplecc;
 
@@ -177,9 +186,9 @@ try {
         DataBase = sqliteUtil.DataBase;
         database = sqliteUtil.database;
     }
-    console.log('sqlite3 database imported successfully');
+    log('[getSandbox] sqlite3 database imported successfully');
 } catch (error) {
-    console.log(`Failed to import sqlite3:${error.message}`);
+    log(`[getSandbox] Failed to import sqlite3:${error.message}`);
 }
 
 globalThis.DataBase = DataBase;
@@ -244,6 +253,7 @@ export async function getSandbox(env = {}) {
         jsonToCookie,
         cookieToJson,
         runMain,
+        cachedRequest, // 添加cachedRequest函数到沙箱中
     };
     const drpyCustomSanbox = {
         MOBILE_UA,
@@ -413,7 +423,7 @@ export async function init(filePath, env = {}, refresh) {
             try {
                 moduleExt = ungzip(moduleExt);
             } catch (e) {
-                log(`[${moduleName}] ungzip解密moduleExt失败: ${e.message}`);
+                log(`[init] [${moduleName}] ungzip解密moduleExt失败: ${e.message}`);
             }
             if (!SitesMap[moduleName].find(i => i.queryStr === moduleExt) && !SitesMap[moduleName].find(i => i.queryObject.params === moduleExt)) {
                 throw new Error("moduleExt is wrong!")
@@ -429,12 +439,12 @@ export async function init(filePath, env = {}, refresh) {
                 return cached.moduleObject;
             }
         }
-        log(`Loading module: ${filePath}`);
+        log(`[init] Loading module: ${filePath}`);
         let t1 = utils.getNowTime();
         const {sandbox, context} = await getSandbox(env);
         // 执行文件内容，将其放入沙箱中
         const js_code = await getOriginalJs(fileContent);
-        // console.log('js_code:', js_code.slice(5000));
+        // log('js_code:', js_code.slice(5000));
         const js_code_wrapper = `
     _asyncGetRule  = (async function() {
         ${js_code}
@@ -466,7 +476,7 @@ export async function init(filePath, env = {}, refresh) {
             ]);
         };
         const result = await executeWithTimeout(ruleScript, context, 30000);
-        // console.log('result:', result);
+        // log('result:', result);
         // sandbox.rule = await sandbox._asyncGetRule;
         sandbox.rule = result;
 
@@ -488,6 +498,9 @@ export async function init(filePath, env = {}, refresh) {
                 rule.params = moduleExt
             }
         }
+        // 模板继承逻辑处理
+        await handleTemplateInheritance(rule, context);
+
         await initParse(rule, env, vm, context);
         // otherScript放入到initParse去执行
 //         const otherScript = new vm.Script(`
@@ -501,13 +514,14 @@ export async function init(filePath, env = {}, refresh) {
         let t2 = utils.getNowTime();
         const moduleObject = utils.deepCopy(rule);
         moduleObject.cost = t2 - t1;
-        // console.log(`${filePath} headers:`, moduleObject.headers);
+        moduleObject.context = context; // 将沙箱上下文添加到moduleObject中
+        // log(`${filePath} headers:`, moduleObject.headers);
         // 缓存模块和文件的 hash 值
         moduleCache.set(hashMd5, {moduleObject, hash: fileHash});
         return moduleObject;
     } catch (error) {
-        console.log(`Error in drpy.init :${filePath}`, error);
-        throw new Error(`Failed to initialize module:${error.message}`);
+        log(`[init] Error in drpy.init :${filePath}`, error);
+        throw new Error(`[init] Failed to initialize module:${error.message}`);
     }
 }
 
@@ -540,6 +554,9 @@ export async function getRuleObject(filePath, env, refresh) {
         ruleScript.runInContext(context);
         sandbox.rule = await sandbox._asyncGetRule;
         const rule = sandbox.rule;
+
+        // 模板继承逻辑处理
+        await handleTemplateInheritance(rule, context);
         let t2 = utils.getNowTime();
         const ruleObject = deepCopy(rule);
         // 设置可搜索、可筛选、可快搜等属性
@@ -547,12 +564,12 @@ export async function getRuleObject(filePath, env, refresh) {
         ruleObject.filterable = ruleObject.hasOwnProperty('filterable') ? Number(ruleObject.filterable) : 0;
         ruleObject.quickSearch = ruleObject.hasOwnProperty('quickSearch') ? Number(ruleObject.quickSearch) : 0;
         ruleObject.cost = t2 - t1;
-        // console.log(`${filePath} headers:`, moduleObject.headers);
+        // log(`${filePath} headers:`, moduleObject.headers);
         // 缓存模块和文件的 hash 值
         ruleObjectCache.set(filePath, {ruleObject, hash: fileHash});
         return ruleObject
     } catch (error) {
-        console.log(`${filePath} Error in drpy.getRuleObject:${error.message}`);
+        log(`[getRuleObject] ${filePath} Error in drpy.getRuleObject:${error.message}`);
         return {}
     }
 }
@@ -574,9 +591,9 @@ export async function initJx(filePath, env, refresh) {
                 return cached.jxObj;
             }
         }
-        log(`Loading jx: ${filePath}, hash:${hashMd5}`);
+        log(`[initJx] Loading jx: ${filePath}, hash:${hashMd5}`);
         let t1 = utils.getNowTime();
-        console.log('env:', env);
+        // log('env:', env);
         const {sandbox, context} = await getSandbox(env);
         // 执行文件内容，将其放入沙箱中
         const js_code = await getOriginalJs(fileContent);
@@ -596,21 +613,21 @@ export async function initJx(filePath, env, refresh) {
         let t2 = utils.getNowTime();
         const jxObj = {...sandbox.jx, lazy: sandbox.lazy};
         const cost = t2 - t1;
-        console.log(`加载解析:${filePath} 耗时 ${cost}毫秒`)
+        log(`[initJx] 加载解析:${filePath} 耗时 ${cost}毫秒`)
         jxCache.set(hashMd5, {jxObj, hash: fileHash});
         return jxObj;
     } catch (error) {
-        console.log(`Error in drpy.initJx:${filePath}`, error);
-        throw new Error(`Failed to initialize jx:${error.message}`);
+        log(`[initJx] Error in drpy.initJx:${filePath}`, error);
+        throw new Error(`[initJx] Failed to initialize jx:${error.message}`);
     }
 }
 
 export async function isLoaded() {
     if (jxCache && jxCache.size > 0) {
-        console.log('Map 不为空,已完成初始化');
+        log('[isLoaded] Map 不为空,已完成初始化');
         return true;
     } else {
-        console.log('Map 为空或未初始化');
+        log('[isLoaded] Map 为空或未初始化');
         return false;
     }
 }
@@ -654,7 +671,7 @@ async function invokeWithInjectVars(rule, method, injectVars, args) {
     switch (injectVars['method']) {
         case '推荐':
             if (error) {
-                log('error:', error);
+                log('[invokeWithInjectVars] error:', error);
                 error = null;
                 result = [];
             }
@@ -664,26 +681,26 @@ async function invokeWithInjectVars(rule, method, injectVars, args) {
             break;
         case '一级':
             result = await cateParseAfter(rule, result, args[1]);
-            console.log(`一级 ${injectVars.input} 执行完毕,结果为:`, JSON.stringify(result.list.slice(0, 2)));
+            log(`[invokeWithInjectVars] 一级 ${injectVars.input} 执行完毕,结果为:`, JSON.stringify(result.list.slice(0, 2)));
             break;
         case '二级':
             result = await detailParseAfter(result);
             break;
         case '搜索':
             result = await searchParseAfter(rule, result, args[2]);
-            console.log(`搜索 ${injectVars.input} 执行完毕,结果为:`, JSON.stringify(result.list.slice(0, 2)));
+            log(`[invokeWithInjectVars] 搜索 ${injectVars.input} 执行完毕,结果为:`, JSON.stringify(result.list.slice(0, 2)));
             break;
         case 'lazy':
             result = await playParseAfter(rule, result, args[1], args[0]);
             ret_str = JSON.stringify(result);
-            console.log(`免嗅 ${injectVars.input} 执行完毕,结果为:`, ret_str.length < 100 ? ret_str : ret_str.slice(0, 100) + '...');
+            log(`[invokeWithInjectVars] 免嗅 ${injectVars.input} 执行完毕,结果为:`, ret_str.length < 100 ? ret_str : ret_str.slice(0, 100) + '...');
             break;
         case 'proxy_rule':
             break;
         case 'action':
             break;
         default:
-            console.log(`invokeWithInjectVars: ${injectVars['method']}`);
+            log(`[invokeWithInjectVars] invokeWithInjectVars: ${injectVars['method']}`);
             break;
     }
     if (error) {
@@ -701,23 +718,51 @@ async function invokeWithInjectVars(rule, method, injectVars, args) {
  * @returns {Promise<*>}
  */
 async function commonLazyParse(moduleObject, method, injectVars, args) {
-    const tmpLazyFunction = async function () {
+    // const tmpLazyFunction = async function () {
+    //     let {input} = this;
+    //     log('[tmpLazyFunction] input:', input);
+    //     return input
+    // };
+    // const tmpLazyFunction = template.common_lazy;
+    const lazyMethod = moduleObject[method];
+    const request = moduleObject.request;
+    const tmpLazyFunction = async function (flag, id, flags) {
         let {input} = this;
-        return input
-    };
-    if (moduleObject[method] && typeof moduleObject[method] === 'function') {
+        log('[tmpLazyFunction] input:', input);
+        let html = await cachedRequest(request, input, {}, 'class');
+        let hconf = html.match(/r player_.*?=(.*?)</)[1];
+        let json = JSON5.parse(hconf);
+        let url = json.url;
+        if (json.encrypt == '1') {
+            url = unescape(url);
+        } else if (json.encrypt == '2') {
+            url = unescape(base64Decode(url));
+        }
+        if (/\.(m3u8|mp4|m4a|mp3)/.test(url)) {
+            input = {
+                parse: 0,
+                jx: 0,
+                url: url,
+            };
+        } else {
+            input = url && url.startsWith('http') && tellIsJx(url) ? {parse: 0, jx: 1, url: url} : input;
+        }
+        log('[tmpLazyFunction] result:', input);
+        return input;
+    }
+    if (lazyMethod && typeof lazyMethod === 'function') {
         try {
-            return await invokeWithInjectVars(moduleObject, moduleObject[method], injectVars, args);
+            return await invokeWithInjectVars(moduleObject, lazyMethod, injectVars, args);
         } catch (e) {
             let playUrl = injectVars.input || '';
-            log(`执行免嗅代码发送了错误: ${e.message},原始链接为:${playUrl}`);
+            log(`[commonLazyParse] 执行免嗅代码发送了错误: ${e.message},原始链接为:${playUrl}`);
             if (SPECIAL_URL.test(playUrl) || /^(push:)/.test(playUrl) || playUrl.startsWith('http')) {
                 return await invokeWithInjectVars(moduleObject, tmpLazyFunction, injectVars, args);
             } else {
                 throw e
             }
         }
-    } else if (!moduleObject[method]) {// 新增特性，可以不写lazy属性
+    } else if (!lazyMethod) {// 新增特性，可以不写lazy属性
         return await invokeWithInjectVars(moduleObject, tmpLazyFunction, injectVars, args);
     }
 }
@@ -743,7 +788,7 @@ async function commonCategoryListParse(moduleObject, method, injectVars, args) {
         }
         let is_json = p[0].startsWith('json:');
         p[0] = p[0].replace(/^(jsp:|json:|jq:)/, '');
-        let html = await request(input);
+        let html = await cachedRequest(request, input, {}, 'class');
         if (html) {
             let $pdfa;
             let $pdfh;
@@ -774,10 +819,16 @@ async function commonCategoryListParse(moduleObject, method, injectVars, args) {
                     vod_id = vod_id + '@@' + vod_name + '@@' + vod_pic;
                 }
                 if (vod_pic) {
-                    if (moduleObject['图片替换'] && typeof moduleObject['图片替换'] === 'function') {
-                        vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                    if (moduleObject['图片替换']) {
+                        if (typeof moduleObject['图片替换'] === 'function') {
+                            vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                        } else if (typeof moduleObject['图片替换'] === 'string' && moduleObject['图片替换'].includes('=>')) {
+                            let replace_from = moduleObject['图片替换'].split('=>')[0];
+                            let replace_to = moduleObject['图片替换'].split('=>')[1];
+                            vod_pic = vod_pic.replace(replace_from, replace_to);
+                        }
                     }
-                    if (moduleObject['图片来源'] && typeof moduleObject['图片替换'] === 'string') {
+                    if (moduleObject['图片来源'] && vod_pic && vod_pic.startsWith('http')) {
                         vod_pic += moduleObject['图片来源'];
                     }
                 }
@@ -824,13 +875,13 @@ async function commonSearchListParse(moduleObject, method, injectVars, args) {
     let p = moduleObject[method] === '*' && moduleObject['一级'] ? moduleObject['一级'] : moduleObject[method];
     // 一级是函数直接调用函数
     if (typeof p === 'function') {
-        // console.log('搜索继承一级函数');
+        // log('搜索继承一级函数');
         return await invokeWithInjectVars(moduleObject, p, injectVars, args);
     }
     p = p.trim();
     let pp = typeof moduleObject['一级'] === 'string' ? moduleObject['一级'].split(';') : [];
-    const request = moduleObject.request;
     const rule_fetch_params = moduleObject.rule_fetch_params;
+    const searchWd = injectVars.KEY;
     const tmpFunction = async function () {
         const {input, MY_URL, pdfa, pdfh, pd, pjfa, pjfh, pj} = this;
         const d = [];
@@ -847,7 +898,7 @@ async function commonSearchListParse(moduleObject, method, injectVars, args) {
             let rurls = MY_URL.split(';')[0].split('#')
             let rurl = rurls[0]
             let params = rurls.length > 1 ? rurls[1] : '';
-            console.log(`post=》rurl:${rurl},params:${params}`);
+            log(`[commonSearchListParse] post=》rurl:${rurl},params:${params}`);
             let _fetch_params = deepCopy(rule_fetch_params);
             let postData = {body: params};
             Object.assign(_fetch_params, postData);
@@ -856,7 +907,7 @@ async function commonSearchListParse(moduleObject, method, injectVars, args) {
             let rurls = MY_URL.split(';')[0].split('#')
             let rurl = rurls[0]
             let params = rurls.length > 1 ? rurls[1] : '';
-            console.log(`postjson-》rurl:${rurl},params:${params}`);
+            log(`[commonSearchListParse] postjson-》rurl:${rurl},params:${params}`);
             try {
                 params = JSON.parse(params);
             } catch (e) {
@@ -867,9 +918,65 @@ async function commonSearchListParse(moduleObject, method, injectVars, args) {
             Object.assign(_fetch_params, postData);
             html = await post(rurl, _fetch_params);
         } else {
-            html = await request(MY_URL);
+            // 在沙箱环境中执行getHtml获取源码，自动带入验证成功的cookie
+            const getHtmlScript = new vm.Script(`
+                (async function() {
+                    try {
+                        return await getHtml('${MY_URL}');
+                    } catch (e) {
+                        log('获取HTML异常:', e.message);
+                        return '';
+                    }
+                })()
+            `);
+            html = await getHtmlScript.runInContext(moduleObject.context);
         }
+
+        // 解决搜索源码奇葩触发自动过验证逻辑
         if (html) {
+            let search_tag = moduleObject['搜索验证标识'] || '系统安全验证|输入验证码';
+            if (new RegExp(search_tag).test(html)) {
+                log('[verifyCode] 遇到搜索验证码,尝试过验证:', html);
+                // 在沙箱中执行验证码处理逻辑
+                const verifyScript = new vm.Script(`
+                    (async function() {
+                        try {
+                            let cookie = await verifyCode('${MY_URL}');
+                            if (cookie) {
+                                log('本次成功过验证,cookie:' + cookie);
+                                setItem(RULE_CK, cookie);
+                                return cookie;
+                            } else {
+                                log('本次自动过搜索验证失败,cookie:' + cookie);
+                                return null;
+                            }
+                        } catch (e) {
+                            log('验证码处理异常:', e.message);
+                            return null;
+                        }
+                    })()
+                `);
+                const cookie = await verifyScript.runInContext(moduleObject.context);
+                // 在沙箱环境中重新获取正确的HTML
+                const getHtmlScript = new vm.Script(`
+                    (async function() {
+                        try {
+                            return await getHtml('${MY_URL}');
+                        } catch (e) {
+                            log('重新获取HTML异常:', e.message);
+                            return '';
+                        }
+                    })()
+                `);
+                html = await getHtmlScript.runInContext(moduleObject.context);
+            }
+        }
+
+        if (html) {
+            if (!html.includes(searchWd)) {
+                log(`[commonSearchListParse] 搜索结果源码未包含关键字【${searchWd}】,疑似搜索失败,正为您打印结果源码`);
+                log('[commonSearchListParse]', html.slice(0, 200) + '...');
+            }
             let $pdfa;
             let $pdfh;
             let $pd;
@@ -910,10 +1017,16 @@ async function commonSearchListParse(moduleObject, method, injectVars, args) {
                     vod_id = vod_id + '@@' + vod_name + '@@' + vod_pic;
                 }
                 if (vod_pic) {
-                    if (moduleObject['图片替换'] && typeof moduleObject['图片替换'] === 'function') {
-                        vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                    if (moduleObject['图片替换']) {
+                        if (typeof moduleObject['图片替换'] === 'function') {
+                            vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                        } else if (typeof moduleObject['图片替换'] === 'string' && moduleObject['图片替换'].includes('=>')) {
+                            let replace_from = moduleObject['图片替换'].split('=>')[0];
+                            let replace_to = moduleObject['图片替换'].split('=>')[1];
+                            vod_pic = vod_pic.replace(replace_from, replace_to);
+                        }
                     }
-                    if (moduleObject['图片来源'] && typeof moduleObject['图片替换'] === 'string') {
+                    if (moduleObject['图片来源'] && vod_pic && vod_pic.startsWith('http')) {
                         vod_pic += moduleObject['图片来源'];
                     }
                 }
@@ -953,7 +1066,8 @@ async function commonClassParse(moduleObject, method, injectVars, args) {
         let is_json = p0.startsWith('json:');
         p0 = p0.replace(/^(jsp:|json:|jq:)/, '');
 
-        let html = await request(input);
+        // 使用cachedRequest来避免重复请求，使用'host'前缀与其他函数保持一致
+        let html = await cachedRequest(request, input, {}, 'host');
         if (html) {
             let $pdfa;
             let $pdfh;
@@ -976,7 +1090,7 @@ async function commonClassParse(moduleObject, method, injectVars, args) {
                         classes = list;
                     }
                 } catch (e) {
-                    log(`json分类解析失败:${e.message}`);
+                    log(`[commonClassParse] json分类解析失败:${e.message}`);
                 }
             } else if (p.length >= 3) { // 可以不写正则
                 try {
@@ -984,6 +1098,7 @@ async function commonClassParse(moduleObject, method, injectVars, args) {
                     if (list && list.length > 0) {
                         for (const it of list) {
                             try {
+                                //log('[commonClassParse] it:', it);
                                 let name = $pdfh(it, p[1]);
                                 let url = $pd(it, p[2]);
                                 if (p.length > 3 && p[3]) {
@@ -993,17 +1108,19 @@ async function commonClassParse(moduleObject, method, injectVars, args) {
                                         url = match[1];
                                     }
                                 }
-                                classes.push({
-                                    'type_id': url.trim(),
-                                    'type_name': name.trim()
-                                });
+                                if (name.trim()) {
+                                    classes.push({
+                                        'type_id': url.trim(),
+                                        'type_name': name.trim()
+                                    });
+                                }
                             } catch (e) {
-                                log(`分类列表解析元素失败:${e.message}`);
+                                log(`[commonClassParse] 分类列表解析元素失败:${e.message}`);
                             }
                         }
                     }
                 } catch (e) {
-                    log(`分类列表解析失败:${e.message}`);
+                    log(`[commonClassParse] 分类列表解析失败:${e.message}`);
                 }
             }
         }
@@ -1025,7 +1142,7 @@ async function commonHomeListParse(moduleObject, method, injectVars, args) {
     let p = moduleObject[method] === '*' && moduleObject['一级'] ? moduleObject['一级'] : moduleObject[method];
     // 一级是函数直接调用函数
     if (typeof p === 'function') {
-        // console.log('推荐继承一级函数');
+        // log('推荐继承一级函数');
         return await invokeWithInjectVars(moduleObject, p, injectVars, args);
     }
     // 推荐完全和一级相同的话，双重定位为false
@@ -1047,7 +1164,7 @@ async function commonHomeListParse(moduleObject, method, injectVars, args) {
         let p0 = getPP(p, 0, pp, 0);
         let is_json = p0.startsWith('json:');
         p0 = p0.replace(/^(jsp:|json:|jq:)/, '');
-        let html = await request(MY_URL);
+        let html = await cachedRequest(request, MY_URL, {}, 'host'); // 使用'host'前缀与其他函数保持一致
         if (html) {
             let $pdfa;
             let $pdfh;
@@ -1105,10 +1222,16 @@ async function commonHomeListParse(moduleObject, method, injectVars, args) {
                             vod_id = vod_id + '@@' + vod_name + '@@' + vod_pic;
                         }
                         if (vod_pic) {
-                            if (moduleObject['图片替换'] && typeof moduleObject['图片替换'] === 'function') {
-                                vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                            if (moduleObject['图片替换']) {
+                                if (typeof moduleObject['图片替换'] === 'function') {
+                                    vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                                } else if (typeof moduleObject['图片替换'] === 'string' && moduleObject['图片替换'].includes('=>')) {
+                                    let replace_from = moduleObject['图片替换'].split('=>')[0];
+                                    let replace_to = moduleObject['图片替换'].split('=>')[1];
+                                    vod_pic = vod_pic.replace(replace_from, replace_to);
+                                }
                             }
-                            if (moduleObject['图片来源'] && typeof moduleObject['图片替换'] === 'string') {
+                            if (moduleObject['图片来源'] && vod_pic && vod_pic.startsWith('http')) {
                                 vod_pic += moduleObject['图片来源'];
                             }
                         }
@@ -1162,10 +1285,16 @@ async function commonHomeListParse(moduleObject, method, injectVars, args) {
                         vod_id = vod_id + '@@' + vod_name + '@@' + vod_pic;
                     }
                     if (vod_pic) {
-                        if (moduleObject['图片替换'] && typeof moduleObject['图片替换'] === 'function') {
-                            vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                        if (moduleObject['图片替换']) {
+                            if (typeof moduleObject['图片替换'] === 'function') {
+                                vod_pic = await moduleObject['图片替换'].apply(injectVars, [vod_pic]);
+                            } else if (typeof moduleObject['图片替换'] === 'string' && moduleObject['图片替换'].includes('=>')) {
+                                let replace_from = moduleObject['图片替换'].split('=>')[0];
+                                let replace_to = moduleObject['图片替换'].split('=>')[1];
+                                vod_pic = vod_pic.replace(replace_from, replace_to);
+                            }
                         }
-                        if (moduleObject['图片来源'] && typeof moduleObject['图片替换'] === 'string') {
+                        if (moduleObject['图片来源'] && vod_pic && vod_pic.startsWith('http')) {
                             vod_pic += moduleObject['图片来源'];
                         }
                     }
@@ -1268,7 +1397,7 @@ async function invokeMethod(filePath, env, method, args = [], injectVars = {}) {
     }
     // 函数直接执行
     else if (moduleObject[method] && typeof moduleObject[method] === 'function') {
-        // console.log('injectVars:', injectVars);
+        // log('injectVars:', injectVars);
         return await invokeWithInjectVars(moduleObject, moduleObject[method], injectVars, args);
     }
     // 特殊处理一级字符串
@@ -1302,15 +1431,15 @@ async function initParse(rule, env, vm, context) {
     rule.host = (rule.host || '').rstrip('/');
     // 检查并执行 `hostJs` 方法
     if (typeof rule.hostJs === 'function') {
-        log('Executing hostJs...');
+        log('[initParse] Executing hostJs...');
         try {
             let HOST = await rule.hostJs.apply({input: rule.host, MY_URL: rule.host, HOST: rule.host});
             if (HOST) {
                 rule.host = HOST.rstrip('/');
-                log(`已动态设置规则【${rule.title}】的host为: ${rule.host}`);
+                log(`[initParse] 已动态设置规则【${rule.title}】的host为: ${rule.host}`);
             }
         } catch (e) {
-            log(`hostJs执行错误:${e.message}`);
+            log(`[initParse] hostJs执行错误:${e.message}`);
         }
     }
     let rule_cate_excludes = (rule.cate_exclude || '').split('|').filter(it => it.trim());
@@ -1375,22 +1504,25 @@ async function initParse(rule, env, vm, context) {
                     let v = rule.headers[k];
                     if (['MOBILE_UA', 'PC_UA', 'UC_UA', 'IOS_UA', 'UA'].includes(v)) {
                         rule.headers[k] = eval(v);
-                        log(rule.headers[k])
+                        log('[initParse]', rule.headers[k])
                     }
                 } else if (k.toLowerCase() === 'cookie') {
                     let v = rule.headers[k];
                     if (v && v.startsWith('http')) {
                         try {
-                            v = fetch(v);
+                            // 使用cachedRequest来避免重复请求，使用'host'前缀与handleTemplateInheritance保持一致
+                            // 使用request函数以确保与handleTemplateInheritance的缓存兼容
+                            // 传递headers参数以确保与handleTemplateInheritance的缓存键一致
+                            v = await cachedRequest(request, v, {headers: rule.headers || {}}, 'host');
                             rule.headers[k] = v;
                         } catch (e) {
-                            console.log(`从${v}获取cookie发生错误:${e.message}`);
+                            log(`[initParse] 从${v}获取cookie发生错误:${e.message}`);
                         }
                     }
                 }
             }
         } catch (e) {
-            console.log(`处理headers发生错误:${e.message}`);
+            log(`[initParse] 处理headers发生错误:${e.message}`);
         }
     } else {
         rule.headers = {}
@@ -1406,7 +1538,7 @@ globalThis.rule_fetch_params = rule.rule_fetch_params;
 
     // 检查并执行 `预处理` 方法
     if (typeof rule.预处理 === 'function') {
-        log('Executing 预处理...');
+        log('[initParse] Executing 预处理...');
         await rule.预处理(env);
     }
 
@@ -1429,7 +1561,7 @@ async function homeParse(rule) {
             // log(filter_json);
             rule.filter = JSON.parse(filter_json);
         } catch (e) {
-            log(`[${rule.title}] filter ungzip或格式化解密出错: ${e.message}`);
+            log(`[homeParse] [${rule.title}] filter ungzip或格式化解密出错: ${e.message}`);
             rule.filter = {};
         }
     }
@@ -1522,7 +1654,7 @@ async function homeVodParse(rule) {
 }
 
 async function cateParse(rule, tid, pg, filter, extend) {
-    log(tid, pg, filter, extend);
+    log('[cateParse]', tid, pg, filter, extend);
     let url = rule.url.replaceAll('fyclass', tid);
     if (pg === 1 && url.includes('[') && url.includes(']')) {
         url = url.split('[')[1].split(']')[0];
@@ -1543,7 +1675,7 @@ async function cateParse(rule, tid, pg, filter, extend) {
                 }
             }
         } catch (e) {
-            log(`合并不同分类对应的默认筛选出错:${e.message}`);
+            log(`[cateParse] 合并不同分类对应的默认筛选出错:${e.message}`);
         }
     }
     if (rule.filter_url) {
@@ -1567,7 +1699,7 @@ async function cateParse(rule, tid, pg, filter, extend) {
                     }
                 }
             } catch (e) {
-                log(`合并不同分类对应的默认筛选出错:${e.message}`);
+                log(`[cateParse] 合并不同分类对应的默认筛选出错:${e.message}`);
             }
         }
         let new_url;
@@ -1618,7 +1750,7 @@ async function detailParse(rule, ids) {
     let vid = ids[0].toString();
     let orId = vid;
     let fyclass = '';
-    log('orId:' + orId);
+    log('[detailParse] orId:' + orId);
     if (vid.indexOf('$') > -1) {
         let tmp = vid.split('$');
         fyclass = tmp[0];
@@ -1702,12 +1834,12 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
 
         // 执行二级访问前代码
         if (moduleObject.二级访问前 && typeof moduleObject.二级访问前 === 'function') {
-            log('开始执行二级访问前代码');
+            log('[commonDetailListParse] 开始执行二级访问前代码');
             try {
                 const result = await moduleObject.二级访问前.call(this);
                 // 如果二级访问前返回了新的URL，需要重新构建解析环境
                 if (result && result !== this.MY_URL) {
-                    log(`二级访问前返回新URL: ${result}`);
+                    log(`[commonDetailListParse] 二级访问前返回新URL: ${result}`);
                     this.MY_URL = result;
                     this.input = result;
                     // 重新创建jsp对象和绑定解析函数
@@ -1724,7 +1856,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                     html = '';
                 }
             } catch (e) {
-                log(`二级访问前执行失败:${e.message}`);
+                log(`[commonDetailListParse] 二级访问前执行失败:${e.message}`);
             }
         }
 
@@ -1745,13 +1877,13 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
             let $pdfh;
             let $pd;
             if (p.is_json) {
-                log('二级是json');
+                log('[commonDetailListParse] 二级是json');
                 html = dealJson(html);
                 $pdfa = this.pjfa;
                 $pdfh = this.pjfh;
                 $pd = this.pj;
             } else {
-                log('二级默认jq');
+                log('[commonDetailListParse] 二级默认jq');
                 $pdfa = this.pdfa;
                 $pdfh = this.pdfh;
                 $pd = this.pd;
@@ -1765,7 +1897,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                     let type_name = p1.length > 1 ? $pdfh(html, p1[1]).replace(/\n|\t/g, '').replace(/ /g, '').trim() : '';
                     vod.type_name = type_name || vod.type_name;
                 } catch (e) {
-                    log(`解析title失败:${e.message}`);
+                    log(`[commonDetailListParse] 解析title失败:${e.message}`);
                 }
             }
 
@@ -1779,7 +1911,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                     vod.vod_actor = p1.length > 3 ? $pdfh(html, p1[3]).replace(/\n|\t/g, '').trim() : '';
                     vod.vod_director = p1.length > 4 ? $pdfh(html, p1[4]).replace(/\n|\t/g, '').trim() : '';
                 } catch (e) {
-                    log(`解析desc失败:${e.message}`);
+                    log(`[commonDetailListParse] 解析desc失败:${e.message}`);
                 }
             }
 
@@ -1789,7 +1921,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                     let p1 = p.content.split(';');
                     vod.vod_content = $pdfh(html, p1[0]).replace(/\n|\t/g, '').trim();
                 } catch (e) {
-                    log(`解析content失败:${e.message}`);
+                    log(`[commonDetailListParse] 解析content失败:${e.message}`);
                 }
             }
 
@@ -1799,7 +1931,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                     let p1 = p.img.split(';');
                     vod.vod_pic = $pd(html, p1[0], this.MY_URL);
                 } catch (e) {
-                    log(`解析img失败:${e.message}`);
+                    log(`[commonDetailListParse] 解析img失败:${e.message}`);
                 }
             }
 
@@ -1808,23 +1940,23 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
 
             // 处理重定向
             if (p.重定向 && typeof p.重定向 === 'function') {
-                log('开始执行重定向代码');
+                log('[commonDetailListParse] 开始执行重定向代码');
                 try {
                     html = await p.重定向.call(this);
                 } catch (e) {
-                    log(`重定向执行失败:${e.message}`);
+                    log(`[commonDetailListParse] 重定向执行失败:${e.message}`);
                 }
             }
 
             // 处理tabs
             if (p.tabs) {
                 if (typeof p.tabs === 'function') {
-                    log('开始执行tabs代码');
+                    log('[commonDetailListParse] 开始执行tabs代码');
                     try {
                         const TABS = await p.tabs.call(this);
                         playFrom = TABS;
                     } catch (e) {
-                        log(`tabs执行失败:${e.message}`);
+                        log(`[commonDetailListParse] tabs执行失败:${e.message}`);
                     }
                 } else {
                     let p_tab = p.tabs.split(';')[0];
@@ -1860,7 +1992,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
             let vod_tab_list = [];
             if (p.lists) {
                 if (typeof p.lists === 'function') {
-                    log('开始执行lists代码');
+                    log('[commonDetailListParse] 开始执行lists代码');
                     try {
                         const LISTS = await p.lists.call(this);
                         for (let i in LISTS) {
@@ -1868,13 +2000,13 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                                 try {
                                     LISTS[i] = LISTS[i].map(it => it.split('$').slice(0, 2).join('$'));
                                 } catch (e) {
-                                    log(`格式化LISTS发生错误:${e.message}`);
+                                    log(`[commonDetailListParse] 格式化LISTS发生错误:${e.message}`);
                                 }
                             }
                         }
                         vod_play_url = LISTS.map(it => it.join('#')).join(vod_play_url);
                     } catch (e) {
-                        log(`lists执行失败:${e.message}`);
+                        log(`[commonDetailListParse] lists执行失败:${e.message}`);
                     }
                 } else {
                     let list_text = p.list_text || 'body&&Text';
@@ -1905,7 +2037,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                             try {
                                 vodList = $pdfa(html, p1);
                             } catch (e) {
-                                log(`解析vodList失败:${e.message}`);
+                                log(`[commonDetailListParse] 解析vodList失败:${e.message}`);
                             }
                             for (let j = 0; j < vodList.length; j++) {
                                 let it = vodList[j];
@@ -1933,7 +2065,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
                 try {
                     vod.vod_pic = await moduleObject.图片替换.call(this, vod.vod_pic);
                 } catch (e) {
-                    log(`图片替换函数执行失败:${e.message}`);
+                    log(`[commonDetailListParse] 图片替换函数执行失败:${e.message}`);
                 }
             } else if (typeof moduleObject.图片替换 === 'string' && moduleObject.图片替换.includes('=>')) {
                 // 字符串替换处理
@@ -1950,7 +2082,7 @@ async function commonDetailListParse(moduleObject, method, injectVars, args) {
         try {
             vod = vodDeal(vod, moduleObject);
         } catch (e) {
-            log(`vodDeal发生错误:${e.message}`);
+            log(`[commonDetailListParse] vodDeal发生错误:${e.message}`);
         }
 
         return vod;
@@ -1988,10 +2120,10 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
     // 执行二级访问前代码
     if (rule.二级访问前) {
         try {
-            log(`尝试在二级访问前执行代码:${rule.二级访问前}`);
+            log(`[detailParseObject] 尝试在二级访问前执行代码:${rule.二级访问前}`);
             // 这里需要在沙箱环境中执行，暂时跳过
         } catch (e) {
-            log(`二级访问前执行代码出现错误:${e.message}`);
+            log(`[detailParseObject] 二级访问前执行代码出现错误:${e.message}`);
         }
     }
 
@@ -2042,7 +2174,7 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
                     html = '';
                 }
             } catch (e) {
-                log(`获取二级页面源码失败:${e.message}`);
+                log(`[detailParseObject] 获取二级页面源码失败:${e.message}`);
                 html = '';
             }
         }
@@ -2080,7 +2212,7 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
                     }
                 }
             } catch (e) {
-                log(`JSON解析失败:${e.message}`);
+                log(`[detailParseObject] JSON解析失败:${e.message}`);
             }
         } else {
             // 普通HTML解析
@@ -2088,28 +2220,28 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
                 try {
                     vod.vod_name = jsp.pdfh(html, p.title) || vod.vod_name;
                 } catch (e) {
-                    log(`解析title失败:${e.message}`);
+                    log(`[detailParseObject] 解析title失败:${e.message}`);
                 }
             }
             if (p.desc) {
                 try {
                     vod.vod_content = jsp.pdfh(html, p.desc) || vod.vod_content;
                 } catch (e) {
-                    log(`解析desc失败:${e.message}`);
+                    log(`[detailParseObject] 解析desc失败:${e.message}`);
                 }
             }
             if (p.content) {
                 try {
                     vod.vod_content = jsp.pdfh(html, p.content) || vod.vod_content;
                 } catch (e) {
-                    log(`解析content失败:${e.message}`);
+                    log(`[detailParseObject] 解析content失败:${e.message}`);
                 }
             }
             if (p.img) {
                 try {
                     vod.vod_pic = jsp.pd(html, p.img, url) || vod.vod_pic;
                 } catch (e) {
-                    log(`解析img失败:${e.message}`);
+                    log(`[detailParseObject] 解析img失败:${e.message}`);
                 }
             }
         }
@@ -2130,7 +2262,7 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
                     playFrom = tabs_list.map(it => jsp.pdfh(it, 'Text'));
                 }
             } catch (e) {
-                log(`解析tabs失败:${e.message}`);
+                log(`[detailParseObject] 解析tabs失败:${e.message}`);
                 playFrom = ['道长在线'];
             }
         } else {
@@ -2177,7 +2309,7 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
                         }
                     }
                 } catch (e) {
-                    log(`解析lists失败:${e.message}`);
+                    log(`[detailParseObject] 解析lists失败:${e.message}`);
                 }
 
                 if (new_vod_list.length > 0) {
@@ -2201,7 +2333,7 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
             try {
                 vod.vod_pic = await rule.图片替换.call(this, vod.vod_pic);
             } catch (e) {
-                log(`图片替换函数执行失败:${e.message}`);
+                log(`[detailParseObject] 图片替换函数执行失败:${e.message}`);
             }
         } else if (typeof rule.图片替换 === 'string' && rule.图片替换.includes('=>')) {
             // 字符串替换处理
@@ -2222,7 +2354,7 @@ async function detailParseObject(rule, url, vid, orId, fyclass) {
     try {
         vod = vodDeal(vod, rule);
     } catch (e) {
-        log(`vodDeal发生错误:${e.message}`);
+        log(`[detailParseObject] vodDeal发生错误:${e.message}`);
     }
 
     const jsp = new jsoup(url);
@@ -2323,7 +2455,7 @@ async function playParse(rule, flag, id, flags) {
     if (!/http/.test(url)) {
         try {
             url = base64Decode(url);
-            log('[playParse]: id is base64 data');
+            log('[playParse] id is base64 data');
         } catch (e) {
         }
     }
@@ -2332,9 +2464,9 @@ async function playParse(rule, flag, id, flags) {
         url = id;
     }
     if (id !== url) {
-        log(`[playParse]: ${id} => ${url}`);
+        log(`[playParse] ${id} => ${url}`);
     } else {
-        log(`[playParse]: ${url}`);
+        log(`[playParse] ${url}`);
     }
     const jsp = new jsoup(url);
     return {
@@ -2373,7 +2505,7 @@ async function playParseAfter(rule, obj, playUrl, flag) {
                 url: obj
             };
         } catch (e) {
-            log(`js免嗅错误:${e.message}`);
+            log(`[playParseAfter] js免嗅错误:${e.message}`);
             lazy_play = common_play;
         }
     } else {
@@ -2416,6 +2548,10 @@ async function proxyParse(rule, params) {
 }
 
 export async function home(filePath, env, filter = 1) {
+    // 使用filePath作为稳定的会话键
+    const sessionKey = filePath;
+    clearPageRequestCache(sessionKey, 'home');
+
     return await invokeMethod(filePath, env, 'class_parse', [filter], {
         input: '$.homeUrl',
         MY_URL: '$.homeUrl'
@@ -2423,6 +2559,10 @@ export async function home(filePath, env, filter = 1) {
 }
 
 export async function homeVod(filePath, env) {
+    // homeVod使用相同的会话键，会自动复用home的缓存
+    const sessionKey = filePath;
+    clearPageRequestCache(sessionKey, 'homeVod');
+
     return await invokeMethod(filePath, env, '推荐', [], {
         input: '$.homeUrl',
         MY_URL: '$.homeUrl'
@@ -2430,6 +2570,9 @@ export async function homeVod(filePath, env) {
 }
 
 export async function category(filePath, env, tid, pg = 1, filter = 1, extend = {}) {
+    const sessionKey = filePath;
+    clearPageRequestCache(sessionKey, 'category');
+
     return await invokeMethod(filePath, env, '一级', [tid, pg, filter, extend], {
         input: '$.url',
         MY_URL: '$.url'
@@ -2437,6 +2580,9 @@ export async function category(filePath, env, tid, pg = 1, filter = 1, extend = 
 }
 
 export async function detail(filePath, env, ids) {
+    const sessionKey = filePath;
+    clearPageRequestCache(sessionKey, 'detail');
+
     if (!Array.isArray(ids)) throw new Error('Parameter "ids" must be an array');
     return await invokeMethod(filePath, env, '二级', [ids], {
         input: `${ids[0]}`,
@@ -2445,6 +2591,9 @@ export async function detail(filePath, env, ids) {
 }
 
 export async function search(filePath, env, wd, quick = 0, pg = 1) {
+    const sessionKey = filePath;
+    clearPageRequestCache(sessionKey, 'search');
+
     return await invokeMethod(filePath, env, '搜索', [wd, quick, pg], {
         input: '$.searchUrl',
         MY_URL: '$.searchUrl'
@@ -2452,6 +2601,9 @@ export async function search(filePath, env, wd, quick = 0, pg = 1) {
 }
 
 export async function play(filePath, env, flag, id, flags) {
+    const sessionKey = filePath;
+    clearPageRequestCache(sessionKey, 'play');
+
     flags = flags || [];
     if (!Array.isArray(flags)) throw new Error('Parameter "flags" must be an array');
     return await invokeMethod(filePath, env, 'lazy', [flag, id, flags], {
@@ -2501,7 +2653,7 @@ export async function getJx(filePath) {
     try {
         // 确保模块已初始化
         const jxObj = await initJx(filePath, {});
-        // console.log('jxObj:', jxObj);
+        // log('jxObj:', jxObj);
         return jxObj;
     } catch (e) {
         return {code: 403, error: `${filePath} 获取代理信息错误:${e.message}`}
@@ -2518,7 +2670,7 @@ export async function getOriginalJs(js_code) {
     if (current_match.test(js_code)) {
         return js_code
     }
-    console.log('密文源自动去除头信息...');
+    log('[getOriginalJs] 密文源自动去除头信息...');
     js_code = await fileHeaderManager.removeHeader(js_code, {mode: 'top-comments', fileType: '.js'});
     let rsa_private_key = 'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqin/jUpqM6+fgYP/oMqj9zcdHMM0mEZXLeTyixIJWP53lzJV2N2E3OP6BBpUmq2O1a9aLnTIbADBaTulTNiOnVGoNG58umBnupnbmmF8iARbDp2mTzdMMeEgLdrfXS6Y3VvazKYALP8EhEQykQVarexR78vRq7ltY3quXx7cgI0ROfZz5Sw3UOLQJ+VoWmwIxu9AMEZLVzFDQN93hzuzs3tNyHK6xspBGB7zGbwCg+TKi0JeqPDrXxYUpAz1cQ/MO+Da0WgvkXnvrry8NQROHejdLVOAslgr6vYthH9bKbsGyNY3H+P12kcxo9RAcVveONnZbcMyxjtF5dWblaernAgMBAAECggEAGdEHlSEPFmAr5PKqKrtoi6tYDHXdyHKHC5tZy4YV+Pp+a6gxxAiUJejx1hRqBcWSPYeKne35BM9dgn5JofgjI5SKzVsuGL6bxl3ayAOu+xXRHWM9f0t8NHoM5fdd0zC3g88dX3fb01geY2QSVtcxSJpEOpNH3twgZe6naT2pgiq1S4okpkpldJPo5GYWGKMCHSLnKGyhwS76gF8bTPLoay9Jxk70uv6BDUMlA4ICENjmsYtd3oirWwLwYMEJbSFMlyJvB7hjOjR/4RpT4FPnlSsIpuRtkCYXD4jdhxGlvpXREw97UF2wwnEUnfgiZJ2FT/MWmvGGoaV/CfboLsLZuQKBgQDTNZdJrs8dbijynHZuuRwvXvwC03GDpEJO6c1tbZ1s9wjRyOZjBbQFRjDgFeWs9/T1aNBLUrgsQL9c9nzgUziXjr1Nmu52I0Mwxi13Km/q3mT+aQfdgNdu6ojsI5apQQHnN/9yMhF6sNHg63YOpH+b+1bGRCtr1XubuLlumKKscwKBgQDOtQ2lQjMtwsqJmyiyRLiUOChtvQ5XI7B2mhKCGi8kZ+WEAbNQcmThPesVzW+puER6D4Ar4hgsh9gCeuTaOzbRfZ+RLn3Aksu2WJEzfs6UrGvm6DU1INn0z/tPYRAwPX7sxoZZGxqML/z+/yQdf2DREoPdClcDa2Lmf1KpHdB+vQKBgBXFCVHz7a8n4pqXG/HvrIMJdEpKRwH9lUQS/zSPPtGzaLpOzchZFyQQBwuh1imM6Te+VPHeldMh3VeUpGxux39/m+160adlnRBS7O7CdgSsZZZ/dusS06HAFNraFDZf1/VgJTk9BeYygX+AZYu+0tReBKSs9BjKSVJUqPBIVUQXAoGBAJcZ7J6oVMcXxHxwqoAeEhtvLcaCU9BJK36XQ/5M67ceJ72mjJC6/plUbNukMAMNyyi62gO6I9exearecRpB/OGIhjNXm99Ar59dAM9228X8gGfryLFMkWcO/fNZzb6lxXmJ6b2LPY3KqpMwqRLTAU/zy+ax30eFoWdDHYa4X6e1AoGAfa8asVGOJ8GL9dlWufEeFkDEDKO9ww5GdnpN+wqLwePWqeJhWCHad7bge6SnlylJp5aZXl1+YaBTtOskC4Whq9TP2J+dNIgxsaF5EFZQJr8Xv+lY9lu0CruYOh9nTNF9x3nubxJgaSid/7yRPfAGnsJRiknB5bsrCvgsFQFjJVs=';
     let decode_content = '';
@@ -2540,9 +2692,9 @@ export async function getOriginalJs(js_code) {
     let error_log = false;
 
     function logger(text) {
-        // console.log('[logger]:', text);
+        // log('[logger]:', text);
         if (error_log) {
-            log(text);
+            log('[getOriginalJs]', text);
         }
     }
 
@@ -2667,7 +2819,7 @@ export async function runMain(main_func_code, arg) {
         eval(main_func_code + '\nmainFunc=main;');
         return mainFunc(arg);
     } catch (e) {
-        log(`执行main_func_code发生了错误:${e.message}`);
+        log(`[runMain] 执行main_func_code发生了错误:${e.message}`);
         return ''
     }
 }
@@ -2685,7 +2837,7 @@ export function clearAllCache() {
         for (const excludeName of excludeList) {
             if (value.moduleObject && value.moduleObject.title &&
                 value.moduleObject.title.includes(excludeName)) {
-                console.log(`跳过清理模块缓存: ${value.moduleObject.title}`);
+                log(`[clearAllCache] 跳过清理模块缓存: ${value.moduleObject.title}`);
                 shouldSkip = true;
                 break;
             }
@@ -2703,7 +2855,7 @@ export function clearAllCache() {
 
         for (const excludeName of excludeList) {
             if (filePath.includes(excludeName)) {
-                console.log(`跳过清理规则缓存: ${filePath}`);
+                log(`[clearAllCache] 跳过清理规则缓存: ${filePath}`);
                 shouldSkip = true;
                 break;
             }
@@ -2721,7 +2873,7 @@ export function clearAllCache() {
 
         for (const excludeName of excludeList) {
             if (key.includes(excludeName)) {
-                console.log(`跳过清理解析缓存: ${key}`);
+                log(`[clearAllCache] 跳过清理解析缓存: ${key}`);
                 shouldSkip = true;
                 break;
             }
@@ -2733,7 +2885,7 @@ export function clearAllCache() {
         }
     }
 
-    console.log(`已清理 ${clearedCount} 个模块缓存，排除了 ${excludeList.join(', ')} 相关缓存`);
+    log(`[clearAllCache] 已清理 ${clearedCount} 个模块缓存，排除了 ${excludeList.join(', ')} 相关缓存`);
 }
 
 /**
@@ -2766,14 +2918,14 @@ function forceOrder(lists, key, option) {
             second = second[key];
         }
     }
-    // console.log(first,second);
+    // log(first,second);
     if (first && second) {
         if (/^\d+$/.test(first) && /^\d+$/.test(second)) {
             // 数字字符串转数字比较
             first = parseInt(first);
             second = parseInt(second);
         }
-        // console.log(first,second,first>second);
+        // log(first,second,first>second);
         if (first > second) {
             return lists.reverse();
         }
@@ -2864,8 +3016,288 @@ function vodDeal(vod, rule) {
         }
 
     } catch (e) {
-        log(`vodDeal处理失败: ${e.message}`);
+        log(`[vodDeal] vodDeal处理失败: ${e.message}`);
     }
 
     return vod;
+}
+
+/**
+ * 智能清理页面请求缓存
+ * @param {string} sessionKey - 会话键（基于filePath）
+ * @param {string} sessionType - 会话类型（home/homeVod/category等）
+ * @param {boolean} force - 是否强制清理
+ */
+function clearPageRequestCache(sessionKey = null, sessionType = 'unknown', force = false) {
+    if (!sessionKey) {
+        pageRequestCache.clear();
+        log('[clearPageRequestCache] 强制清理所有缓存');
+        return;
+    }
+
+    const now = Date.now();
+
+    // 对于home类型的请求，使用特殊的会话管理
+    if (sessionType === 'home') {
+        if (activeHomeSessions.has(sessionKey)) {
+            log(`[clearPageRequestCache] 跳过清理，home会话正在进行: ${sessionKey}`);
+            return;
+        }
+        // 标记home会话开始，记录时间戳
+        activeHomeSessions.add(sessionKey);
+        lastClearTime = now;
+        pageRequestCache.clear();
+        currentSessionId = sessionKey;
+        log(`[clearPageRequestCache] 开始home会话，已清理缓存: ${sessionKey}`);
+
+        // 10秒后自动清理会话标记，防止内存泄漏
+        setTimeout(() => {
+            activeHomeSessions.delete(sessionKey);
+            log(`[clearPageRequestCache] 清理home会话标记: ${sessionKey}`);
+        }, 10000);
+
+    } else if (sessionType === 'homeVod') {
+        // 检查是否有对应的home会话，或者距离上次清理时间很近（30秒内）
+        if (activeHomeSessions.has(sessionKey) || (lastClearTime && (now - lastClearTime) < 30000)) {
+            log(`[clearPageRequestCache] homeVod复用home会话缓存: ${sessionKey}`);
+            return;
+        }
+        // 如果没有对应的home会话且时间间隔较长，则清理缓存
+        pageRequestCache.clear();
+        lastClearTime = now;
+        currentSessionId = sessionKey;
+        log(`[clearPageRequestCache] 独立homeVod会话，已清理缓存: ${sessionKey}`);
+
+    } else {
+        // 其他类型的请求直接清理缓存
+        pageRequestCache.clear();
+        lastClearTime = now;
+        currentSessionId = sessionKey;
+        log(`[clearPageRequestCache] ${sessionType}会话，已清理缓存: ${sessionKey}`);
+    }
+}
+
+/**
+ * 缓存请求函数，避免重复请求相同URL
+ * @param {Function} requestFunc - 请求函数
+ * @param {string} url - 请求URL
+ * @param {Object} options - 请求选项
+ * @param {string} cachePrefix - 缓存前缀
+ * @returns {Promise<string>} - 请求结果
+ */
+async function cachedRequest(requestFunc, url, options = {}, cachePrefix = 'page') {
+    const cacheKey = `${cachePrefix}:${md5(url + JSON.stringify(options))}`;
+
+    // 检查缓存
+    let cached = pageRequestCache.get(cacheKey);
+    if (cached) {
+        log(`[cachedRequest] 使用缓存的页面内容: ${url}`);
+        return cached;
+    }
+
+    // 发起请求
+    log(`[cachedRequest] 首次请求页面: ${url}`);
+    try {
+        const result = await requestFunc(url, options);
+        if (result) {
+            // 缓存结果，设置2分钟过期时间
+            pageRequestCache.set(cacheKey, result);
+            setTimeout(() => {
+                pageRequestCache.delete(cacheKey);
+                log(`[cachedRequest] 清除页面缓存: ${url}`);
+            }, 2 * 60 * 1000);
+        }
+        return result;
+    } catch (e) {
+        log(`[cachedRequest] 请求失败: ${url}, 错误: ${e.message}`);
+        return '';
+    }
+}
+
+/**
+ * 处理模板继承逻辑
+ * @param {Object} rule - 规则对象
+ * @param {Object} context - VM上下文
+ */
+async function handleTemplateInheritance(rule, context) {
+    try {
+        // 获取模板字典
+        const muban = template.getMubans();
+
+        // 处理自动模板匹配
+        if (rule['模板'] === '自动') {
+            try {
+                let host_headers = rule['headers'] || {};
+                const cacheKey = md5(rule.host + JSON.stringify(host_headers));
+
+                // 先检查缓存中是否有HOST页面内容
+                let host_html = hostHtmlCache.get(cacheKey);
+
+                if (!host_html) {
+                    // 缓存中没有，使用cachedRequest统一缓存管理
+                    log(`[handleTemplateInheritance] 首次请求HOST页面: ${rule.host}`);
+                    const getHostHtmlScript = new vm.Script(`
+                        (async function() {
+                            try {
+                                // 使用cachedRequest来统一缓存管理，避免重复请求
+                                const response = await cachedRequest(request, rule.host || HOST, { headers: ${JSON.stringify(host_headers)} }, 'host');
+                                return response;
+                            } catch (e) {
+                                log('[handleTemplateInheritance] 获取HOST页面失败:', e.message);
+                                return '';
+                            }
+                        })()
+                    `);
+                    host_html = await getHostHtmlScript.runInContext(context);
+
+                    // 将结果也缓存到hostHtmlCache，保持兼容性
+                    if (host_html) {
+                        hostHtmlCache.set(cacheKey, host_html);
+                        // 5分钟后清除缓存
+                        setTimeout(() => {
+                            hostHtmlCache.delete(cacheKey);
+                            log(`[handleTemplateInheritance] 清除HOST页面缓存: ${rule.host}`);
+                        }, 5 * 60 * 1000);
+                    }
+                } else {
+                    log(`[handleTemplateInheritance] 使用缓存的HOST页面: ${rule.host}`);
+                }
+
+                let match_muban = '';
+                let muban_keys = Object.keys(muban).filter(it => !/默认|短视2|采集1/.test(it));
+
+                for (let muban_key of muban_keys) {
+                    try {
+                        // 检查模板是否有class_parse
+                        if (muban[muban_key].class_parse) {
+                            let class_parse = muban[muban_key].class_parse;
+
+                            // 直接在context中执行class_parse代码进行测试
+                            const testScript = new vm.Script(`
+                                  (async function() {
+                                      try {
+                                          let html = ${JSON.stringify(host_html)};
+                                          let p = ${JSON.stringify(class_parse)};
+                                          let classes = [];
+                                          
+                                          // 处理class_parse字符串解析
+                                          p = p.split(';');
+                                          let p0 = p[0];
+                                          let is_json = p0.startsWith('json:');
+                                          p0 = p0.replace(/^(jsp:|json:|jq:)/, '');
+                                          
+                                          if (html) {
+                                              let $pdfa, $pdfh, $pd;
+                                              if (is_json) {
+                                                  html = dealJson(html);
+                                                  $pdfa = pjfa;
+                                                  $pdfh = pjfh;
+                                                  $pd = pj;
+                                              } else {
+                                                  $pdfa = pdfa;
+                                                  $pdfh = pdfh;
+                                                  $pd = pd;
+                                              }
+                                              
+                                              if (is_json) {
+                                                  try {
+                                                      let list = $pdfa(html, p0);
+                                                      if (list && list.length > 0) {
+                                                          classes = list;
+                                                      }
+                                                  } catch (e) {
+                                                      log('[handleTemplateInheritance] json分类解析失败:' + e.message);
+                                                  }
+                                              } else if (p.length >= 3) {
+                                                  try {
+                                                      let list = $pdfa(html, p0);
+                                                      if (list && list.length > 0) {
+                                                          for (const it of list) {
+                                                              try {
+                                                              //log('[handleTemplateInheritance] test it:',it);
+                                                                  let name = $pdfh(it, p[1]);
+                                                                  let url = $pd(it, p[2]);
+                                                                  if (p.length > 3 && p[3]) {
+                                                                      let exp = new RegExp(p[3]);
+                                                                      let match = url.match(exp);
+                                                                      if (match && match[1]) {
+                                                                          url = match[1];
+                                                                      }
+                                                                  }
+                                                                  if (name.trim()) {
+                                                                      classes.push({
+                                                                          'type_id': url.trim(),
+                                                                          'type_name': name.trim()
+                                                                      });
+                                                                  }
+                                                              } catch (e) {
+                                                                  log('[handleTemplateInheritance] 分类列表解析元素失败:' + e.message);
+                                                              }
+                                                          }
+                                                      }
+                                                  } catch (e) {
+                                                      log('[handleTemplateInheritance] 分类列表解析失败:' + e.message);
+                                                  }
+                                              }
+                                          }
+                                          
+                                          return { class: classes };
+                                      } catch (e) {
+                                          log('[handleTemplateInheritance] 模板测试执行错误:', e.message);
+                                          return { class: [] };
+                                      }
+                                  })()
+                              `);
+
+                            const host_data = await testScript.runInContext(context);
+
+                            if (host_data.class && host_data.class.length > 0) {
+                                match_muban = muban_key;
+                                log(`[handleTemplateInheritance] 自动匹配模板:【${muban_key}】`);
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        log(`[handleTemplateInheritance] 自动匹配模板:【${muban_key}】错误:${e.message}`);
+                    }
+                }
+
+                if (match_muban) {
+                    muban['自动'] = muban[match_muban];
+                } else {
+                    delete rule['模板'];
+                }
+            } catch (e) {
+                log('[handleTemplateInheritance] 自动模板匹配失败:', e.message);
+                delete rule['模板'];
+            }
+        }
+
+        // 处理模板修改 - 在模板继承之前统一执行，避免重复执行
+        if (rule['模板修改'] && typeof rule['模板修改'] === 'function' && rule.模板 && muban.hasOwnProperty(rule.模板)) {
+            try {
+                // 将muban传入函数，让模板修改能够修改模板
+                await rule['模板修改'](muban);
+            } catch (e) {
+                log('[handleTemplateInheritance] 模板修改执行失败:', e.message);
+            }
+        }
+
+        // 处理普通模板继承
+        if (rule.模板 && muban.hasOwnProperty(rule.模板)) {
+            log('[handleTemplateInheritance] 继承模板:' + rule.模板);
+
+            // 使用Object.assign进行模板继承，模板属性在前，rule属性在后（rule属性优先级更高）
+            const templateRule = muban[rule.模板];
+            const originalRule = {...rule};
+            Object.assign(rule, templateRule, originalRule);
+        }
+
+        // 清理模板相关属性
+        delete rule['模板'];
+        delete rule['模板修改'];
+
+    } catch (error) {
+        log('[handleTemplateInheritance] 模板继承处理失败:', error.message);
+    }
 }

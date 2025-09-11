@@ -7,7 +7,7 @@ class FetchAxios {
             baseURL: '',
             headers: {},
             timeout: 0,
-            responseType: 'json', // json 或 text
+            responseType: 'json', // json, text 或 arraybuffer
             withCredentials: false,
             httpsAgent: null,
             ...defaultConfig,
@@ -71,6 +71,8 @@ class FetchAxios {
             let responseData;
             if (finalConfig.responseType === 'json') {
                 responseData = await response.json().catch(() => null);
+            } else if (finalConfig.responseType === 'arraybuffer') {
+                responseData = await response.arrayBuffer();
             } else {
                 responseData = await response.text();
             }
@@ -134,7 +136,7 @@ export function createHttpsInstance() {
     return createInstance({
         headers: {'User-Agent': 'Mozilla/5.0'},
         timeout: 10000,
-        responseType: 'text',
+        responseType: 'arraybuffer',
         httpsAgent: httpsAgent
     });
 }

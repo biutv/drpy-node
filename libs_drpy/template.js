@@ -1,59 +1,54 @@
-if (typeof Object.assign !== 'function') {
-    Object.assign = function () {
-        let target = arguments[0];
-        for (let i = 1; i < arguments.length; i++) {
-            let source = arguments[i];
-            for (let key in source) {
-                if (Object.prototype.hasOwnProperty.call(source, key)) {
-                    target[key] = source[key];
-                }
-            }
-        }
-        return target;
-    };
-}
-
 // 通用免嗅探播放
-let common_lazy = `js:
-  let html = request(input);
-  let hconf = html.match(/r player_.*?=(.*?)</)[1];
-  let json = JSON5.parse(hconf);
-  let url = json.url;
-  if (json.encrypt == '1') {
-    url = unescape(url);
-  } else if (json.encrypt == '2') {
-    url = unescape(base64Decode(url));
-  }
-  if (/\\.(m3u8|mp4|m4a|mp3)/.test(url)) {
-    input = {
-      parse: 0,
-      jx: 0,
-      url: url,
-    };
-  } else {
-    input = url && url.startsWith('http') && tellIsJx(url) ? {parse:0,jx:1,url:url}:input;
-  }`;
+let common_lazy = async function (flag, id, flags) {
+    let {input} = this;
+    console.log('[common_lazy] input:', input);
+    let html = await request(input);
+    let hconf = html.match(/r player_.*?=(.*?)</)[1];
+    let json = JSON5.parse(hconf);
+    let url = json.url;
+    if (json.encrypt == '1') {
+        url = unescape(url);
+    } else if (json.encrypt == '2') {
+        url = unescape(base64Decode(url));
+    }
+    if (/\\.(m3u8|mp4|m4a|mp3)/.test(url)) {
+        input = {
+            parse: 0,
+            jx: 0,
+            url: url,
+        };
+    } else {
+        input = url && url.startsWith('http') && tellIsJx(url) ? {parse: 0, jx: 1, url: url} : input;
+    }
+    console.log('[common_lazy] result:', input);
+    return input;
+}
 // 默认嗅探播放
 
-let def_lazy = `js:
-  input = { parse: 1, url: input, js: '' };`;
+let def_lazy = async function (flag, id, flags) {
+    let {input} = this;
+    return {parse: 1, url: input, js: ''}
+}
 // 采集站播放
 
-let cj_lazy = `js:
-  if (/\\.(m3u8|mp4)/.test(input)) {
-    input = { parse: 0, url: input };
-  } else {
-    if (rule.parse_url.startsWith('json:')) {
-      let purl = rule.parse_url.replace('json:', '') + input;
-      let html = request(purl);
-      let json = JSON.parse(html);
-      if (json.url) {
-        input = { parse: 0, url: json.url };
-      }
+let cj_lazy = async function (flag, id, flags) {
+    let {input} = this;
+    if (/\.(m3u8|mp4)/.test(input)) {
+        input = {parse: 0, url: input};
     } else {
-      input = rule.parse_url + input;
+        if (rule.parse_url.startsWith('json:')) {
+            let purl = rule.parse_url.replace('json:', '') + input;
+            let html = await request(purl);
+            let json = JSON.parse(html);
+            if (json.url) {
+                input = {parse: 0, url: json.url};
+            }
+        } else {
+            input = rule.parse_url + input;
+        }
     }
-  }`;
+    return input;
+};
 
 function getMubans() {
     const mubanDict = { // 模板字典
@@ -410,6 +405,6 @@ function getMubans() {
 let mubanDict = getMubans();
 let muban = getMubans();
 const template = {
-    muban, getMubans
+    muban, getMubans, common_lazy, def_lazy, cj_lazy
 }
 export default template;
