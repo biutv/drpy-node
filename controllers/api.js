@@ -234,7 +234,8 @@ export default (fastify, options, done) => {
                         null,
                         `初始化接口[${moduleName}]`
                     );
-                    return reply.send(refreshedObject);
+                    const {context, ...responseObject} = refreshedObject;
+                    return reply.send(responseObject);
                 }
                 if (!('filter' in query)) {
                     query.filter = 1

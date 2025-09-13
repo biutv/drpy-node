@@ -14,6 +14,17 @@ async function init(cfg) {
     cfg.stype = '3';
 }
 
+function ensureVars(){
+    console.log('typeof getProxy:', typeof getProxy);
+    console.log('typeof base64Encode:', typeof base64Encode);
+    console.log('typeof base64Decode:', typeof base64Decode);
+    console.log('typeof JSON5:', typeof JSON5);
+    console.log('typeof gzip:', typeof gzip);
+    console.log('typeof ungzip:', typeof ungzip);
+    console.log('typeof atob:', typeof atob);
+    console.log('typeof btoa:', typeof btoa);
+}
+
 // let host = 'https://api.ubj83.com';
 //let host = 'https://xqmbwc.zxbwv.com';
 //let host = 'https://zlokzk.deweit.com';
@@ -30,6 +41,7 @@ async function home(filter) {
     // if (typeof getProxy === 'function') {
     //     console.log('getProxy(true):', getProxy(true));
     // }
+    // ensureVars();
     let classes = [{type_id: '1', type_name: '电影',}, {type_id: '2', type_name: '电视剧',}, {
         type_id: '3',
         type_name: '动漫',

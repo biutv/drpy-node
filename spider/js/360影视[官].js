@@ -32,7 +32,10 @@ var rule = {
     play_parse: true,
     lazy: async function () {
         let {input} = this;
-        return input.split("?")[0];
+        if (input.includes('?') && !input.includes('video?vid=')) {
+            input = input.split("?")[0];
+        }
+        return input
     },
     推荐: 'json:data;title;cover;comment;cat+ent_id;description',
     一级: 'json:data.movies;title;cover;pubdate;id;description',

@@ -1,7 +1,75 @@
 import path from "path";
-import {readFileSync, existsSync} from 'fs';
+import {readFileSync, existsSync, mkdirSync, writeFileSync} from 'fs';
 import {fileURLToPath} from "url";
+import {getSitesMap} from "./sites-map.js";
 import '../libs_drpy/jinja.js'
+
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const _data_path = path.join(__dirname, '../data');
+const _config_path = path.join(__dirname, '../config');
+const _lib_path = path.join(__dirname, '../spider/js');
+
+const es6JsPath = path.join(__dirname, '../libs_drpy/es6-extend.js');
+// 读取扩展代码
+export const es6_extend_code = readFileSync(es6JsPath, 'utf8');
+const reqJsPath = path.join(__dirname, '../libs_drpy/req-extend.js');
+// 读取网络请求扩展代码
+export const req_extend_code = readFileSync(reqJsPath, 'utf8');
+
+export const SitesMap = getSitesMap(_config_path);
+export const pathLib = {
+    basename: path.basename,
+    extname: path.extname,
+    readFile: function (filename) {
+        let _file_path = path.join(_data_path, filename);
+        const resolvedPath = path.resolve(_data_path, _file_path); // 将路径解析为绝对路径
+        if (!resolvedPath.startsWith(_data_path)) {
+            log(`[pathLib.readFile] no access for read ${_file_path}`)
+            return '';
+        }
+        // 检查文件是否存在
+        if (!existsSync(resolvedPath)) {
+            log(`[pathLib.readFile] file not found for read ${resolvedPath}`)
+            return '';
+        }
+        return readFileSync(resolvedPath, 'utf8')
+    },
+    writeFile: function (filename, text) {
+        let _file_path = path.join(_data_path, filename);
+        const resolvedPath = path.resolve(_data_path, _file_path); // 将路径解析为绝对路径
+        if (!resolvedPath.startsWith(_data_path)) {
+            log(`[pathLib.writeFile] no access for read ${_file_path}`)
+            return '';
+        }
+        try {
+            const dirPath = path.dirname(resolvedPath);
+            // 检查目录是否存在，不存在则创建
+            if (!existsSync(dirPath)) {
+                mkdirSync(dirPath, {recursive: true});
+            }
+            writeFileSync(resolvedPath, text, 'utf8');
+            return true
+        } catch (e) {
+            log(`[pathLib.writeFile] failed for saveFile ${_file_path}　error:${e.message}`);
+            return false
+        }
+    },
+    readLib: function (filename) {
+        let _file_path = path.join(_lib_path, filename);
+        const resolvedPath = path.resolve(_data_path, _file_path); // 将路径解析为绝对路径
+        if (!resolvedPath.startsWith(_lib_path)) {
+            log(`[pathLib.readLib] no access for read ${_file_path}`)
+            return '';
+        }
+        // 检查文件是否存在
+        if (!existsSync(resolvedPath)) {
+            log(`[pathLib.readLib] file not found for read ${resolvedPath}`)
+            return '';
+        }
+        return readFileSync(resolvedPath, 'utf8')
+    },
+};
 
 export function getParsesDict(host) {
     const __filename = fileURLToPath(import.meta.url);

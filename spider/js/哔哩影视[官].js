@@ -14,14 +14,14 @@
  * 客户端长期Cookie设置教程:
  * 抓包哔哩手机端搜索access_key,取任意链接里的access_key和appkey在drpy环境变量中增加同名的环境变量即可
  * 此时哔哩.js这个解析可用于此源的解析线路用
-@header({
+ @header({
   searchable: 1,
   filterable: 1,
   quickSearch: 0,
   title: '哔哩影视[官]',
   lang: 'ds'
-})
-*/var rule = {
+  })
+ */var rule = {
     title: '哔哩影视[官]',
     host: 'https://api.bilibili.com',
     url: '/fyclass-fypage&vmid=$vmid',
@@ -279,8 +279,11 @@
                 result["url"] = url;
                 result["header"] = {
                     Referer: "https://www.bilibili.com",
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36",
                 };
+                if (rule.headers.Cookie) {
+                    result["header"]["Cookie"] = rule.headers.Cookie
+                }
                 result["contentType"] = "video/x-flv";
                 result["danmaku"] = dan;
                 input = result

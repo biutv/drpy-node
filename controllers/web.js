@@ -6,9 +6,8 @@ import COOKIE from '../utils/cookieManager.js';
 const COOKIE_AUTH_CODE = process.env.COOKIE_AUTH_CODE || 'drpys';
 
 export default (fastify, options, done) => {
-    // 读取 views 目录下的 encoder.html 文件并返回
     fastify.get('/admin/encoder', async (request, reply) => {
-        const encoderFilePath = path.join(options.viewsDir, 'encoder.html'); // 获取 encoder.html 文件的路径
+        const encoderFilePath = path.join(options.appsDir, 'encoder/index.html'); // 获取 encoder.html 文件的路径
 
         // 检查文件是否存在
         if (!existsSync(encoderFilePath)) {

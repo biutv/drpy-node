@@ -6,9 +6,16 @@ const maxSockets = 64;
 const _axios = createAxiosInstance({maxSockets: maxSockets});
 
 export default (fastify, options, done) => {
-    // 读取 views 目录下的 encoder.html 文件并返回
     fastify.post('/http', async (req, reply) => {
-        const {url, headers: userHeaders = {}, params = {}, method = 'GET', data = {}} = req.body;
+        const {
+            url,
+            headers: userHeaders = {},
+            params = {},
+            method = 'GET',
+            data = {},
+            responseType,
+            maxRedirects
+        } = req.body;
         if (!url) {
             return reply.status(400).send({error: 'Missing required field: url'});
         }
@@ -25,21 +32,32 @@ export default (fastify, options, done) => {
                 url,
                 method,
                 headers,
+                responseType,
+                maxRedirects,
                 params,
                 data,
             });
 
-            reply.status(response.status).send({
-                status: response.status,
-                headers: response.headers,
-                data: response.data,
-            });
+            if (response.status >= 200 && response.status < 400) {
+                reply.status(response.status).send({
+                    status: response.status,
+                    headers: response.headers,
+                    data: response.data,
+                });
+            } else {
+                reply.status(response.status).send({
+                    status: 200,
+                    headers: response.headers,
+                    data: '',
+                });
+            }
         } catch (error) {
             // console.error(error);
             if (error.response) {
                 // 服务器返回了非 2xx 状态码
                 reply.status(error.response.status).send({
                     error: error.response.data,
+                    headers: error.response.headers,
                     status: error.response.status,
                 });
             } else {

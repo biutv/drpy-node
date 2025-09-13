@@ -1,7 +1,7 @@
-import req from './req.js';
-import {ENV} from './env.js';
-import COOKIE from './cookieManager.js';
-import '../libs_drpy/crypto-js.js';
+import req from '../req.js';
+import {ENV} from '../env.js';
+import COOKIE from '../cookieManager.js';
+import CryptoJS from "crypto-js";
 import {join} from 'path';
 import fs from 'fs';
 import {PassThrough} from 'stream';

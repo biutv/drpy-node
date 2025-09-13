@@ -1,10 +1,10 @@
-import'../libs_drpy/jsencrypt.js'
-import {ENV} from "./env.js";
+import {ENV} from "../env.js";
 import axios from "axios";
-import qs from "qs"
+import qs from "qs";
+import '../../libs_drpy/jsencrypt.js';
 
 
-class CloudDrive{
+class CloudDrive {
     constructor() {
         this.regex = /https:\/\/cloud\.189\.cn\/web\/share\?code=([^&]+)/;//https://cloud.189.cn/web/share?code=qI3aMjqYRrqa
         this.config = {
@@ -19,7 +19,7 @@ class CloudDrive{
             'Accept-Encoding': 'gzip, deflate',
         };
         this.api = 'https://cloud.189.cn/api',
-        this.shareCode = '';
+            this.shareCode = '';
         this.accessCode = '';
         this.shareId = '';
         this.shareMode = '';
@@ -35,22 +35,22 @@ class CloudDrive{
         if (this.password) {
             console.log('天翼密码获取成功：' + this.password)
         }
-        if(this.cookie){
+        if (this.cookie) {
             console.log('天翼cookie获取成功' + this.cookie)
-        }else {
+        } else {
             ENV.set('cloud_cookie', await this.login(this.account, this.password))
         }
     }
 
-    get account(){
+    get account() {
         return ENV.get('cloud_account')
     }
 
-    get password(){
+    get password() {
         return ENV.get('cloud_password')
     }
 
-    get cookie(){
+    get cookie() {
         return ENV.get('cloud_cookie')
     }
 
@@ -67,8 +67,8 @@ class CloudDrive{
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/76.0',
                 'Referer': 'https://open.e.189.cn/', Lt, Reqid,
             };
-            let data = { version: '2.0', appKey: 'cloud' };
-            resp = await axios.post('https://open.e.189.cn/api/logbox/oauth2/appConf.do', qs.stringify(data), { headers: tHeaders });
+            let data = {version: '2.0', appKey: 'cloud'};
+            resp = await axios.post('https://open.e.189.cn/api/logbox/oauth2/appConf.do', qs.stringify(data), {headers: tHeaders});
             let returnUrl = resp.data.data.returnUrl;
             let paramId = resp.data.data.paramId;
             const keyData = `-----BEGIN PUBLIC KEY-----\n${pubKey}\n-----END PUBLIC KEY-----`;
@@ -92,13 +92,20 @@ class CloudDrive{
                 userName: `{NRP}${enUname}`,
                 password: `{NRP}${enPasswd}`,
             };
-            resp = await axios.post('https://open.e.189.cn/api/logbox/oauth2/loginSubmit.do', qs.stringify(data), { headers: tHeaders, validateStatus: null });
+            resp = await axios.post('https://open.e.189.cn/api/logbox/oauth2/loginSubmit.do', qs.stringify(data), {
+                headers: tHeaders,
+                validateStatus: null
+            });
             if (resp.data.toUrl) {
                 let cookies = resp.headers['set-cookie'].map(it => it.split(';')[0]).join(';');
-                resp = await axios.get(resp.data.toUrl, { headers: { ...this.headers, Cookie: cookies }, maxRedirects: 0, validateStatus: null });
+                resp = await axios.get(resp.data.toUrl, {
+                    headers: {...this.headers, Cookie: cookies},
+                    maxRedirects: 0,
+                    validateStatus: null
+                });
                 cookies += '; ' + resp.headers['set-cookie'].map(it => it.split(';')[0]).join(';');
                 ENV.set('cloud_cookie', cookies)
-            }else {
+            } else {
                 console.error('Error during login:', resp.data);
             }
         } catch (error) {
@@ -106,7 +113,7 @@ class CloudDrive{
         }
     }
 
-    async getShareID(url,accessCode){
+    async getShareID(url, accessCode) {
         const matches = this.regex.exec(url);
         if (matches && matches[1]) {
             this.shareCode = matches[1];
@@ -118,18 +125,18 @@ class CloudDrive{
             const accessCodeMatch = this.shareCode.match(/访问码：([a-zA-Z0-9]+)/);
             this.accessCode = accessCodeMatch ? accessCodeMatch[1] : '';
         }
-        if(accessCode){
+        if (accessCode) {
             this.accessCode = accessCode
         }
     }
 
-    async getShareData(shareUrl,accessCode){
+    async getShareData(shareUrl, accessCode) {
         let file = {}
         let fileData = []
-        let fileId = await this.getShareInfo(shareUrl,accessCode)
-        if (fileId){
+        let fileId = await this.getShareInfo(shareUrl, accessCode)
+        if (fileId) {
             let fileList = await this.getShareList(fileId);
-            if(fileList && Array.isArray(fileList)){
+            if (fileList && Array.isArray(fileList)) {
                 await Promise.all(fileList.map(async (item) => {
                     if (!(item.name in file)) {
                         file[item.name] = [];
@@ -151,7 +158,7 @@ class CloudDrive{
                         file[item.name].push(...fileData);
                     }
                 }));
-            }else {
+            } else {
                 file['root'] = await this.getShareFile(fileId)
             }
         }
@@ -176,15 +183,15 @@ class CloudDrive{
         return match ? parseInt(match[1], 10) : null;
     }
 
-    async getShareInfo(shareUrl,accessCode) {
-        if (shareUrl.startsWith('http')){
-            await this.getShareID(shareUrl,accessCode);
-        }else {
+    async getShareInfo(shareUrl, accessCode) {
+        if (shareUrl.startsWith('http')) {
+            await this.getShareID(shareUrl, accessCode);
+        } else {
             this.shareCode = shareUrl;
         }
         try {
-            if(accessCode){
-                let check = await axios.get(`${this.api}/open/share/checkAccessCode.action?shareCode=${this.shareCode}&accessCode=${this.accessCode}`,{
+            if (accessCode) {
+                let check = await axios.get(`${this.api}/open/share/checkAccessCode.action?shareCode=${this.shareCode}&accessCode=${this.accessCode}`, {
                     headers: {
                         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                         'accept': 'application/json;charset=UTF-8',
@@ -192,7 +199,7 @@ class CloudDrive{
                         'accept-language': 'zh-CN,zh;q=0.9',
                     }
                 })
-                if(check.status === 200){
+                if (check.status === 200) {
                     this.shareId = check.data.shareId;
                 }
                 let resp = await axios.get(`${this.api}/open/share/getShareInfoByCodeV2.action?key=noCache&shareCode=${this.shareCode}`,
@@ -206,9 +213,9 @@ class CloudDrive{
                     });
                 let fileId = resp.data.fileId;
                 this.shareMode = resp.data.shareMode;
-                this.isFolder  = resp.data.isFolder;
+                this.isFolder = resp.data.isFolder;
                 return fileId;
-            }else {
+            } else {
                 let resp = await axios.get(`${this.api}/open/share/getShareInfoByCodeV2.action?key=noCache&shareCode=${this.shareCode}`,
                     {
                         headers: {
@@ -221,7 +228,7 @@ class CloudDrive{
                 let fileId = resp.data.fileId;
                 this.shareId = resp.data.shareId;
                 this.shareMode = resp.data.shareMode;
-                this.isFolder  = resp.data.isFolder;
+                this.isFolder = resp.data.isFolder;
                 return fileId;
             }
 
@@ -231,7 +238,7 @@ class CloudDrive{
     }
 
     async getShareList(fileId) {
-        try{
+        try {
             let videos = []
             const headers = new Headers();
             headers.append('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
@@ -241,16 +248,16 @@ class CloudDrive{
                 method: 'GET',
                 headers: headers
             };
-            let resp = await _fetch(`${this.api}/open/share/listShareDir.action?key=noCache&pageNum=1&pageSize=120&fileId=${fileId}&shareDirFileId=${fileId}&isFolder=${this.isFolder}&shareId=${this.shareId}&shareMode=${this.shareMode}&iconOption=5&orderBy=filename&descending=false&accessCode=${this.accessCode}&noCache=${Math.random()}`,options)
+            let resp = await _fetch(`${this.api}/open/share/listShareDir.action?key=noCache&pageNum=1&pageSize=120&fileId=${fileId}&shareDirFileId=${fileId}&isFolder=${this.isFolder}&shareId=${this.shareId}&shareMode=${this.shareMode}&iconOption=5&orderBy=filename&descending=false&accessCode=${this.accessCode}&noCache=${Math.random()}`, options)
             let json = JsonBig.parse(await resp.text());
             const data = json?.fileListAO;
             let folderList = data?.folderList
-            if(!folderList){
+            if (!folderList) {
                 return null
             }
             let names = folderList.map(item => item.name)
             let ids = folderList.map(item => item.id);
-            if(folderList && folderList.length>0){
+            if (folderList && folderList.length > 0) {
                 names.forEach((name, index) => {
                     videos.push({
                         name: name,
@@ -262,12 +269,12 @@ class CloudDrive{
                 result = result.filter(item => item !== undefined && item !== null);
                 return [...videos, ...result.flat()];
             }
-        }catch (e) {
+        } catch (e) {
             console.log(e)
         }
     }
 
-    async getShareFile(fileId){
+    async getShareFile(fileId) {
         try {
             const headers = new Headers();
             headers.append('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
@@ -277,12 +284,12 @@ class CloudDrive{
                 method: 'GET',
                 headers: headers
             };
-            let resp = await _fetch(`${this.api}/open/share/listShareDir.action?key=noCache&pageNum=1&pageSize=120&fileId=${fileId}&shareDirFileId=${fileId}&isFolder=${this.isFolder}&shareId=${this.shareId}&shareMode=${this.shareMode}&iconOption=5&orderBy=filename&descending=false&accessCode=${this.accessCode}&noCache=${Math.random()}`,options)
+            let resp = await _fetch(`${this.api}/open/share/listShareDir.action?key=noCache&pageNum=1&pageSize=120&fileId=${fileId}&shareDirFileId=${fileId}&isFolder=${this.isFolder}&shareId=${this.shareId}&shareMode=${this.shareMode}&iconOption=5&orderBy=filename&descending=false&accessCode=${this.accessCode}&noCache=${Math.random()}`, options)
             let json = JsonBig.parse(await resp.text());
             let videos = []
             const data = json?.fileListAO;
             let fileList = data?.fileList
-            if(!fileList){
+            if (!fileList) {
                 return null
             }
             let filename = fileList.map(item => item.name)
@@ -290,7 +297,7 @@ class CloudDrive{
             let count = data.fileListSize
             if (count >= 0) {
                 for (let i = 0; i < count; i++) {
-                    if(fileList[i].mediaType === 3){
+                    if (fileList[i].mediaType === 3) {
                         videos.push({
                             name: filename[i],
                             fileId: ids[i],
@@ -300,7 +307,7 @@ class CloudDrive{
                 }
             }
             return videos
-        }catch (e){
+        } catch (e) {
             console.log(e)
         }
 
@@ -338,7 +345,7 @@ class CloudDrive{
             return link;
         } catch (error) {
             if (error.response && error.response.status === 400 && this.index < 2) {
-                console.log("获取播放地址失败，错误信息为："+error.response.data)
+                console.log("获取播放地址失败，错误信息为：" + error.response.data)
                 console.log('cookie失效，正在重新获取cookie')
                 ENV.set('cloud_cookie', '');
                 this.index += 1;

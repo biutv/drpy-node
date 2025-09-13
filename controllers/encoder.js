@@ -1,4 +1,4 @@
-import {jsEncoder} from '../libs/drpyS.js';
+import {jsEncoder} from '../libs_drpy/drpyCustom.js';
 import {readFileSync, writeFileSync} from 'fs';
 
 // 检测命令行参数

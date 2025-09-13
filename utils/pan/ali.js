@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import {IOS_UA} from './misc.js';
-import req from './req.js';
-import {ENV} from "./env.js";
+import {IOS_UA} from '../misc.js';
+import req from '../req.js';
+import {ENV} from "../env.js";
 
 const apiUrl = 'https://api.aliyundrive.com';
 // const openApiUrl = 'https://open.aliyundrive.com/adrive/v1.0';

@@ -11,7 +11,7 @@
 
 var rule = {
     title: '樱花动漫',
-    模板:'自动',
+    模板:'mxpro',
     host: 'http://www.yinghuadm.cn',
     url: '/show_fyclass--------fypage---.html',
     searchUrl: '/search_**----------fypage---.html',

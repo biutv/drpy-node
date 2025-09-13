@@ -9,8 +9,7 @@ const RKEY = typeof (key) !== 'undefined' && key ? key : 'drpyS_' + (rule.title 
  * @param ocr_flag 标识此flag是用于请求ocr识别的,自动过滤content-type指定编码
  * @returns {string|string|DocumentFragment|*}
  */
-async function request(url, obj, ocr_flag) {
-    ocr_flag = ocr_flag || false;
+async function request(url, obj = {}, ocr_flag = false) {
     if (typeof (obj) === 'undefined' || !obj || (typeof obj === 'object' && obj !== null && Object.keys(obj).length === 0)) {
         let fetch_params = {};
         let headers = {
@@ -95,8 +94,7 @@ async function request(url, obj, ocr_flag) {
  * @param obj 对象
  * @returns {string|DocumentFragment|*}
  */
-async function post(url, obj) {
-    obj = obj || {};
+async function post(url, obj = {}) {
     obj.method = 'POST';
     return await request(url, obj);
 }
@@ -109,10 +107,8 @@ async function post(url, obj) {
  * @param all_cookie 返回全部cookie.默认false只返回第一个,一般是PhpSessionId
  * @returns {{cookie: string, html: (*|string|DocumentFragment)}}
  */
-async function reqCookie(url, obj, all_cookie) {
-    obj = obj || {};
+async function reqCookie(url, obj = {}, all_cookie = false) {
     obj.withHeaders = true;
-    all_cookie = all_cookie || false;
     let html = await request(url, obj);
     let json = JSON.parse(html);
     let setCk = Object.keys(json).find(it => it.toLowerCase() === 'set-cookie');
@@ -137,7 +133,7 @@ async function reqCookie(url, obj, all_cookie) {
  * @param obj 来源obj
  * @returns {string|DocumentFragment|*}
  */
-async function checkHtml(html, url, obj) {
+async function checkHtml(html, url, obj = {}) {
     if (/\?btwaf=/.test(html)) {
         let btwaf = html.match(/btwaf(.*?)"/)[1];
         url = url.split('#')[0] + '?btwaf' + btwaf;
@@ -153,7 +149,7 @@ async function checkHtml(html, url, obj) {
  * @param obj 请求参数
  * @returns {string|DocumentFragment}
  */
-async function getCode(url, obj) {
+async function getCode(url, obj = {}) {
     let html = await request(url, obj);
     html = await checkHtml(html, url, obj);
     return html

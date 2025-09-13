@@ -32,7 +32,6 @@ const pyDir = path.join(__dirname, 'spider/py');
 const catDir = path.join(__dirname, 'spider/catvod');
 const catLibDir = path.join(__dirname, 'spider/catLib');
 const xbpqDir = path.join(__dirname, 'spider/xbpq');
-const viewsDir = path.join(__dirname, 'views');
 const configDir = path.join(__dirname, 'config');
 
 const pluginProcs = startAllPlugins(__dirname);
@@ -173,7 +172,6 @@ registerRoutes(fastify, {
     xbpqDir,
     PORT,
     MAX_TEXT_SIZE,
-    viewsDir,
     configDir,
     indexFilePath: path.join(__dirname, 'index.json'),
     customFilePath: path.join(__dirname, 'custom.json'),

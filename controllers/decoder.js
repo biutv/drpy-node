@@ -1,4 +1,4 @@
-import {getOriginalJs, jsDecoder} from '../libs/drpyS.js';
+import {getOriginalJs, jsDecoder} from '../libs_drpy/drpyCustom.js';
 import {readFileSync, writeFileSync, existsSync} from 'fs';
 import path from "path";
 
