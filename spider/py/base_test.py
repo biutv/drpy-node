@@ -266,6 +266,16 @@ class TestDemoFunctions(unittest.TestCase):
             "versionCode": "20100",
             "UMENG_CHANNEL": "zhuan"
         }
+        self.functionality = self._test_script_functionality(script_path, ext_dict)
+
+    def test_appyqk_script_1(self):
+        """测试AppYqk.py脚本，使用一起看配置"""
+        script_path = './AppYqk.py'
+        ext_dict = {
+            "host": "https://gapi0320.3njzmrx1.com/config.json,https://gapi0320.lq0okex8.com/config.json,https://gapi0320.zabqs8xp.com/config.json,https://yappconfig-20250628-1318635097.cos.ap-shanghai.myqcloud.com/config.json,https://yconfig-20250628-1360051343.cos.ap-guangzhou.myqcloud.com/config.json",
+            "appId": "d6d520ea90904f1ba680ed6c9c9f9007", "appkey": "70af67d2b6cf47679b397ea4c1886877",
+            "udid": "bfc18c00-c866-46cb-8d7b-121c39b942d4", "bundlerId": "com.flotimingo.ts", "source": "1001_default",
+            "version": "1.3.10", "versionCode": 1104}
         self._test_script_functionality(script_path, ext_dict)
 
     def test_apphs_script_haigou2(self):

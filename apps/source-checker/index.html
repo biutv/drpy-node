@@ -59,8 +59,11 @@
         .result-label{color:var(--muted)}
         .result-status{font-weight:500}
         
-        .progress{width:100%;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;margin:12px 0}
+        .progress-container{display:flex;align-items:center;gap:12px;margin:12px 0}
+        .progress{flex:1;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden}
         .progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),#4f46e5);transition:width 0.3s ease}
+        .progress-text{font-size:12px;color:var(--muted);font-weight:500;min-width:30px;text-align:right}
+        .timer-text{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
         
         .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-bottom:16px}
         .stat-item{text-align:center;padding:12px;background:var(--glass);border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
@@ -156,21 +159,25 @@
                     </div>
                 </div>
                 
-                <div class="progress">
-                    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+                <div class="progress-container">
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
                 </div>
+                <div class="timer-text" id="timerText" style="display:none;"></div>
             </div>
         </div>
     </div>
     
     <div class="card">
-        <h2 style="margin:0 0 12px;font-size:16px">检测结果</h2>
-        <div id="sourceList"></div>
+        <h2 style="margin:0 0 12px;font-size:16px">检测日志</h2>
+        <div class="log" id="logContainer"></div>
     </div>
     
     <div class="card">
-        <h2 style="margin:0 0 12px;font-size:16px">检测日志</h2>
-        <div class="log" id="logContainer"></div>
+        <h2 style="margin:0 0 12px;font-size:16px">检测结果</h2>
+        <div id="sourceList"></div>
     </div>
 </div>
 
@@ -182,6 +189,8 @@ class SourceChecker {
         this.currentIndex = 0;
         this.results = new Map();
         this.currentFilter = 'all'; // 当前筛选状态
+        this.startTime = null;
+        this.timerInterval = null;
         
         this.initElements();
         this.bindEvents();
@@ -206,6 +215,8 @@ class SourceChecker {
         this.sourceList = document.getElementById('sourceList');
         this.logContainer = document.getElementById('logContainer');
         this.progressBar = document.getElementById('progressBar');
+        this.progressText = document.getElementById('progressText');
+        this.timerText = document.getElementById('timerText');
         
         this.totalCount = document.getElementById('totalCount');
         this.successCount = document.getElementById('successCount');
@@ -338,6 +349,7 @@ class SourceChecker {
         
         const progress = total > 0 ? ((success + error) / total) * 100 : 0;
         this.progressBar.style.width = `${progress}%`;
+        this.progressText.textContent = `${Math.round(progress)}%`;
     }
     
     async startCheck() {
@@ -352,6 +364,12 @@ class SourceChecker {
         
         // 隐藏历史报告状态指示器，进入实时检测模式
         this.statusIndicator.classList.add('hidden');
+        
+        // 开始计时
+        this.startTime = Date.now();
+        this.timerText.style.display = 'block';
+        this.timerText.textContent = '检测中，已耗时 0 秒';
+        this.startTimer();
         
         this.startCheckBtn.disabled = true;
         this.stopCheckBtn.disabled = false;
@@ -407,14 +425,36 @@ class SourceChecker {
         }
     }
     
+    startTimer() {
+        this.timerInterval = setInterval(() => {
+            if (this.startTime && this.isChecking) {
+                const elapsed = Math.round((Date.now() - this.startTime) / 1000);
+                this.timerText.textContent = `检测中，已耗时 ${elapsed} 秒`;
+            }
+        }, 1000);
+    }
+    
     stopCheck() {
         this.isChecking = false;
+        
+        // 停止计时
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        
+        // 显示总耗时
+        if (this.startTime) {
+            const totalTime = Math.round((Date.now() - this.startTime) / 1000);
+            this.timerText.textContent = `检测完毕，本轮检测共计耗时 ${totalTime} 秒`;
+            this.log(`检测完毕，本轮检测共计耗时 ${totalTime} 秒`);
+        }
+        
         this.startCheckBtn.disabled = false;
         this.stopCheckBtn.disabled = true;
         this.loadConfigBtn.disabled = false;
         this.exportReportBtn.disabled = this.results.size === 0;
         this.saveReportBtn.disabled = this.results.size === 0;
-        this.log('检测已停止');
     }
     
     async checkSource(source, index) {

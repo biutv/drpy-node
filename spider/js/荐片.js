@@ -29,7 +29,7 @@ var rule = {
         // }
         // HOST = src
         // HOST = 'https://api.ubj83.com'
-        HOST = 'https://ij1men.slsw6.com'
+        HOST = ' https://api.ztcgi.com'
         imghost = `https://${JSON.parse((await req(`${HOST}/api/appAuthConfig`)).content).data.imgDomain}`;
         return HOST
     },

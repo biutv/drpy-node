@@ -16,6 +16,8 @@
 
 const {getRandomFromList} = $.require('./_lib.random.js');
 const {requestHtml} = $.require('./_lib.request.js');
+// const fqweb_host = 'http://fqweb.jsj66.com';
+const fqweb_host = 'http://fanqie.mduge.com';
 
 var rule = {
     类型: '小说',
@@ -24,7 +26,7 @@ var rule = {
     host: 'https://fanqienovel.com/',
     homeUrl: 'https://fanqienovel.com/api/author/book/category_list/v0/',
     url: '/api/author/library/book_list/v0/?page_count=18&page_index=(fypage-1)&gender=1&category_id=fyclass&creation_status=-1&word_count=-1&book_type=-1&sort=0#fyfilter',
-    searchUrl: 'http://fqweb.jsj66.com/search?query=**&page=fypage',
+    searchUrl: fqweb_host + '/search?query=**&page=fypage',
     searchable: 2,
     quickSearch: 0,
     filterable: 1,
@@ -129,7 +131,7 @@ var rule = {
         let list = book_info.chapterListWithVolume.flat();
         let urls = [];
         list.forEach((it, index) => {
-            urls.push(it.title + '$' + it.itemId);
+            urls.push(it.title + '$' + it.itemId + '@' + it.title);
         });
         let vod = {
             vod_id: input,
@@ -171,12 +173,13 @@ var rule = {
     },
     lazy: async function (flag, id, flags) {
         let {input} = this;
-        let title = '小说标题';
+        let title = input.split('@')[1];
+        input = input.split('@')[0];
         let content = '小说内容';
         let content_url = ''; // 正文获取接口
         // content_url = `http://fqweb.jsj66.com/content?item_id=${input}`;
         //   content_url = `https://fanqienovel.com/reader/${input}?enter_from=reader`;
-        content_url = `http://fanqie.mduge.com/content?item_id=${input}`;
+        content_url = `${fqweb_host}/content?item_id=${input}`;
         /*
         log(content_url);
         
@@ -199,7 +202,7 @@ var rule = {
         content = json.content.replace(/\n\n妍󠇕希󠆖󠅽󠇕󠆨󠅼󠄡󠄩󠄠󠄩󠄣󠄣󠄢󠄨󠄨󠄩\n/g, "\n");
         //  print(content)
         let ret = JSON.stringify({
-            // title,
+            title,
             content
         });
         return {parse: 0, url: 'novel://' + ret, js: ''}

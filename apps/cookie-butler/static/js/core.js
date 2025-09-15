@@ -5,6 +5,7 @@ class QRCodeHandler {
     static STATUS_CONFIRMED = "CONFIRMED"; // 已确认
     static STATUS_CANCELED = "CANCELED";   // 已取消
     static STATUS_EXPIRED = "EXPIRED";     // 已过期
+    static STATUS_WAIT = "WAIT";     // 待确认授权
 
     // 平台常量
     static PLATFORM_QUARK = "quark";      // 夸克
@@ -637,6 +638,9 @@ class QRCodeHandler {
             let bduss = ''
             if (resData.channel_v) { // 扫码成功
                 let bddata = JSON.parse(resData.channel_v);
+                if (bddata.status === 1) { // 等待授权
+                    return {status: QRCodeHandler.STATUS_WAIT};
+                }
                 if (bddata.v) {
                     bduss = bddata.v
                 }

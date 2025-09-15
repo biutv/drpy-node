@@ -88,12 +88,12 @@ class Spider(BaseSpider):
         if not self.host: return None
         path = f"{self.host}/api.php/Appfox/vod?ac=detail&wd={key}"
         if self.froms: path += '&from=' + self.froms
-        response = self.fetch(path, headers=self.headers, verify=False).json()
+        response = self.fetch(path, headers=self.headers, verify=False, timeout=7).json()
         self.detail = response['list']
         return response
 
     def detailContent(self, ids):
-        video = next((i for i in self.detail if str(i['vod_id']) == str(ids[0])), None)
+        video = next((i.copy() for i in self.detail if str(i['vod_id']) == str(ids[0])), None)
         if not video:
             detail_response = self.fetch(f"{self.host}/api.php/Appfox/vod?ac=detail&ids={ids[0]}", headers=self.headers,
                                          verify=False).json()
@@ -128,12 +128,12 @@ class Spider(BaseSpider):
                 processed_play_urls.append('#'.join(processed_urls))
         video['vod_play_from'] = '$$$'.join(play_from)
         video['vod_play_url'] = '$$$'.join(processed_play_urls)
-        self.parses.update({p['playerCode']: p['url'] for p in jiexi_data_list if p.get('url', '').startswith('http')})
+        self.parses = {p['playerCode']: p['url'] for p in jiexi_data_list if p.get('url', '').startswith('http')}
         return {'list': [video]}
 
     def playerContent(self, flag, id, vipflags):
         play_from, raw_url = id.split('@', 1)
-        jx, parse, parsed = 1, 0, 0
+        jx, parse, parsed = 0, 0, 0
         url = raw_url
         parses_main = []
         if self.custom_first == 1:
@@ -142,8 +142,9 @@ class Spider(BaseSpider):
         else:
             parses_main.append(self.parses)
             parses_main.append(self.custom_parses)
+        print(parses_main)
         for parses2 in parses_main:
-            if not parsed and not re.match(r'https?://.*\.(m3u8|mp4|flv)', url):
+            if not parsed and not re.match(r'https?://.*\.(m3u8|mp4|flv|mkv)', url):
                 for key, parsers in parses2.items():
                     if play_from not in key:
                         continue
@@ -174,8 +175,8 @@ class Spider(BaseSpider):
                         break
             if parsed or parse:
                 break
-        if re.match(r'https?:\/\/.*\.(m3u8|mp4|flv)', url) or parsed == 1:
-            jx = 0
+        if not (re.match(r'https?:\/\/.*\.(m3u8|mp4|flv|mkv)', url) or parsed == 1):
+            jx = 1
         return {'jx': jx, 'parse': parse, 'url': url, 'header': {
             'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'}}
 

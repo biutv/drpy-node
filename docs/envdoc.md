@@ -32,4 +32,6 @@
 | CLIPBOARD_MAX_READ_SIZE   | 最大可读取问文本体积，默认2mb               | 2048000                                                           |
 | API_TIMEOUT               | 默认API超时时间                      | 20                                                                |
 | API_ACTION_TIMEOUT        | action接口专用超时时间                 | 60                                                                |
+| MAX_TEXT_SIZE             | 设置最大文本大小(剪切板插件)                | 0.1 * 1024 * 1024                                                 |
+| MAX_IMAGE_SIZE            | 设置最大图片大小(图片插件)                 | 0.5 * 1024 * 1024                                                 |
 

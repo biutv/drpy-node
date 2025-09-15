@@ -40,6 +40,7 @@ class BaiduHandler {
     }
 
     getShareData(url) {
+        this.clearSaveDir();
         // 解析分享链接获取分享ID和密码
         try {
             url = decodeURIComponent(url).replace(/\s+/g, '');

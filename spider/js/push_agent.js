@@ -75,7 +75,7 @@ var rule = {
             let list = input.split('@');
             // log(list);
             for (let i = 0; i < list.length; i++) {
-                if (/pan.quark.cn|drive.uc.cn|www.alipan.com|www.aliyundrive.com|cloud.189.cn|yun.139.com|www.123684.com|www.123865.com|www.123912.com|www.123pan.com|www.123pan.cn|www.123592.com/.test(list[i])) {
+                if (/pan.quark.cn|drive.uc.cn|www.alipan.com|www.aliyundrive.com|cloud.189.cn|yun.139.com|www.123684.com|www.123865.com|www.123912.com|www.123pan.com|www.123pan.cn|www.123592.com|pan.baidu.com/.test(list[i])) {
                     if (/pan.quark.cn/.test(list[i])) {
                         playPans.push(list[i]);
                         const shareData = Quark.getShareData(list[i]);
@@ -158,12 +158,20 @@ var rule = {
                             }).join('#'))
                         }
                     }
+                    if (/pan.baidu.com/.test(list[i])) {
+                        let data = await Baidu2.getShareData(list[i])
+                        Object.keys(data).forEach(it => {
+                            playform.push('Baidu-' + it)
+                            const urls = data[it].map(item => item.name + "$" + [item.path, item.uk, item.shareid, item.fsid].join('*')).join('#');
+                            playurls.push(urls);
+                        })
+                    }
                 } else {
                     playform.push('推送');
                     playurls.push("推送" + '$' + list[i])
                 }
             }
-        } else if (/pan.quark.cn|drive.uc.cn|www.alipan.com|www.aliyundrive.com|cloud.189.cn|yun.139.com|www.123684.com|www.123865.com|www.123912.com|www.123pan.com|www.123pan.cn|www.123592.com/.test(input)) {
+        } else if (/pan.quark.cn|drive.uc.cn|www.alipan.com|www.aliyundrive.com|cloud.189.cn|yun.139.com|www.123684.com|www.123865.com|www.123912.com|www.123pan.com|www.123pan.cn|www.123592.com|pan.baidu.com/.test(input)) {
             if (/pan.quark.cn/.test(input)) {
                 playPans.push(input);
                 const shareData = Quark.getShareData(input);
@@ -247,6 +255,14 @@ var rule = {
                     playurls.push(urls);
                 })
             }
+            if (/pan.baidu.com/.test(input)) {
+                let data = await Baidu2.getShareData(input)
+                Object.keys(data).forEach(it => {
+                    playform.push('Baidu-' + it)
+                    const urls = data[it].map(item => item.name + "$" + [item.path, item.uk, item.shareid, item.fsid].join('*')).join('#');
+                    playurls.push(urls);
+                })
+            }
         } else {
             playform.push('推送');
             playurls.push("推送" + '$' + input)
@@ -266,7 +282,7 @@ var rule = {
             } else {
                 return {parse: 1, url: input}
             }
-        } else if (/Quark-|UC-|Ali-|Cloud-|Yun-|Pan123-/.test(flag)) {
+        } else if (/Quark-|UC-|Ali-|Cloud-|Yun-|Pan123-|Baidu-/.test(flag)) {
             const ids = input.split('*');
             const urls = [];
             let UCDownloadingCache = {};
@@ -359,6 +375,33 @@ var rule = {
                 return {
                     parse: 0,
                     url: urls
+                }
+            }
+            if (flag.startsWith('Baidu-')) {
+                log('百度网盘开始解析')
+                //网页转码
+                // let url = await Baidu2.getShareUrl(ids[0],ids[1],ids[2],ids[3])
+                // let urls = []
+                // url.map(it=>{
+                //     urls.push(it.name,it.url + "#isVideo=true##fastPlayMode##threads=10#")
+                // })
+                // return {
+                //     parse:0,
+                //     url:urls,
+                //     header:{
+                //         "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0',
+                //         "Cookie": ENV.get('baidu_cookie'),
+                //     }
+                // }
+                //App原画不转存
+                let url = await Baidu2.getAppShareUrl(ids[0], ids[1], ids[2], ids[3])
+                return {
+                    parse: 0,
+                    url: url + "#isVideo=true##fastPlayMode##threads=10#",
+                    header: {
+                        "User-Agent": 'netdisk;P2SP;2.2.91.136;android-android;',
+                        "Cookie": ENV.get('baidu_cookie'),
+                    }
                 }
             }
         } else {

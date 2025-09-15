@@ -47,6 +47,7 @@ const {
     _checkUCStatus,
     _checkAliStatus,
     _checkBiliStatus,
+    _checkBaiduStatus,
     QRCodeHandler,
     qrcode
 } = $.require('./_lib.scan.js');
@@ -63,6 +64,7 @@ let quick_data = {
     UC: 'https://drive.uc.cn/s/59023f57d3ce4?public=1',
     阿里: 'https://www.alipan.com/s/vgXMcowK8pQ',
     天翼: 'https://cloud.189.cn/web/share?code=INJbU3NbqyUj',
+    百度: 'https://pan.baidu.com/s/1TdbgcwaMG1dK7B5pQ1LbBg?pwd=1234',
     移动1: 'https://yun.139.com/shareweb/#/w/i/0i5CLQ7BpV7Ai',
     移动2: 'https://caiyun.139.com/m/i?2jexC1gcjeN7q',
     移动3: 'https://yun.139.com/shareweb/#/w/i/2i2MoE9ZHn9p1',
@@ -224,11 +226,12 @@ var rule = {
     },
     UCScanCheck: null,
     quarkScanCheck: null,
+    baiduScanCheck: null,
     aliScanCheck: null,
     biliScanCheck: null,
     host: 'http://empty',
-    class_name: '推送&夸克&UC&阿里&天翼&百度&哔哩&系统配置&测试&接口挂载&视频解析',
-    class_url: 'push&quark&uc&ali&cloud&baidu&bili&system&test&apiLink&videoParse',
+    class_name: '推送&夸克&UC&阿里&百度&哔哩&天翼&系统配置&测试&接口挂载&视频解析',
+    class_url: 'push&quark&uc&ali&baidu&bili&cloud&system&test&apiLink&videoParse',
     url: '/fyclass',
 
     预处理: async function (env) {
@@ -345,6 +348,13 @@ var rule = {
             case 'baidu':
                 d.push(genMultiInput('baidu_cookie', '设置百度 cookie', null, images.baidu));
                 d.push(getInput('get_baidu_cookie', '查看百度 cookie', images.baidu));
+                d.push({
+                    vod_id: '百度扫码',
+                    vod_name: '百度扫码',
+                    vod_pic: images.baidu,
+                    vod_remarks: '百度',
+                    vod_tag: 'action'
+                });
                 break;
             case 'bili':
                 d.push(genMultiInput('bili_cookie', '设置哔哩 cookie', null, images.bili));
@@ -463,7 +473,7 @@ var rule = {
         }
     },
     action: async function (action, value) {
-        let {httpUrl, publicUrl} = this;
+        let {httpUrl, imageApi, requestHost, publicUrl} = this;
         if (action === 'set-cookie') {
             return JSON.stringify({
                 action: {
@@ -1021,6 +1031,162 @@ var rule = {
             return;
         }
 
+        if (action === '百度扫码') {
+            if (rule.baiduScanCheck) {
+                log('请等待上个扫码任务完成：' + rule.baiduScanCheck);
+                return '请等待上个扫码任务完成';
+            }
+
+            let requestId = generateUUID();
+            let t3 = new Date().getTime().toString();
+            let t1 = Math.floor(new Date().getTime() / 1000).toString();
+            let call = `tangram_guid_${t3}`;
+            log(`[百度扫码] httpUrl: ${httpUrl} | request_id: ${requestId}`);
+            const res = await axios({
+                url: httpUrl,
+                method: "POST",
+                data: {
+                    url: "https://passport.baidu.com/v2/api/getqrcode",
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.61 Chrome/126.0.6478.61 Not/A)Brand/8  Safari/537.36',
+                        'sec-ch-ua-platform': '"Windows"',
+                        'sec-ch-ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+                        'DNT': '1',
+                        'sec-ch-ua-mobile': '?0',
+                        'Sec-Fetch-Site': 'same-site',
+                        'Sec-Fetch-Mode': 'no-cors',
+                        'Sec-Fetch-Dest': 'script',
+                        'Referer': 'https://pan.baidu.com/',
+                        'Accept-Language': 'zh-CN,zh;q=0.9',
+                    },
+                    params: {
+                        "lp": "pc",
+                        "qrloginfrom": "pc",
+                        "gid": requestId,
+                        // "callback": `tangram_guid_${t3}`,
+                        "apiver": "v3",
+                        "tt": `${t3}`,
+                        "tpl": "netdisk",
+                        "logPage": `traceId%3Apc_loginv5_${t1}%2ClogPage%3Aloginv5`,
+                        "_": `${t3}`
+                    }
+                }
+            });
+            const resData = res.data.data;
+            log('[百度扫码] data:', resData);
+            let qrcodeUrl = 'https://' + resData.imgurl;
+            let channel_id = resData.sign;
+            log('[百度扫码] qrcodeUrl:', qrcodeUrl);
+            const qrCode = await _getQRCode(httpUrl, qrcodeUrl);
+            const imageUploadUrl = imageApi + '/upload';
+            log('[百度扫码] 图片上传接口 imageUploadUrl:', imageUploadUrl);
+            // log('[百度扫码] qrCode:', qrCode);
+            try {
+                const basicHeader = createBasicAuthHeaders();
+                const baiduQrcode = (await axios({
+                    url: httpUrl,
+                    method: "POST",
+                    data: {
+                        url: imageUploadUrl,
+                        method: "POST",
+                        headers: {
+                            ...basicHeader
+                        },
+                        data: {imageId: 'baiduQrcode', base64Data: qrCode}
+                    },
+                })).data.data;
+                log('[百度扫码] baiduQrcode:', baiduQrcode);
+                qrcodeUrl = requestHost + baiduQrcode.data.imageUrl + `?t=${requestId}`;
+                log('[百度扫码] ds代理 qrcodeUrl:', qrcodeUrl);
+            } catch (e) {
+                log('[百度扫码] error:', e.message);
+            }
+            qrcode.platformStates[QRCodeHandler.PLATFORM_BAIDU] = {
+                t1: t1,
+                t3: t3,
+                channel_id: channel_id,
+                request_id: requestId,
+            };
+            return JSON.stringify({
+                action: {
+                    actionId: 'baiduScanCookie',
+                    id: 'baiduScanCookie',
+                    canceledOnTouchOutside: false,
+                    type: 'input',
+                    title: '百度扫码Cookie',
+                    msg: '请使用百度APP扫码登录获取',
+                    width: 500,
+                    button: 1,
+                    timeout: 30,
+                    imageUrl: qrcodeUrl,
+                    imageHeight: 400,
+                    // qrcode: qrcodeUrl,
+                    // isQrcode: 1, // 告诉壳子我已经是二维码了，你不要再去生成了(图片链接或者base64文本)！！！
+                    qrcodeSize: '400',
+                    initAction: 'baiduScanCheck',
+                    initValue: requestId,
+                    cancelAction: 'baiduScanCancel',
+                    cancelValue: requestId,
+                    httpTimeout: 60,
+                }
+            });
+        }
+        if (action === 'baiduScanCheck') {
+            log('baiduScanCheck value:', value);
+            rule.baiduScanCheck = value;
+            const state = qrcode.platformStates[QRCodeHandler.PLATFORM_BAIDU];
+            if (state) { // 生成二维码的时候设置了扫码id
+                setTimeout(() => {
+                    if (rule.baiduScanCheck) {
+                        rule.baiduScanCheck = null;
+                    }
+                }, 60000);
+                for (let i = 1; i <= 5; i++) {
+                    if (!rule.baiduScanCheck) {
+                        log('退出扫码检测：' + value);
+                        return '扫码取消';
+                    }
+                    log('[baiduScanCheck]等待用户扫码，第' + i + '次');
+                    const scanResult = await _checkBaiduStatus(state, httpUrl);
+                    log('scanResult:', scanResult);
+                    if (scanResult.status === 'CONFIRMED') {
+                        let cookie = scanResult.cookie;
+                        log('扫码成功获取到cookie:', cookie);
+                        parseSaveCookie('baidu_cookie', cookie);
+                        rule.baiduScanCheck = null;
+                        qrcode.platformStates[QRCodeHandler.PLATFORM_BAIDU] = null;
+                        return '扫描完成，已成功获取cookie并入库';
+                    } else if (scanResult.status === 'EXPIRED') {
+                        log('已过期')
+                        break;
+                    } else {
+                        await sleep(1000);
+                    }
+                }
+            }
+            rule.baiduScanCheck = null;
+            qrcode.platformStates[QRCodeHandler.PLATFORM_BAIDU] = null;
+            return JSON.stringify({
+                action: {
+                    actionId: 'baiduCookieError',
+                    id: 'cookie',
+                    type: 'input',
+                    title: 'baiduCookie',
+                    width: 300,
+                    button: false,
+                    imageUrl: 'https://preview.qiantucdn.com/agency/dp/dp_thumbs/1014014/15854479/staff_1024.jpg!w1024_new_small_1',
+                    imageHeight: 200,
+                    msg: '扫码超时,请重进'
+                }
+            });
+        }
+        if (action === 'baiduScanCancel') {
+            log('用户取消扫码：' + value);
+            rule.baiduScanCheck = null;
+            qrcode.platformStates[QRCodeHandler.PLATFORM_BAIDU] = null;
+            return;
+        }
+
 
         if (action === '推送视频播放') {
             try {
@@ -1307,4 +1473,33 @@ function parseSaveCookie(key, value) {
     }
     // 调用 ENV.set 设置环境变量
     ENV.set(key, cookie_str);
+}
+
+
+function arrayBufferToBase64(buffer) {
+    // 将 ArrayBuffer 转为 Uint8Array（字节数组）
+    const bytes = new Uint8Array(buffer);
+    // 将每个字节转为字符，拼接成字符串（需确保二进制安全）
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    // 用 btoa 将二进制字符串转为 Base64（btoa 支持单字节字符串）
+    return btoa(binary);
+}
+
+async function _getQRCode(httpUrl, url) {
+    let arrayBufferData = await axios({
+        url: httpUrl,
+        method: "POST",
+        data: {
+            url: url,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; ) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.61 Chrome/126.0.6478.61 Not/A)Brand/8  Safari/537.36',
+            },
+            responseType: 'arraybuffer'
+        }
+    });
+    let base64Images = arrayBufferToBase64(arrayBufferData.data.data.data)
+    return 'data:image/png;base64,' + base64Images;
 }

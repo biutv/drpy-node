@@ -13,6 +13,7 @@ import clipboardPusherController from './clipboard-pusher.js';
 // import taskController from './tasker.js';
 import cronTaskerController from './cron-tasker.js';
 import sourceCheckerController from './source-checker.js';
+import imageStoreController from './image-store.js';
 
 export const registerRoutes = (fastify, options) => {
     fastify.register(staticController, options);
@@ -30,4 +31,5 @@ export const registerRoutes = (fastify, options) => {
     // fastify.register(taskController, options);
     fastify.register(cronTaskerController, options);
     fastify.register(sourceCheckerController, options);
+    fastify.register(imageStoreController, options);
 };

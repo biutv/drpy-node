@@ -1,10 +1,10 @@
 {
-  "exportTime": "2025-09-13T00:16:51.503Z",
+  "exportTime": "2025-09-14T01:18:03.895Z",
   "configUrl": "http://localhost:5757/config/1?sub=all&healthy=0&pwd=dzyyds",
-  "totalSources": 194,
+  "totalSources": 196,
   "summary": {
-    "success": 139,
-    "error": 55,
+    "success": 137,
+    "error": 59,
     "pending": 0
   },
   "sources": [
@@ -20,22 +20,37 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%AE%BE%E7%BD%AE%E4%B8%AD%E5%BF%83?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.895Z",
       "manuallyMarked": false
     },
     {
-      "key": "drpyS_大象影视",
-      "name": "大象影视(DS)",
-      "api": "http://localhost:5757/api/大象影视?pwd=dzyyds",
+      "key": "drpyS_央视大全[官]",
+      "name": "央视大全[官](DS)",
+      "api": "http://localhost:5757/api/央视大全[官]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E5%A4%AE%E8%A7%86%E5%A4%A7%E5%85%A8[%E5%AE%98]?pwd=dzyyds"
+      },
+      "checkTime": "2025-09-14T01:18:03.895Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_腾云驾雾[官]",
+      "name": "腾云驾雾[官](DS)",
+      "api": "http://localhost:5757/api/腾云驾雾[官]?pwd=dzyyds",
       "type": 4,
       "searchable": 2,
       "lang": "ds",
       "status": "success",
       "message": "推荐接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/%E5%A4%A7%E8%B1%A1%E5%BD%B1%E8%A7%86?pwd=dzyyds"
+        "home": "http://localhost:5757/api/%E8%85%BE%E4%BA%91%E9%A9%BE%E9%9B%BE[%E5%AE%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.895Z",
       "manuallyMarked": false
     },
     {
@@ -51,67 +66,25 @@
         "home": "http://localhost:5757/api/%E7%95%AA%E8%8C%84%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%95%AA%E8%8C%84%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.895Z",
       "manuallyMarked": false
     },
     {
-      "key": "drpyS_央视大全[官]",
-      "name": "央视大全[官](DS)",
-      "api": "http://localhost:5757/api/央视大全[官]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E5%A4%AE%E8%A7%86%E5%A4%A7%E5%85%A8[%E5%AE%98]?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_腾云驾雾[官]",
-      "name": "腾云驾雾[官](DS)",
-      "api": "http://localhost:5757/api/腾云驾雾[官]?pwd=dzyyds",
+      "key": "drpyS_大象影视",
+      "name": "大象影视(DS)",
+      "api": "http://localhost:5757/api/大象影视?pwd=dzyyds",
       "type": 4,
       "searchable": 2,
       "lang": "ds",
       "status": "success",
-      "message": "推荐接口正常",
+      "message": "4/4 接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/%E8%85%BE%E4%BA%91%E9%A9%BE%E9%9B%BE[%E5%AE%98]?pwd=dzyyds"
+        "home": "http://localhost:5757/api/%E5%A4%A7%E8%B1%A1%E5%BD%B1%E8%A7%86?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E5%A4%A7%E8%B1%A1%E5%BD%B1%E8%A7%86?pwd=dzyyds&ac=list&t=1&pg=1",
+        "search": "http://localhost:5757/api/%E5%A4%A7%E8%B1%A1%E5%BD%B1%E8%A7%86?pwd=dzyyds&ac=list&wd=%E6%B5%8B%E8%AF%95",
+        "detail": "http://localhost:5757/api/%E5%A4%A7%E8%B1%A1%E5%BD%B1%E8%A7%86?pwd=dzyyds&ac=detail&ids=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_光速[优]",
-      "name": "光速[优](DS)",
-      "api": "http://localhost:5757/api/光速[优]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E5%85%89%E9%80%9F[%E4%BC%98]?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_粤漫之家[优]",
-      "name": "粤漫之家[优](DS)",
-      "api": "http://localhost:5757/api/粤漫之家[优]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 0,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E7%B2%A4%E6%BC%AB%E4%B9%8B%E5%AE%B6[%E4%BC%98]?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.895Z",
       "manuallyMarked": false
     },
     {
@@ -126,7 +99,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E6%A8%B1%E8%8A%B1%E5%8A%A8%E6%BC%AB[%E4%BC%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.895Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_粤漫之家[优]",
+      "name": "粤漫之家[优](DS)",
+      "api": "http://localhost:5757/api/粤漫之家[优]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 0,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E7%B2%A4%E6%BC%AB%E4%B9%8B%E5%AE%B6[%E4%BC%98]?pwd=dzyyds"
+      },
+      "checkTime": "2025-09-14T01:18:03.895Z",
       "manuallyMarked": false
     },
     {
@@ -141,22 +129,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/PTT[%E4%BC%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_hdmoli[盘]",
-      "name": "hdmoli[盘](DS)",
-      "api": "http://localhost:5757/api/hdmoli[盘]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/hdmoli[%E7%9B%98]?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -171,23 +144,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%82%BB%E6%A0%B7[%E7%9B%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
-      "key": "drpyS_团长资源[盘]",
-      "name": "团长资源[盘](DS)",
-      "api": "http://localhost:5757/api/团长资源[盘]?pwd=dzyyds",
+      "key": "drpyS_hdmoli[盘]",
+      "name": "hdmoli[盘](DS)",
+      "api": "http://localhost:5757/api/hdmoli[盘]?pwd=dzyyds",
       "type": 4,
-      "searchable": 1,
+      "searchable": 2,
       "lang": "ds",
       "status": "success",
-      "message": "分类接口正常",
+      "message": "推荐接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/%E5%9B%A2%E9%95%BF%E8%B5%84%E6%BA%90[%E7%9B%98]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/%E5%9B%A2%E9%95%BF%E8%B5%84%E6%BA%90[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
+        "home": "http://localhost:5757/api/hdmoli[%E7%9B%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -202,7 +174,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%B0%8F%E7%B1%B3%E7%9B%98%E6%90%9C[%E7%9B%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -217,7 +189,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%A4%9A%E5%A4%9A[%E7%9B%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -233,39 +205,7 @@
         "home": "http://localhost:5757/api/%E6%AC%A7%E5%93%A5[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E6%AC%A7%E5%93%A5[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_玩偶哥哥[盘]",
-      "name": "玩偶哥哥[盘](DS)",
-      "api": "http://localhost:5757/api/玩偶哥哥[盘]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "分类接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5[%E7%9B%98]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_玩偶哥哥DM[盘]",
-      "name": "玩偶哥哥DM[盘](DS)",
-      "api": "http://localhost:5757/api/玩偶哥哥DM[盘]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "分类接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5DM[%E7%9B%98]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5DM[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -281,7 +221,39 @@
         "home": "http://localhost:5757/api/%E8%87%B3%E8%87%BB[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E8%87%B3%E8%87%BB[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_玩偶哥哥[盘]",
+      "name": "玩偶哥哥[盘](DS)",
+      "api": "http://localhost:5757/api/玩偶哥哥[盘]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "success",
+      "message": "分类接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5[%E7%9B%98]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_玩偶哥哥DM[盘]",
+      "name": "玩偶哥哥DM[盘](DS)",
+      "api": "http://localhost:5757/api/玩偶哥哥DM[盘]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "success",
+      "message": "分类接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5DM[%E7%9B%98]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E7%8E%A9%E5%81%B6%E5%93%A5%E5%93%A5DM[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -296,7 +268,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/360%E5%BD%B1%E8%A7%86[%E5%AE%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -312,7 +284,7 @@
         "home": "http://localhost:5757/api/%E8%B6%A3%E7%9B%98%E7%A4%BE[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E8%B6%A3%E7%9B%98%E7%A4%BE[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -327,7 +299,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%9C%A1%E7%AC%94[%E7%9B%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -343,7 +315,7 @@
         "home": "http://localhost:5757/api/%E9%9B%B7%E9%B2%B8%E5%B0%8F%E7%AB%99[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E9%9B%B7%E9%B2%B8%E5%B0%8F%E7%AB%99[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -359,7 +331,7 @@
         "home": "http://localhost:5757/api/%E5%93%94%E5%93%A9%E6%94%B6%E8%97%8F[%E5%AE%98]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK59N2fZier8eSAQA1H95AxkAAAA%3D",
         "category": "http://localhost:5757/api/%E5%93%94%E5%93%A9%E6%94%B6%E8%97%8F[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK59N2fZier8eSAQA1H95AxkAAAA%3D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -375,7 +347,7 @@
         "home": "http://localhost:5757/api/%E4%BC%98%E9%85%B7[%E5%AE%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E4%BC%98%E9%85%B7[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -391,7 +363,7 @@
         "home": "http://localhost:5757/api/%E5%A5%87%E7%8F%8D%E5%BC%82%E5%85%BD[%E5%AE%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%A5%87%E7%8F%8D%E5%BC%82%E5%85%BD[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -406,22 +378,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%93%94%E5%93%A9%E5%BD%B1%E8%A7%86[%E5%AE%98]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_哔哩大杂烩[官]",
-      "name": "哔哩大杂烩[官](DS)",
-      "api": "http://localhost:5757/api/我的哔哩[官]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E6%88%91%E7%9A%84%E5%93%94%E5%93%A9[%E5%AE%98]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK58uWf5sbtPz5pV6IEEAolZcGBwAAAA%3D"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -436,22 +393,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E6%88%91%E7%9A%84%E5%93%94%E5%93%A9[%E5%AE%98]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK59umPi0Zb8eSAQAOsH08xkAAAA%3D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_哔哩教育[官]",
-      "name": "哔哩教育[官](DS)",
-      "api": "http://localhost:5757/api/我的哔哩[官]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E6%88%91%E7%9A%84%E5%93%94%E5%93%A9[%E5%AE%98]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK59NnfmiaZMeSAQAgv7xPBkAAAA%3D"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -466,7 +408,55 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E6%88%91%E7%9A%84%E5%93%94%E5%93%A9[%E5%AE%98]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK58uWf60dYUeSAQAZ2A%2BOBkAAAA%3D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_哔哩教育[官]",
+      "name": "哔哩教育[官](DS)",
+      "api": "http://localhost:5757/api/我的哔哩[官]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E6%88%91%E7%9A%84%E5%93%94%E5%93%A9[%E5%AE%98]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK59NnfmiaZMeSAQAgv7xPBkAAAA%3D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_哔哩大杂烩[官]",
+      "name": "哔哩大杂烩[官](DS)",
+      "api": "http://localhost:5757/api/我的哔哩[官]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E6%88%91%E7%9A%84%E5%93%94%E5%93%A9[%E5%AE%98]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTfzp5ytPJK58uWf5sbtPz5pV6IEEAolZcGBwAAAA%3D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_菜狗[官]",
+      "name": "菜狗[官](DS)",
+      "api": "http://localhost:5757/api/菜狗[官]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "success",
+      "message": "3/4 接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E8%8F%9C%E7%8B%97[%E5%AE%98]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E8%8F%9C%E7%8B%97[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1",
+        "search": "http://localhost:5757/api/%E8%8F%9C%E7%8B%97[%E5%AE%98]?pwd=dzyyds&ac=list&wd=%E6%B5%8B%E8%AF%95",
+        "detail": "http://localhost:5757/api/%E8%8F%9C%E7%8B%97[%E5%AE%98]?pwd=dzyyds&ac=detail&ids=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -481,7 +471,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/16wMV[%E5%90%AC]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9rb%2BLR17ZMd7c%2FW9jybvUmvpKIEABrNdgcbAAAA"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -496,23 +486,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fappcms.4kdq.icu%22%2C%22key%22%3A%22R6FVRw4jsy4Hsitj%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_菜狗[官]",
-      "name": "菜狗[官](DS)",
-      "api": "http://localhost:5757/api/菜狗[官]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "success",
-      "message": "分类接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E8%8F%9C%E7%8B%97[%E5%AE%98]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/%E8%8F%9C%E7%8B%97[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -528,7 +502,7 @@
         "home": "http://localhost:5757/api/%E7%99%BE%E5%BF%99%E6%97%A0%E6%9E%9C[%E5%AE%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%99%BE%E5%BF%99%E6%97%A0%E6%9E%9C[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -543,7 +517,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppSk?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fdmsk.oss-rg-china-mainland.aliyuncs.com%2Fdmapp%2Fdmapi.txt%22%2C%22key%22%3A%22ygcnbcobcegtgigg%22%2C%22iv%22%3A%224058263969143708%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -559,7 +533,7 @@
         "home": "http://localhost:5757/api/30wMV[%E5%90%AC]?pwd=dzyyds",
         "category": "http://localhost:5757/api/30wMV[%E5%90%AC]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -574,7 +548,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppToV5?do=py&pwd=dzyyds&extend=http%3A%2F%2F111.173.114.61%3A8762"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -589,7 +563,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Ftengxunyunaliyun.oss-cn-shanghai.aliyuncs.com%2Ftengxunyun.txt%22%2C%22datakey%22%3A%22n3l2tx5jdkp9s2c8%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -604,7 +578,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppMuou?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fmuouapp.oss-cn-hangzhou.aliyuncs.com%2FMUOUAPP%2F764119293.txt%22%2C%22version%22%3A%224.2.0%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -620,7 +594,7 @@
         "home": "http://localhost:5757/api/%E5%95%8A%E5%93%88DJ[%E5%90%AC]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%95%8A%E5%93%88DJ[%E5%90%AC]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -635,7 +609,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E7%99%BE%E5%BA%A6%E7%9B%98[%E6%90%9C]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -650,7 +624,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%B4%9D%E4%B9%90%E8%99%8E[%E5%84%BF]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -665,7 +639,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%8D%9A%E7%9C%8B%E5%90%AC%E4%B9%A6[%E5%90%AC]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -680,37 +654,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E6%92%AD%E5%AE%A2[%E5%90%AC]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_采王成人[密]",
-      "name": "采王成人[密](DS)",
-      "api": "http://localhost:5757/api/采集之王[合]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ2W%2FTT9W2xL%2BfOfNbQqAcSVjFUAQAd5YgpIQAAAA%3D%3D"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_采王zy[密]",
-      "name": "采王zy[密](DS)",
-      "api": "http://localhost:5757/api/采集之王[合]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ2W3RVZezLuTOfNTTqgURVDAGu%2FMCKHwAAAA%3D%3D"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -725,22 +669,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ2m5GBkcnLuTOfNTTqgURVDFUAlKCu7yAAAAA%3D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_采王2025",
-      "name": "采王2025(DS)",
-      "api": "http://localhost:5757/api/采集之王[合]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ2m5GBkenLuTOfNTTqgURVDFUAfHtVViAAAAA%3D"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -755,7 +684,52 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ228u5M581NOqBRFQMAcGPDNobAAAA"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_采王2025",
+      "name": "采王2025(DS)",
+      "api": "http://localhost:5757/api/采集之王[合]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ2m5GBkenLuTOfNTTqgURVDFUAfHtVViAAAAA%3D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_采王zy[密]",
+      "name": "采王zy[密](DS)",
+      "api": "http://localhost:5757/api/采集之王[合]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ2W3RVZezLuTOfNTTqgURVDAGu%2FMCKHwAAAA%3D%3D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_采王成人[密]",
+      "name": "采王成人[密](DS)",
+      "api": "http://localhost:5757/api/采集之王[合]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E9%87%87%E9%9B%86%E4%B9%8B%E7%8E%8B[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9ne%2FnJ2W%2FTT9W2xL%2BfOfNbQqAcSVjFUAQAd5YgpIQAAAA%3D%3D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -770,7 +744,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppToV5?do=py&pwd=dzyyds&extend=http%3A%2F%2F118.89.203.120%3A8366"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -785,7 +759,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fnewappcms.cs4k.top%22%2C%22key%22%3A%22Z98KXaLtO2wC1Pte%22%2C%22path%22%3A%22%2Fapi.php%2Fqijiappapi%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -800,7 +774,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%8D%89%E6%A6%B4%E7%A4%BE%E5%8C%BA[%E5%AF%86]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -815,22 +789,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppV2%C2%B2?do=py&pwd=dzyyds&extend=https%3A%2F%2Fdmz8k4.wiki"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_动作交互",
-      "name": "动作交互(DS)",
-      "api": "http://localhost:5757/api/动作交互?pwd=dzyyds",
-      "type": 4,
-      "searchable": 0,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E5%8A%A8%E4%BD%9C%E4%BA%A4%E4%BA%92?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -845,7 +804,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E7%82%B9%E6%AD%8C%E6%AC%A2%E5%94%B1[B]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTf9rb%2BLR17ZMd7c%2FW9jybvUmvpKIEABrNdgcbAAAA"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -860,7 +819,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%8A%A8%E4%BD%9C%E4%BB%A3%E7%90%86%E6%B5%8B%E8%AF%95?do=py&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_动作交互",
+      "name": "动作交互(DS)",
+      "api": "http://localhost:5757/api/动作交互?pwd=dzyyds",
+      "type": 4,
+      "searchable": 0,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E5%8A%A8%E4%BD%9C%E4%BA%A4%E4%BA%92?pwd=dzyyds"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -875,7 +849,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppToV5?do=py&pwd=dzyyds&extend=http%3A%2F%2F118.89.203.120%3A8762"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -890,7 +864,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -905,22 +879,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%87%A1%E5%AE%A2TV?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_短剧库",
-      "name": "短剧库(DS)",
-      "api": "http://localhost:5757/api/短剧库?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E7%9F%AD%E5%89%A7%E5%BA%93?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -936,7 +895,7 @@
         "home": "http://localhost:5757/api/%E5%87%A4%E5%87%B0FM[%E5%90%AC]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%87%A4%E5%87%B0FM[%E5%90%AC]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -951,7 +910,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fwww.gugu3.com%22%2C%22key%22%3A%22nKfZ8KX6JTNWRzTD%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -966,7 +925,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fwww.guahd.com%2F1.txt%22%2C%22key%22%3A%22f2A7D4B9E8C16531%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -981,7 +940,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E9%A3%8E%E8%BD%A6%E5%8A%A8%E6%BC%AB?do=cat&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -996,7 +955,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppV2%C2%B2?do=py&pwd=dzyyds&extend=http%3A%2F%2Fv.lnhaozhenjin.cn"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1012,37 +971,7 @@
         "home": "http://localhost:5757/api/AppShark[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E5%85%89%E6%98%A0%E8%A7%86%E7%95%8C",
         "category": "http://localhost:5757/api/AppShark[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&ac=list&t=1&pg=1&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E5%85%89%E6%98%A0%E8%A7%86%E7%95%8C"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_好乐影视",
-      "name": "好乐影视(DS)",
-      "api": "http://localhost:5757/api/好乐影视?pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E5%A5%BD%E4%B9%90%E5%BD%B1%E8%A7%86?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_海狗视频[Hs]",
-      "name": "海狗视频[Hs](hipy)",
-      "api": "http://localhost:5757/api/AppHs?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppHs?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fdy.stxbed.com%22%2C%22app_id%22%3A%22haigou%22%2C%22deviceid%22%3A%22%22%2C%22versionCode%22%3A%2220100%22%2C%22UMENG_CHANNEL%22%3A%22zhuan%22%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1057,7 +986,37 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E9%AC%BC%E7%89%87%E4%B9%8B%E5%AE%B6?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_好乐影视",
+      "name": "好乐影视(DS)",
+      "api": "http://localhost:5757/api/好乐影视?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E5%A5%BD%E4%B9%90%E5%BD%B1%E8%A7%86?pwd=dzyyds"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_海狗视频[Hs]",
+      "name": "海狗视频[Hs](hipy)",
+      "api": "http://localhost:5757/api/AppHs?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppHs?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fdy.stxbed.com%22%2C%22app_id%22%3A%22haigou%22%2C%22deviceid%22%3A%22%22%2C%22versionCode%22%3A%2220100%22%2C%22UMENG_CHANNEL%22%3A%22zhuan%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1072,7 +1031,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E6%B2%B3%E5%8D%97%E7%94%B5%E8%A7%86%E4%BB%A3%E7%90%86?do=cat&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1087,7 +1046,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2F154.12.90.59%3A14500%22%2C%22key%22%3A%22J6AIORKJ3PQOJKM3%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1102,7 +1061,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppV2%C2%B2?do=py&pwd=dzyyds&extend=https%3A%2F%2Fwww.heli888.cc"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1117,7 +1076,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%8D%90%E7%89%87?do=cat&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1132,22 +1091,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E9%9B%86%E7%99%BE%E5%8A%A8%E6%BC%AB?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_火猫影视[AFX]",
-      "name": "火猫影视[AFX](hipy)",
-      "api": "http://localhost:5757/api/AppFox?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppFox?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fcunchu8.obs.cn-north-4.myhuaweicloud.com%2Fconfig.json%22%2C%22parse%22%3A%7B%22JL4K%22%3A%22http%3A%2F%2F194.147.100.155%3A7891%2F%3Furl%3D%22%7D%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1162,7 +1106,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppSk?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fskyappdata-1321528676.cos.accelerate.myqcloud.com%2F4kapp%2Fappipr.txt%22%2C%22key%22%3A%22ygcnbckhcuvygdyb%22%2C%22iv%22%3A%224023892775143708%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_火猫影视[AFX]",
+      "name": "火猫影视[AFX](hipy)",
+      "api": "http://localhost:5757/api/AppFox?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppFox?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fcunchu8.obs.cn-north-4.myhuaweicloud.com%2Fconfig.json%22%2C%22parse%22%3A%7B%22JL4K%22%3A%22http%3A%2F%2F194.147.100.155%3A7891%2F%3Furl%3D%22%7D%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1177,7 +1136,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%8D%90%E7%89%87?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1192,22 +1151,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E9%94%A6%E9%B2%A4%E7%9F%AD%E5%89%A7?do=py&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_鲸鱼影视[AG³]",
-      "name": "鲸鱼影视[AG³](hipy)",
-      "api": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fjingyu4k-1312635929.cos.ap-nanjing.myqcloud.com%2F1.json%22%2C%22datakey%22%3A%22AAdgrdghjfgswerA%22%2C%22api%22%3A2%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1222,7 +1166,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fapi1.bffree.cn%22%2C%22key%22%3A%222015692015692015%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1237,38 +1181,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppV2%C2%B2?do=py&pwd=dzyyds&extend=http%3A%2F%2Fjxfmax.juxiafan.com"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
-      "key": "hipy_py_剧下饭[AV⁶]",
-      "name": "剧下饭[AV⁶](hipy)",
-      "api": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds",
+      "key": "hipy_py_橘子TV[Ayq]",
+      "name": "橘子TV[Ayq](hipy)",
+      "api": "http://localhost:5757/api/AppYqk?do=py&pwd=dzyyds",
       "type": 4,
       "searchable": 1,
       "lang": "hipy",
       "status": "success",
       "message": "推荐接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds&extend=http%3A%2F%2Fjxfmax.juxiafan.com%2Ficciu_api.php%2Fv1.vod"
+        "home": "http://localhost:5757/api/AppYqk?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fgapi0725.5p8jcjc.com%2Fconfig.json%2Chttps%3A%2F%2Fgapi0725.olrv5gz.com%2Fconfig.json%2Chttps%3A%2F%2Fgapi0725.mvljeat.com%2Fconfig.json%2Chttps%3A%2F%2Fjzapp-1318635097.cos.ap-shanghai.myqcloud.com%2Fconfig.json%2Chttps%3A%2F%2Fjuzi-config-1360051343.cos.ap-shanghai.myqcloud.com%2Fconfig.json%22%2C%22appId%22%3A%22fea23e11fc1241409682880e15fb2851%22%2C%22appkey%22%3A%22f384b87cc9ef41e4842dda977bae2c7f%22%2C%22udid%22%3A%22bfc18c00-c866-46cb-8d7b-121c39b942d4%22%2C%22bundlerId%22%3A%22com.voraguzzee.ts%22%2C%22source%22%3A%221003_default%22%2C%22version%22%3A%221.0.1%22%2C%22versionCode%22%3A1000%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_酷我听书[听]",
-      "name": "酷我听书[听](DS)",
-      "api": "http://localhost:5757/api/酷我听书[听]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "success",
-      "message": "分类接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E9%85%B7%E6%88%91%E5%90%AC%E4%B9%A6[%E5%90%AC]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/%E9%85%B7%E6%88%91%E5%90%AC%E4%B9%A6[%E5%90%AC]?pwd=dzyyds&ac=list&t=1&pg=1"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1284,22 +1212,7 @@
         "home": "http://localhost:5757/api/%E5%8F%AF%E5%8F%AF%E5%BD%B1%E8%A7%86?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%8F%AF%E5%8F%AF%E5%BD%B1%E8%A7%86?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_剧永久[AV⁶]",
-      "name": "剧永久[AV⁶](hipy)",
-      "api": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds&extend=%7B%22api%22%3A%22http%3A%2F%2Fyjyi.juyongjiu.com%2Ficciu_api.php%2Fv1.vod%22%2C%22datasignkey%22%3A%226QQNUsP3PkD2ajJCPCY8%22%2C%22apisignkey%22%3A%22lvdoutv-1.0.0%22%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1314,7 +1227,37 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppSk?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fkankelm.cn%3A2024%2Fappdomain.txt%22%2C%22key%22%3A%22ygcnbcvybqqckwqy%22%2C%22iv%22%3A%221583560747143708%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_剧永久[AV⁶]",
+      "name": "剧永久[AV⁶](hipy)",
+      "api": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds&extend=%7B%22api%22%3A%22http%3A%2F%2Fyjyi.juyongjiu.com%2Ficciu_api.php%2Fv1.vod%22%2C%22datasignkey%22%3A%226QQNUsP3PkD2ajJCPCY8%22%2C%22apisignkey%22%3A%22lvdoutv-1.0.0%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_剧下饭[AV⁶]",
+      "name": "剧下饭[AV⁶](hipy)",
+      "api": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppV6?do=py&pwd=dzyyds&extend=http%3A%2F%2Fjxfmax.juxiafan.com%2Ficciu_api.php%2Fv1.vod"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1329,7 +1272,23 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E6%87%92%E6%87%92%E8%A7%86%E9%A2%91?do=py&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_酷我听书[听]",
+      "name": "酷我听书[听](DS)",
+      "api": "http://localhost:5757/api/酷我听书[听]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "success",
+      "message": "分类接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E9%85%B7%E6%88%91%E5%90%AC%E4%B9%A6[%E5%90%AC]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E9%85%B7%E6%88%91%E5%90%AC%E4%B9%A6[%E5%90%AC]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1345,7 +1304,7 @@
         "home": "http://localhost:5757/api/Appget[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E8%93%9D%E9%B9%B0",
         "category": "http://localhost:5757/api/Appget[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&ac=list&t=1&pg=1&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E8%93%9D%E9%B9%B0"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1360,22 +1319,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%85%AD%E6%9C%88%E5%90%AC%E4%B9%A6[%E5%90%AC]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_玲珑[AG¹]",
-      "name": "玲珑[AG¹](hipy)",
-      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fmac.555618.xyz%22%2C%22key%22%3A%22%23getapp%40TMD%402025%22%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1390,7 +1334,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fapiapplbys.lbys.app%3A5678%22%2C%22key%22%3A%22apiapplbyskey168%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_玲珑[AG¹]",
+      "name": "玲珑[AG¹](hipy)",
+      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fmac.555618.xyz%22%2C%22key%22%3A%22%23getapp%40TMD%402025%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1405,7 +1364,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E7%8C%AB%E6%B5%8B%E8%AF%95?do=cat&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1421,7 +1380,37 @@
         "home": "http://localhost:5757/api/%E7%BE%8E%E9%A2%9C%E6%80%AA[%E6%93%A6]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%BE%8E%E9%A2%9C%E6%80%AA[%E6%93%A6]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_米诺-旧[AG¹]",
+      "name": "米诺-旧[AG¹](hipy)",
+      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fwww.milkidc.cn%22%2C%22key%22%3A%2220c79c979da8db0f%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_米兔-旧[AG¹]",
+      "name": "米兔-旧[AG¹](hipy)",
+      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fnew.tkbot.fun%22%2C%22key%22%3A%22d032c12876bc6848%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1437,53 +1426,7 @@
         "home": "http://localhost:5757/api/%E7%89%9B%E7%89%9B%E7%9F%AD%E5%89%A7?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%89%9B%E7%89%9B%E7%9F%AD%E5%89%A7?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_米诺-旧[AG¹]",
-      "name": "米诺-旧[AG¹](hipy)",
-      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fwww.milkidc.cn%22%2C%22key%22%3A%2220c79c979da8db0f%22%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_米兔-旧[AG¹]",
-      "name": "米兔-旧[AG¹](hipy)",
-      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fnew.tkbot.fun%22%2C%22key%22%3A%22d032c12876bc6848%22%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_七猫小说[书]",
-      "name": "七猫小说[书](DS)",
-      "api": "http://localhost:5757/api/七猫小说[书]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "success",
-      "message": "分类接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?pwd=dzyyds&ac=list&t=1&pg=1"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1499,7 +1442,7 @@
         "home": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E7%9F%AD%E5%89%A7?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E7%9F%AD%E5%89%A7?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1514,7 +1457,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppToV5?do=py&pwd=dzyyds&extend=http%3A%2F%2F38.55.237.41%3A8762"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1529,7 +1472,23 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E6%B8%85%E9%A3%8EDJ[%E5%90%AC]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_七猫小说[书]",
+      "name": "七猫小说[书](DS)",
+      "api": "http://localhost:5757/api/七猫小说[书]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "success",
+      "message": "分类接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1544,7 +1503,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2F99.jl8.top%2F1.txt%22%2C%22key%22%3A%22xnybssspqtwotuwj%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -1560,7 +1519,7 @@
         "home": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?do=py&pwd=dzyyds",
         "category": "http://localhost:5757/api/%E4%B8%83%E7%8C%AB%E5%B0%8F%E8%AF%B4[%E4%B9%A6]?do=py&pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1575,7 +1534,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppV2%C2%B2?do=py&pwd=dzyyds&extend=https%3A%2F%2Fwww.rebovod.com"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_森林动漫[AF]",
+      "name": "森林动漫[AF](hipy)",
+      "api": "http://localhost:5757/api/AppFei?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppFei?do=py&pwd=dzyyds&extend=https%3A%2F%2Fysa.yy-fun.cc%2Ffeiapp"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1591,22 +1565,7 @@
         "home": "http://localhost:5757/api/%E8%BD%AF%E9%B8%AD%E7%9F%AD%E5%89%A7?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E8%BD%AF%E9%B8%AD%E7%9F%AD%E5%89%A7?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_森林动漫[AF]",
-      "name": "森林动漫[AF](hipy)",
-      "api": "http://localhost:5757/api/AppFei?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppFei?do=py&pwd=dzyyds&extend=https%3A%2F%2Fysa.yy-fun.cc%2Ffeiapp"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1621,22 +1580,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppV2%C2%B2?do=py&pwd=dzyyds&extend=http%3A%2F%2F38.47.213.61%3A41271"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_天空影视",
-      "name": "天空影视(hipy)",
-      "api": "http://localhost:5757/api/天空影视?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E5%A4%A9%E7%A9%BA%E5%BD%B1%E8%A7%86?do=py&pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1651,22 +1595,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppHs?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fdy.jmzp.net.cn%22%2C%22app_id%22%3A%22shiguang%22%2C%22deviceid%22%3A%22%22%2C%22versionCode%22%3A%2210000%22%2C%22UMENG_CHANNEL%22%3A%22guan%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
-      "key": "hipy_py_五八[AG¹]",
-      "name": "五八[AG¹](hipy)",
-      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "key": "hipy_py_天空影视",
+      "name": "天空影视(hipy)",
+      "api": "http://localhost:5757/api/天空影视?do=py&pwd=dzyyds",
       "type": 4,
       "searchable": 1,
       "lang": "hipy",
       "status": "success",
       "message": "推荐接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fdy.58ys.vip%22%2C%22key%22%3A%22JEWibY1AgWF0V1xx%22%7D"
+        "home": "http://localhost:5757/api/%E5%A4%A9%E7%A9%BA%E5%BD%B1%E8%A7%86?do=py&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1682,7 +1626,7 @@
         "home": "http://localhost:5757/api/AppFox?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fkumiao.yzbao.com.cn%22%2C%22parse%22%3A%7B%22qq%7Cqiyi%7Cmgtv%7Cyouku%7Cbilibili%22%3A%22https%3A%2F%2Fapi.qljson.xyz%2Fapi%2F%3Fkey%3D67f6a108dc6d84eaf81ac58417c1f72a%26url%3D%22%7D%7D",
         "category": "http://localhost:5757/api/AppFox?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=%7B%22host%22%3A%22http%3A%2F%2Fkumiao.yzbao.com.cn%22%2C%22parse%22%3A%7B%22qq%7Cqiyi%7Cmgtv%7Cyouku%7Cbilibili%22%3A%22https%3A%2F%2Fapi.qljson.xyz%2Fapi%2F%3Fkey%3D67f6a108dc6d84eaf81ac58417c1f72a%26url%3D%22%7D%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1697,7 +1641,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fguowaiju.com%22%2C%22key%22%3A%227xv16h7qgkrs9b1p%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1712,7 +1656,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E7%8E%8B%E5%AD%90TV?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1728,7 +1672,22 @@
         "home": "http://localhost:5757/api/%E5%85%94%E5%B0%8F%E8%B4%9D[%E5%84%BF]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%85%94%E5%B0%8F%E8%B4%9D[%E5%84%BF]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_五八[AG¹]",
+      "name": "五八[AG¹](hipy)",
+      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fdy.58ys.vip%22%2C%22key%22%3A%22JEWibY1AgWF0V1xx%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1744,22 +1703,7 @@
         "home": "http://localhost:5757/api/%E8%A5%BF%E9%A5%AD%E7%9F%AD%E5%89%A7?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E8%A5%BF%E9%A5%AD%E7%9F%AD%E5%89%A7?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_欣欣影视",
-      "name": "欣欣影视(hipy)",
-      "api": "http://localhost:5757/api/欣欣影视?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E6%AC%A3%E6%AC%A3%E5%BD%B1%E8%A7%86?do=py&pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1774,7 +1718,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%B0%8F%E7%BB%BF%E4%B9%A6[B]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1789,22 +1733,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E5%85%84%E5%BC%9F%E7%9B%98[%E6%90%9C]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_雄鹰[AG²]",
-      "name": "雄鹰[AG²](hipy)",
-      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Flanyinghz.oss-cn-hangzhou.aliyuncs.com%2Flanyingxmy.txt%22%2C%22key%22%3A%22ca94b06ca359d80e%22%2C%22path%22%3A%22%2Fapi.php%2Fqijiappapi%22%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1820,7 +1749,37 @@
         "home": "http://localhost:5757/api/%E6%98%9F%E8%8A%BD%E7%9F%AD%E5%89%A7?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E6%98%9F%E8%8A%BD%E7%9F%AD%E5%89%A7?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_欣欣影视",
+      "name": "欣欣影视(hipy)",
+      "api": "http://localhost:5757/api/欣欣影视?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E6%AC%A3%E6%AC%A3%E5%BD%B1%E8%A7%86?do=py&pwd=dzyyds"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_新浪资源",
+      "name": "新浪资源(hipy)",
+      "api": "http://localhost:5757/api/新浪资源?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E6%96%B0%E6%B5%AA%E8%B5%84%E6%BA%90?do=py&pwd=dzyyds"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1835,7 +1794,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Ftv.yy-fun.cc%22%2C%22key%22%3A%22qkxnwkfjwpcnwycl%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_雄鹰[AG²]",
+      "name": "雄鹰[AG²](hipy)",
+      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Flanyinghz.oss-cn-hangzhou.aliyuncs.com%2Flanyingxmy.txt%22%2C%22key%22%3A%22ca94b06ca359d80e%22%2C%22path%22%3A%22%2Fapi.php%2Fqijiappapi%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1850,7 +1824,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppFei?do=py&pwd=dzyyds&extend=https%3A%2F%2Fysc.yy-fun.cc%2Ffeiapp"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1865,7 +1839,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppHs?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fdy.jszdzs.com%22%2C%22app_id%22%3A%22xuebao%22%2C%22deviceid%22%3A%22%22%2C%22versionCode%22%3A%2221300%22%2C%22UMENG_CHANNEL%22%3A%22share%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1880,37 +1854,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E4%BE%9D%E8%B5%96%E6%B5%8B%E8%AF%95?do=py&pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_掌上追剧[AG³]",
-      "name": "掌上追剧[AG³](hipy)",
-      "api": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Ftvb.yy-fun.cc%22%2C%22key%22%3A%22jcTz6Jda2aKrH8Tk%22%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_云云[AG³]",
-      "name": "云云[AG³](hipy)",
-      "api": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fstaraugust123456.oss-cn-hangzhou.aliyuncs.com%2F1.txt%22%2C%22datakey%22%3A%22staraugust123456%22%2C%22api%22%3A2%7D"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1926,7 +1870,37 @@
         "home": "http://localhost:5757/api/%E6%A8%B1%E6%BC%AB[%E6%BC%AB]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E6%A8%B1%E6%BC%AB[%E6%BC%AB]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_一起看[Ayq]",
+      "name": "一起看[Ayq](hipy)",
+      "api": "http://localhost:5757/api/AppYqk?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppYqk?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fgapi0320.3njzmrx1.com%2Fconfig.json%2Chttps%3A%2F%2Fgapi0320.lq0okex8.com%2Fconfig.json%2Chttps%3A%2F%2Fgapi0320.zabqs8xp.com%2Fconfig.json%2Chttps%3A%2F%2Fyappconfig-20250628-1318635097.cos.ap-shanghai.myqcloud.com%2Fconfig.json%2Chttps%3A%2F%2Fyconfig-20250628-1360051343.cos.ap-guangzhou.myqcloud.com%2Fconfig.json%22%2C%22appId%22%3A%22d6d520ea90904f1ba680ed6c9c9f9007%22%2C%22appkey%22%3A%2270af67d2b6cf47679b397ea4c1886877%22%2C%22udid%22%3A%22bfc18c00-c866-46cb-8d7b-121c39b942d4%22%2C%22bundlerId%22%3A%22com.flotimingo.ts%22%2C%22source%22%3A%221001_default%22%2C%22version%22%3A%221.3.10%22%2C%22versionCode%22%3A1104%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_掌上追剧[AG³]",
+      "name": "掌上追剧[AG³](hipy)",
+      "api": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "success",
+      "message": "推荐接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Ftvb.yy-fun.cc%22%2C%22key%22%3A%22jcTz6Jda2aKrH8Tk%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1941,22 +1915,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E7%9B%B4%E6%92%AD%E8%BD%AC%E7%82%B9%E6%92%AD[%E5%90%88]?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTz8ksSzVKzi3WA%2FEAuuBHLxUAAAA%3D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
-      "key": "hipy_py_紫云[AV¹]",
-      "name": "紫云[AV¹](hipy)",
-      "api": "http://localhost:5757/api/AppV1?do=py&pwd=dzyyds",
+      "key": "hipy_py_云云[AG³]",
+      "name": "云云[AG³](hipy)",
+      "api": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds",
       "type": 4,
       "searchable": 1,
       "lang": "hipy",
       "status": "success",
       "message": "推荐接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/AppV1?do=py&pwd=dzyyds&extend=http%3A%2F%2Fziyuncms.feifan12.xyz%2Fapi.php"
+        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fstaraugust123456.oss-cn-hangzhou.aliyuncs.com%2F1.txt%22%2C%22datakey%22%3A%22staraugust123456%22%2C%22api%22%3A2%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -1971,22 +1945,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%BF%BD%E5%89%A7%E7%8B%82%E4%BA%BA?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_iptv",
-      "name": "iptv(DS)",
-      "api": "http://localhost:5757/api/iptv?pwd=dzyyds",
-      "type": 4,
-      "searchable": 0,
-      "lang": "ds",
-      "status": "success",
-      "message": "推荐接口正常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/iptv?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2002,23 +1961,22 @@
         "home": "http://localhost:5757/api/APP%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE?pwd=dzyyds",
         "category": "http://localhost:5757/api/APP%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
-      "key": "drpyS_ikanbot",
-      "name": "ikanbot(DS)",
-      "api": "http://localhost:5757/api/ikanbot?pwd=dzyyds",
+      "key": "hipy_py_紫云[AV¹]",
+      "name": "紫云[AV¹](hipy)",
+      "api": "http://localhost:5757/api/AppV1?do=py&pwd=dzyyds",
       "type": 4,
-      "searchable": 2,
-      "lang": "ds",
+      "searchable": 1,
+      "lang": "hipy",
       "status": "success",
-      "message": "分类接口正常",
+      "message": "推荐接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/ikanbot?pwd=dzyyds",
-        "category": "http://localhost:5757/api/ikanbot?pwd=dzyyds&ac=list&t=1&pg=1"
+        "home": "http://localhost:5757/api/AppV1?do=py&pwd=dzyyds&extend=http%3A%2F%2Fziyuncms.feifan12.xyz%2Fapi.php"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2033,7 +1991,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/gaze?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2048,22 +2006,22 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppSk?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fsk.xiaoyaoys.top%2Fskkkkkkk.txt%22%2C%22key%22%3A%22ygcnbcczduwydmrs%22%2C%22iv%22%3A%224672921073143708%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
-      "key": "hipy_py_OMOfun[AG¹]",
-      "name": "OMOfun[AG¹](hipy)",
-      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "key": "drpyS_iptv",
+      "name": "iptv(DS)",
+      "api": "http://localhost:5757/api/iptv?pwd=dzyyds",
       "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
+      "searchable": 0,
+      "lang": "ds",
       "status": "success",
       "message": "推荐接口正常",
       "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fapp.omofun1.top%22%2C%22key%22%3A%2266dc309cbeeca454%22%7D"
+        "home": "http://localhost:5757/api/iptv?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2079,7 +2037,23 @@
         "home": "http://localhost:5757/api/KTV%E6%AD%8C%E5%8E%85[%E5%90%AC]?pwd=dzyyds",
         "category": "http://localhost:5757/api/KTV%E6%AD%8C%E5%8E%85[%E5%90%AC]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_ikanbot",
+      "name": "ikanbot(DS)",
+      "api": "http://localhost:5757/api/ikanbot?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "success",
+      "message": "分类接口正常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/ikanbot?pwd=dzyyds",
+        "category": "http://localhost:5757/api/ikanbot?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2094,7 +2068,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/push_agent?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2109,7 +2083,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/TVB%E4%BA%91%E6%92%AD?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2124,7 +2098,23 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppFox?do=py&pwd=dzyyds&extend=http%3A%2F%2Fapp.hktvyb.cc"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_光速[优]",
+      "name": "光速[优](DS)",
+      "api": "http://localhost:5757/api/光速[优]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E5%85%89%E9%80%9F[%E4%BC%98]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E5%85%89%E9%80%9F[%E4%BC%98]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.895Z",
       "manuallyMarked": false
     },
     {
@@ -2140,7 +2130,7 @@
         "home": "http://localhost:5757/api/%E7%9A%AE%E7%9A%AE%E8%99%BE[%E4%BC%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%9A%AE%E7%9A%AE%E8%99%BE[%E4%BC%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.895Z",
       "manuallyMarked": false
     },
     {
@@ -2156,7 +2146,23 @@
         "home": "http://localhost:5757/api/UC%E5%88%86%E4%BA%AB?pwd=dzyyds&extend=H4sIAAAAAAAAA9PT088qzs%2FTD3V%2B2tH2ZNdqPRAPAKubOwMVAAAA",
         "category": "http://localhost:5757/api/UC%E5%88%86%E4%BA%AB?pwd=dzyyds&ac=list&t=1&pg=1&extend=H4sIAAAAAAAAA9PT088qzs%2FTD3V%2B2tH2ZNdqPRAPAKubOwMVAAAA"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_团长资源[盘]",
+      "name": "团长资源[盘](DS)",
+      "api": "http://localhost:5757/api/团长资源[盘]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "ds",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E5%9B%A2%E9%95%BF%E8%B5%84%E6%BA%90[%E7%9B%98]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E5%9B%A2%E9%95%BF%E8%B5%84%E6%BA%90[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2169,9 +2175,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/%E8%A7%86%E8%A7%89[%E4%BC%98]?pwd=dzyyds"
+        "home": "http://localhost:5757/api/%E8%A7%86%E8%A7%89[%E4%BC%98]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E8%A7%86%E8%A7%89[%E4%BC%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2187,7 +2194,7 @@
         "home": "http://localhost:5757/api/%E6%9C%A8%E5%81%B6[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E6%9C%A8%E5%81%B6[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2203,7 +2210,7 @@
         "home": "http://localhost:5757/api/%E5%B0%8F%E7%B1%B3[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%B0%8F%E7%B1%B3[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2219,7 +2226,7 @@
         "home": "http://localhost:5757/api/%E7%89%B9%E4%B8%8B%E9%A5%AD[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%89%B9%E4%B8%8B%E9%A5%AD[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2235,7 +2242,7 @@
         "home": "http://localhost:5757/api/%E8%99%8E%E6%96%91[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E8%99%8E%E6%96%91[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2251,7 +2258,7 @@
         "home": "http://localhost:5757/api/%E9%97%AA%E7%94%B5%E4%BC%98%E6%B1%90[%E7%9B%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E9%97%AA%E7%94%B5%E4%BC%98%E6%B1%90[%E7%9B%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2267,7 +2274,7 @@
         "home": "http://localhost:5757/api/%E5%93%94%E5%93%A9%E7%9B%B4%E6%92%AD[%E5%AE%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%93%94%E5%93%A9%E7%9B%B4%E6%92%AD[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2283,7 +2290,7 @@
         "home": "http://localhost:5757/api/%E6%8A%96%E9%9F%B3%E7%9B%B4%E6%92%AD%E5%BC%B9%E5%B9%95[%E5%AE%98]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E6%8A%96%E9%9F%B3%E7%9B%B4%E6%92%AD%E5%BC%B9%E5%B9%95[%E5%AE%98]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2299,7 +2306,7 @@
         "home": "http://localhost:5757/api/%E6%92%AD%E5%89%A7%E7%BD%91?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E6%92%AD%E5%89%A7%E7%BD%91?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2312,9 +2319,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/%E5%A4%A7%E5%AB%82TV[%E5%AF%86]?pwd=dzyyds"
+        "home": "http://localhost:5757/api/%E5%A4%A7%E5%AB%82TV[%E5%AF%86]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E5%A4%A7%E5%AB%82TV[%E5%AF%86]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2330,7 +2338,7 @@
         "home": "http://localhost:5757/api/%E5%8A%A8%E6%BC%AB%E5%B7%B4%E5%A3%AB[%E6%BC%AB]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%8A%A8%E6%BC%AB%E5%B7%B4%E5%A3%AB[%E6%BC%AB]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2343,9 +2351,26 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E7%94%B5%E5%BD%B1%E9%A9%BF%E7%AB%99"
+        "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E7%94%B5%E5%BD%B1%E9%A9%BF%E7%AB%99",
+        "category": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&ac=list&t=1&pg=1&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E7%94%B5%E5%BD%B1%E9%A9%BF%E7%AB%99"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_短剧库",
+      "name": "短剧库(DS)",
+      "api": "http://localhost:5757/api/短剧库?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E7%9F%AD%E5%89%A7%E5%BA%93?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E7%9F%AD%E5%89%A7%E5%BA%93?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2361,7 +2386,7 @@
         "home": "http://localhost:5757/api/%E7%95%AA%E8%96%AF%E5%8A%A8%E6%BC%AB[%E6%BC%AB]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%95%AA%E8%96%AF%E5%8A%A8%E6%BC%AB[%E6%BC%AB]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2376,7 +2401,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E7%93%9C%E5%AD%90H5?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2391,7 +2416,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E9%BB%91%E6%96%99%E4%B8%8D%E6%89%93%E7%83%8A[%E5%AF%86]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2407,7 +2432,7 @@
         "home": "http://localhost:5757/api/%E7%81%AB%E8%BD%A6%E5%A4%AA%E5%A0%B5?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%81%AB%E8%BD%A6%E5%A4%AA%E5%A0%B5?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2422,7 +2447,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E7%81%AB%E7%8C%AB"
       },
-      "checkTime": "2025-09-13T00:16:51.504Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2435,9 +2460,26 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fjjjj.nilinili.org%22%2C%22key%22%3A%22672263e98f232a05%22%7D"
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2Fjjjj.nilinili.org%22%2C%22key%22%3A%22672263e98f232a05%22%7D",
+        "category": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=%7B%22host%22%3A%22http%3A%2F%2Fjjjj.nilinili.org%22%2C%22key%22%3A%22672263e98f232a05%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_鲸鱼影视[AG³]",
+      "name": "鲸鱼影视[AG³](hipy)",
+      "api": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fjingyu4k-1312635929.cos.ap-nanjing.myqcloud.com%2F1.json%22%2C%22datakey%22%3A%22AAdgrdghjfgswerA%22%2C%22api%22%3A2%7D",
+        "category": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=%7B%22host%22%3A%22https%3A%2F%2Fjingyu4k-1312635929.cos.ap-nanjing.myqcloud.com%2F1.json%22%2C%22datakey%22%3A%22AAdgrdghjfgswerA%22%2C%22api%22%3A2%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2453,7 +2495,7 @@
         "home": "http://localhost:5757/api/%E9%87%91%E7%89%8C%E5%BD%B1%E9%99%A2?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E9%87%91%E7%89%8C%E5%BD%B1%E9%99%A2?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2466,9 +2508,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E6%A9%98%E5%AD%90"
+        "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E6%A9%98%E5%AD%90",
+        "category": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&ac=list&t=1&pg=1&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E6%A9%98%E5%AD%90"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2484,7 +2527,7 @@
         "home": "http://localhost:5757/api/%E4%B9%9D%E4%B8%83%E7%94%B5%E5%BD%B1%E7%BD%91?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E4%B9%9D%E4%B8%83%E7%94%B5%E5%BD%B1%E7%BD%91?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2497,9 +2540,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/AppV2%C2%B9?do=py&pwd=dzyyds&extend=http%3A%2F%2F160.202.231.210%3A7080%2Fikumiao_api.php%2Fv1.vod"
+        "home": "http://localhost:5757/api/AppV2%C2%B9?do=py&pwd=dzyyds&extend=http%3A%2F%2F160.202.231.210%3A7080%2Fikumiao_api.php%2Fv1.vod",
+        "category": "http://localhost:5757/api/AppV2%C2%B9?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=http%3A%2F%2F160.202.231.210%3A7080%2Fikumiao_api.php%2Fv1.vod"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2512,9 +2556,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2F122.228.193.2%3A9654%22%2C%22key%22%3A%22ca94b06ca3c7d80e%22%7D"
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2F122.228.193.2%3A9654%22%2C%22key%22%3A%22ca94b06ca3c7d80e%22%7D",
+        "category": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=%7B%22host%22%3A%22http%3A%2F%2F122.228.193.2%3A9654%22%2C%22key%22%3A%22ca94b06ca3c7d80e%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2530,22 +2575,7 @@
         "home": "http://localhost:5757/api/%E8%93%9D%E8%8E%93%E7%9F%AD%E5%89%A7?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E8%93%9D%E8%8E%93%E7%9F%AD%E5%89%A7?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_老白故事[听]",
-      "name": "老白故事[听](DS)",
-      "api": "http://localhost:5757/api/老白故事[听]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "error",
-      "message": "推荐和分类接口均异常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E8%80%81%E7%99%BD%E6%95%85%E4%BA%8B[%E5%90%AC]?pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2560,7 +2590,23 @@
       "testUrls": {
         "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E8%90%BD%E5%8A%9F%E9%98%81"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_老白故事[听]",
+      "name": "老白故事[听](DS)",
+      "api": "http://localhost:5757/api/老白故事[听]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E8%80%81%E7%99%BD%E6%95%85%E4%BA%8B[%E5%90%AC]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E8%80%81%E7%99%BD%E6%95%85%E4%BA%8B[%E5%90%AC]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2576,7 +2622,7 @@
         "home": "http://localhost:5757/api/%E9%BA%A6%E7%94%B0%E5%BD%B1%E9%99%A2?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E9%BA%A6%E7%94%B0%E5%BD%B1%E9%99%A2?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2591,7 +2637,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E4%B8%83%E5%BA%A6%E7%A9%BA%E9%97%B4[%E5%AF%86]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2607,7 +2653,7 @@
         "home": "http://localhost:5757/api/%E9%A3%98%E9%9B%AA%E5%BD%B1%E9%99%A2?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E9%A3%98%E9%9B%AA%E5%BD%B1%E9%99%A2?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2622,23 +2668,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fqjappcms.sun4k.top%22%2C%22key%22%3A%22sBxqXVF5pAHbGzrH%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_秋霞电影网",
-      "name": "秋霞电影网(DS)",
-      "api": "http://localhost:5757/api/秋霞电影网?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "error",
-      "message": "推荐和分类接口均异常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E7%A7%8B%E9%9C%9E%E7%94%B5%E5%BD%B1%E7%BD%91?pwd=dzyyds",
-        "category": "http://localhost:5757/api/%E7%A7%8B%E9%9C%9E%E7%94%B5%E5%BD%B1%E7%BD%91?pwd=dzyyds&ac=list&t=1&pg=1"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.896Z",
       "manuallyMarked": false
     },
     {
@@ -2651,9 +2681,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E8%B6%A3%E7%9C%8B"
+        "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E8%B6%A3%E7%9C%8B",
+        "category": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&ac=list&t=1&pg=1&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E8%B6%A3%E7%9C%8B"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2669,7 +2700,23 @@
         "home": "http://localhost:5757/api/%E4%BA%BA%E4%BA%BA%E8%A7%86%E9%A2%91?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E4%BA%BA%E4%BA%BA%E8%A7%86%E9%A2%91?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_秋霞电影网",
+      "name": "秋霞电影网(DS)",
+      "api": "http://localhost:5757/api/秋霞电影网?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/%E7%A7%8B%E9%9C%9E%E7%94%B5%E5%BD%B1%E7%BD%91?pwd=dzyyds",
+        "category": "http://localhost:5757/api/%E7%A7%8B%E9%9C%9E%E7%94%B5%E5%BD%B1%E7%BD%91?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2685,7 +2732,7 @@
         "home": "http://localhost:5757/api/%E5%85%A8%E6%B0%91%E8%BF%BD%E5%89%A7?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%85%A8%E6%B0%91%E8%BF%BD%E5%89%A7?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2700,7 +2747,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%89%B2%E8%8A%B1%E5%A0%82[%E5%AF%86+]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2715,7 +2762,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/%E8%89%B2%E8%8A%B1%E5%A0%82[%E5%AF%86]?pwd=dzyyds"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2730,7 +2777,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22http%3A%2F%2F110.40.59.188%3A9527%22%2C%22key%22%3A%22ebad3f1a58b13933%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2745,7 +2792,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/Appget[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E6%B7%98%E5%BD%B1%E7%94%B5%E5%BD%B1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2758,9 +2805,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fsykjw.xyz%22%2C%22key%22%3A%22sicnagduxbSfisnz%22%2C%22api%22%3A2%7D"
+        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fsykjw.xyz%22%2C%22key%22%3A%22sicnagduxbSfisnz%22%2C%22api%22%3A2%7D",
+        "category": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=%7B%22host%22%3A%22https%3A%2F%2Fsykjw.xyz%22%2C%22key%22%3A%22sicnagduxbSfisnz%22%2C%22api%22%3A2%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2776,7 +2824,7 @@
         "home": "http://localhost:5757/api/%E7%B4%A0%E7%99%BD%E7%99%BD?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E7%B4%A0%E7%99%BD%E7%99%BD?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2789,9 +2837,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fappcms.xy4k.com%22%2C%22datakey%22%3A%227SDWjknU34zqFbVr%22%7D"
+        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fappcms.xy4k.com%22%2C%22datakey%22%3A%227SDWjknU34zqFbVr%22%7D",
+        "category": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=%7B%22host%22%3A%22https%3A%2F%2Fappcms.xy4k.com%22%2C%22datakey%22%3A%227SDWjknU34zqFbVr%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2804,9 +2853,10 @@
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fappcms.xy4k.com%22%2C%22key%22%3A%227SDWjknU34zqFbVr%22%7D"
+        "home": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fappcms.xy4k.com%22%2C%22key%22%3A%227SDWjknU34zqFbVr%22%7D",
+        "category": "http://localhost:5757/api/getapp3.4.4?do=py&pwd=dzyyds&ac=list&t=1&pg=1&extend=%7B%22host%22%3A%22https%3A%2F%2Fappcms.xy4k.com%22%2C%22key%22%3A%227SDWjknU34zqFbVr%22%7D"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2822,22 +2872,7 @@
         "home": "http://localhost:5757/api/%E5%85%84%E5%BC%9F%E5%BD%B1%E8%A7%86?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E5%85%84%E5%BC%9F%E5%BD%B1%E8%A7%86?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "hipy_py_新浪资源",
-      "name": "新浪资源(hipy)",
-      "api": "http://localhost:5757/api/新浪资源?do=py&pwd=dzyyds",
-      "type": 4,
-      "searchable": 1,
-      "lang": "hipy",
-      "status": "error",
-      "message": "推荐和分类接口均异常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/%E6%96%B0%E6%B5%AA%E8%B5%84%E6%BA%90?do=py&pwd=dzyyds"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2853,7 +2888,7 @@
         "home": "http://localhost:5757/api/%E9%9B%AA%E7%B3%95TV?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E9%9B%AA%E7%B3%95TV?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2868,7 +2903,7 @@
       "testUrls": {
         "home": "http://localhost:5757/api/Appmuou[%E6%A8%A1%E6%9D%BF]?pwd=dzyyds&extend=..%2Fjson%2FApp%E6%A8%A1%E6%9D%BF%E9%85%8D%E7%BD%AE.json%24%E6%BC%94%E5%91%98"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2884,23 +2919,7 @@
         "home": "http://localhost:5757/api/%E4%BC%8A%E7%94%B8%E5%9B%AD[%E5%AF%86]?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E4%BC%8A%E7%94%B8%E5%9B%AD[%E5%AF%86]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
-      "manuallyMarked": false
-    },
-    {
-      "key": "drpyS_ACG漫画网[画]",
-      "name": "ACG漫画网[画](DS)",
-      "api": "http://localhost:5757/api/ACG漫画网[画]?pwd=dzyyds",
-      "type": 4,
-      "searchable": 2,
-      "lang": "ds",
-      "status": "error",
-      "message": "推荐和分类接口均异常",
-      "testUrls": {
-        "home": "http://localhost:5757/api/ACG%E6%BC%AB%E7%94%BB%E7%BD%91[%E7%94%BB]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/ACG%E6%BC%AB%E7%94%BB%E7%BD%91[%E7%94%BB]?pwd=dzyyds&ac=list&t=1&pg=1"
-      },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2916,23 +2935,23 @@
         "home": "http://localhost:5757/api/%E4%B8%93%E4%BA%AB%E5%BD%B1%E8%A7%86?pwd=dzyyds",
         "category": "http://localhost:5757/api/%E4%B8%93%E4%BA%AB%E5%BD%B1%E8%A7%86?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
-      "key": "drpyS_OmoFun[漫]",
-      "name": "OmoFun[漫](DS)",
-      "api": "http://localhost:5757/api/OmoFun[漫]?pwd=dzyyds",
+      "key": "drpyS_ACG漫画网[画]",
+      "name": "ACG漫画网[画](DS)",
+      "api": "http://localhost:5757/api/ACG漫画网[画]?pwd=dzyyds",
       "type": 4,
       "searchable": 2,
       "lang": "ds",
       "status": "error",
       "message": "推荐和分类接口均异常",
       "testUrls": {
-        "home": "http://localhost:5757/api/OmoFun[%E6%BC%AB]?pwd=dzyyds",
-        "category": "http://localhost:5757/api/OmoFun[%E6%BC%AB]?pwd=dzyyds&ac=list&t=1&pg=1"
+        "home": "http://localhost:5757/api/ACG%E6%BC%AB%E7%94%BB%E7%BD%91[%E7%94%BB]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/ACG%E6%BC%AB%E7%94%BB%E7%BD%91[%E7%94%BB]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2948,7 +2967,7 @@
         "home": "http://localhost:5757/api/Nyafun[%E6%BC%AB]?pwd=dzyyds",
         "category": "http://localhost:5757/api/Nyafun[%E6%BC%AB]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2964,7 +2983,38 @@
         "home": "http://localhost:5757/api/MP4%E7%94%B5%E5%BD%B1[%E7%A3%81]?pwd=dzyyds",
         "category": "http://localhost:5757/api/MP4%E7%94%B5%E5%BD%B1[%E7%A3%81]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "hipy_py_OMOfun[AG¹]",
+      "name": "OMOfun[AG¹](hipy)",
+      "api": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds",
+      "type": 4,
+      "searchable": 1,
+      "lang": "hipy",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/AppGet?do=py&pwd=dzyyds&extend=%7B%22host%22%3A%22https%3A%2F%2Fapp.omofun1.top%22%2C%22key%22%3A%2266dc309cbeeca454%22%7D"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
+      "manuallyMarked": false
+    },
+    {
+      "key": "drpyS_OmoFun[漫]",
+      "name": "OmoFun[漫](DS)",
+      "api": "http://localhost:5757/api/OmoFun[漫]?pwd=dzyyds",
+      "type": 4,
+      "searchable": 2,
+      "lang": "ds",
+      "status": "error",
+      "message": "推荐和分类接口均异常",
+      "testUrls": {
+        "home": "http://localhost:5757/api/OmoFun[%E6%BC%AB]?pwd=dzyyds",
+        "category": "http://localhost:5757/api/OmoFun[%E6%BC%AB]?pwd=dzyyds&ac=list&t=1&pg=1"
+      },
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     },
     {
@@ -2980,7 +3030,7 @@
         "home": "http://localhost:5757/api/xvideos[%E5%AF%86]?pwd=dzyyds",
         "category": "http://localhost:5757/api/xvideos[%E5%AF%86]?pwd=dzyyds&ac=list&t=1&pg=1"
       },
-      "checkTime": "2025-09-13T00:16:51.505Z",
+      "checkTime": "2025-09-14T01:18:03.897Z",
       "manuallyMarked": false
     }
   ]

@@ -56,10 +56,11 @@ globalThis.JsonBig = JSONbig({storeAsString: true});
 globalThis.require = rootRequire;
 initializeGlobalDollar();
 
-const {Ali, Baidu, Cloud, Pan, Quark, UC, Yun} = PanS;
+const {Ali, Baidu, Baidu2, Cloud, Pan, Quark, UC, Yun} = PanS;
 const {
     sleep, sleepSync, getNowTime, computeHash, deepCopy,
-    urljoin, urljoin2, joinUrl, keysToLowerCase, naturalSort, $js
+    urljoin, urljoin2, joinUrl, keysToLowerCase, naturalSort, $js,
+    createBasicAuthHeaders
 } = utils;
 // 缓存已初始化的模块和文件 hash 值
 const moduleCache = new Map();
@@ -156,6 +157,7 @@ export async function getSandbox(env = {}) {
         joinUrl,
         naturalSort,
         $js,
+        createBasicAuthHeaders,
         $,
         pupWebview,
         getProxyUrl,
@@ -281,6 +283,7 @@ export async function getSandbox(env = {}) {
         _ENV,
         Quark,
         Baidu,
+        Baidu2,
         UC,
         Ali,
         Cloud,
@@ -460,11 +463,11 @@ export async function init(filePath, env = {}, refresh) {
         moduleObject.cost = t2 - t1;
         moduleObject.context = context; // 将沙箱上下文添加到moduleObject中
         // log(`${filePath} headers:`, moduleObject.headers);
-        
+
         // 清理原始rule对象以减少内存占用
         // 由于已经深拷贝到moduleObject，原始rule不再需要
         // delete sandbox.rule;
-        
+
         // 缓存模块和文件的 hash 值
         moduleCache.set(hashMd5, {moduleObject, hash: fileHash});
         return moduleObject;
@@ -515,11 +518,11 @@ export async function getRuleObject(filePath, env, refresh) {
         ruleObject.quickSearch = ruleObject.hasOwnProperty('quickSearch') ? Number(ruleObject.quickSearch) : 0;
         ruleObject.cost = t2 - t1;
         // log(`${filePath} headers:`, moduleObject.headers);
-        
+
         // 清理原始rule对象以减少内存占用
         // 由于已经深拷贝到ruleObject，原始rule不再需要
         // delete sandbox.rule;
-        
+
         // 缓存模块和文件的 hash 值
         ruleObjectCache.set(filePath, {ruleObject, hash: fileHash});
         return ruleObject
