@@ -1,8 +1,15 @@
 import vm from "vm";
 import {
-    dealJson, encodeStr, tellIsJx, ungzip,
-    jinja, nodata, SPECIAL_URL,
-    forceOrder, vodDeal, processImage,
+    dealJson,
+    encodeStr,
+    forceOrder,
+    jinja,
+    nodata,
+    processImage,
+    SPECIAL_URL,
+    tellIsJx,
+    ungzip,
+    vodDeal,
 } from "../libs_drpy/drpyCustom.js";
 import {base64Decode, md5} from "../libs_drpy/crypto-util.js";
 import {deepCopy, urljoin} from "../utils/utils.js";
@@ -417,7 +424,7 @@ export async function homeParse(rule) {
     return context;
 }
 
-async function homeParseAfter(d, _type, hikerListCol, hikerClassListCol, injectVars) {
+export async function homeParseAfter(d, _type, hikerListCol, hikerClassListCol, injectVars) {
     if (!d) {
         d = {};
     }
@@ -531,7 +538,7 @@ export async function cateParse(rule, tid, pg, filter, extend) {
     });
 }
 
-async function cateParseAfter(rule, d, pg) {
+export async function cateParseAfter(rule, d, pg) {
     return d.length < 1 ? nodata : {
         'page': parseInt(pg),
         'pagecount': 9999,
@@ -571,7 +578,7 @@ export async function detailParse(rule, ids) {
     });
 }
 
-async function detailParseAfter(vod) {
+export async function detailParseAfter(vod) {
     return {
         list: [vod]
     }
@@ -621,7 +628,7 @@ export async function searchParse(rule, wd, quick, pg) {
 
 }
 
-async function searchParseAfter(rule, d, pg) {
+export async function searchParseAfter(rule, d, pg) {
     return {
         'page': parseInt(pg),
         'pagecount': 9999,
@@ -657,7 +664,7 @@ export async function playParse(rule, flag, id, flags) {
     });
 }
 
-async function playParseAfter(rule, obj, playUrl, flag) {
+export async function playParseAfter(rule, obj, playUrl, flag) {
     let common_play = {
         parse: SPECIAL_URL.test(playUrl) || /^(push:)/.test(playUrl) ? 0 : 1,
         url: playUrl,
@@ -728,6 +735,7 @@ export async function proxyParse(rule, params) {
 export async function commonClassParse(moduleObject, method, injectVars, args) {
     // class_parse字符串p
     let p = moduleObject[method].trim();
+    let cate_exclude = moduleObject['cate_exclude'].trim();
     const tmpFunction = async function () {
         const {input, MY_URL, pdfa, pdfh, pd, pjfa, pjfh, pj} = this;
         let classes = [];
@@ -763,6 +771,9 @@ export async function commonClassParse(moduleObject, method, injectVars, args) {
                             try {
                                 //log('[commonClassParse] it:', it);
                                 let name = $pdfh(it, p[1]);
+                                if (cate_exclude && (new RegExp(cate_exclude).test(name))) {
+                                    continue;
+                                }
                                 let url = $pd(it, p[2]);
                                 if (p.length > 3 && p[3]) {
                                     let exp = new RegExp(p[3]);
@@ -1602,5 +1613,72 @@ async function executeSandboxFunction(functionName, args, context, errorMessage 
     } catch (e) {
         log(`[executeSandboxFunction] ${errorMessage}:`, e.message);
         return defaultReturn;
+    }
+}
+
+/**
+ * 在沙箱环境中执行js:开头的字符串代码
+ * @param {object} moduleObject - 模块对象
+ * @param {string} method - 方法名
+ * @param {object} injectVars - 注入变量，作为this上下文
+ * @param {array} args - 参数数组
+ * @returns {Promise<any>} - 执行结果
+ */
+export async function executeJsCodeInSandbox(moduleObject, method, injectVars = {}, args = []) {
+    let contextWithVars = null;
+    let functionCode = null;
+
+    try {
+        // 获取js:后面的代码
+        const jsCode = moduleObject[method].substring(3); // 去掉'js:'前缀
+
+        // 获取原始沙箱上下文
+        const originalContext = moduleObject.context;
+        if (!originalContext) {
+            throw new Error('Sandbox context not found in moduleObject');
+        }
+
+        // 构建函数代码，将用户代码包装在函数中
+        functionCode = `
+            (async function() {
+                ${jsCode}
+            })()
+        `;
+
+        // 创建一个新的上下文，包含原始上下文和注入的变量
+        contextWithVars = vm.createContext({
+            ...originalContext,
+            ...injectVars
+        });
+
+        // 在新上下文中执行函数代码
+        const result = await vm.runInContext(functionCode, contextWithVars);
+
+        // 深拷贝结果以避免引用原上下文中的对象
+        return deepCopy(result);
+    } catch (error) {
+        log(`[executeJsCodeInSandbox] Error executing js: code for method ${method}:`, error);
+        throw new Error(`Failed to execute js: code: ${error.message}`);
+    } finally {
+        // 内存清理：销毁临时变量和上下文
+        if (contextWithVars) {
+            // 清空上下文中的所有属性
+            for (const key in contextWithVars) {
+                try {
+                    delete contextWithVars[key];
+                } catch (e) {
+                    // 忽略无法删除的属性
+                }
+            }
+            contextWithVars = null;
+        }
+
+        // 清空函数代码字符串
+        functionCode = null;
+
+        // 建议垃圾回收（仅建议，实际执行由V8决定）
+        if (global.gc) {
+            global.gc();
+        }
     }
 }

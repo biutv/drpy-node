@@ -248,6 +248,13 @@ export function createBasicAuthHeaders(username, password) {
 export const $js = {
     toString(func) {
         let strfun = func.toString();
-        return strfun.replace(/^\(\)(\s+)?=>(\s+)?\{/, "js:").replace(/\}$/, '');
+        // 处理 async () => { ... } 形式
+        // 匹配: async () => { 或 async() => { 或 () => { 
+        strfun = strfun.replace(/^(async\s*)?\(\)(\s+)?=>(\s+)?\{/, "js:");
+        // 移除末尾的 }
+        strfun = strfun.replace(/\}$/, '');
+        // 去除开头和结尾的多余空白字符，但保留内部格式
+        strfun = strfun.replace(/^js:\s*/, 'js:').replace(/\s*$/, '');
+        return strfun;
     }
 };

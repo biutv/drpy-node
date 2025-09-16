@@ -59,6 +59,7 @@ class BaiduDrive {
         return await this.getShareList()
     }
 
+
     async getRandsk() {
         let data = qs.stringify({
             'pwd': this.pwd,
@@ -89,6 +90,7 @@ class BaiduDrive {
 
     }
 
+
     async getShareList() {
         await this.getRandsk()
         this.headers['cookie'] = this.cookie
@@ -106,9 +108,11 @@ class BaiduDrive {
                     dirs.push(item.path)
                 }
                 if (item.category === '1' || item.category === 1) {
+                    // 确保所有情况下都提取文件名
+                    const fileName = item.server_filename || item.path.split('/').pop();
                     videos.push({
-                        name: item.path,
-                        path: item.path,
+                        name: fileName, // 只使用文件名
+                        path: item.path, // 保留完整路径用于内部处理
                         uk: this.uk,
                         shareid: this.shareid,
                         fsid: item.fs_id || item.fsid
@@ -124,7 +128,14 @@ class BaiduDrive {
             let result = await Promise.all(dirs.map(async (path) => this.getSharepath(path)))
             result = result.filter(item => item !== undefined && item !== null).flat()
             if (result.length >= 0) {
-                file[data.title].push(...result);
+                // 确保递归获取的文件也正确处理文件名
+                const processedResult = result.map(item => {
+                    if (item.name && item.name.includes('/')) {
+                        item.name = item.name.split('/').pop();
+                    }
+                    return item;
+                });
+                file[data.title].push(...processedResult);
             }
             return file;
         }
@@ -144,9 +155,11 @@ class BaiduDrive {
                     dirs.push(item.path)
                 }
                 if (item.category === '1' || item.category === 1) {
+                    // 确保所有情况下都提取文件名
+                    const fileName = item.server_filename || item.path.split('/').pop();
                     videos.push({
-                        name: item.path,
-                        path: item.path,
+                        name: fileName, // 只使用文件名
+                        path: item.path, // 保留完整路径用于内部处理
                         uk: this.uk,
                         shareid: this.shareid,
                         fsid: item.fs_id || item.fsid
@@ -155,7 +168,16 @@ class BaiduDrive {
             });
             let result = await Promise.all(dirs.map(async (path) => this.getSharepath(path)))
             result = result.filter(item => item !== undefined && item !== null);
-            return [...videos, ...result.flat()];
+
+            // 确保递归获取的文件也正确处理文件名
+            const processedResult = result.map(item => {
+                if (item.name && item.name.includes('/')) {
+                    item.name = item.name.split('/').pop();
+                }
+                return item;
+            });
+
+            return [...videos, ...processedResult.flat()];
         }
     }
 

@@ -109,6 +109,7 @@ async function post(url, obj = {}) {
  */
 async function reqCookie(url, obj = {}, all_cookie = false) {
     obj.withHeaders = true;
+    log('[reqCookie] obj:', obj);
     let html = await request(url, obj);
     let json = JSON.parse(html);
     let setCk = Object.keys(json).find(it => it.toLowerCase() === 'set-cookie');
@@ -120,6 +121,7 @@ async function reqCookie(url, obj = {}, all_cookie = false) {
         cookie = cookie.split(';')[0];
     }
     html = json.body;
+    log('[reqCookie] cookie:', obj);
     return {
         cookie,
         html

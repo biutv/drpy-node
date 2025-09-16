@@ -160,11 +160,15 @@ var rule = {
                     }
                     if (/pan.baidu.com/.test(list[i])) {
                         let data = await Baidu2.getShareData(list[i])
-                        Object.keys(data).forEach(it => {
-                            playform.push('Baidu-' + it)
+                        let vod_content_add = [vod.vod_content];
+                        Object.keys(data).forEach((it, index) => {
+                            // playform.push('Baidu-' + it)
+                            playform.push('Baidu-' + Number(index + 1));
+                            vod_content_add.push(it);
                             const urls = data[it].map(item => item.name + "$" + [item.path, item.uk, item.shareid, item.fsid].join('*')).join('#');
                             playurls.push(urls);
                         })
+                        vod.vod_content = vod_content_add.join('\n');
                     }
                 } else {
                     playform.push('推送');
@@ -257,11 +261,15 @@ var rule = {
             }
             if (/pan.baidu.com/.test(input)) {
                 let data = await Baidu2.getShareData(input)
-                Object.keys(data).forEach(it => {
-                    playform.push('Baidu-' + it)
+                let vod_content_add = [vod.vod_content];
+                Object.keys(data).forEach((it, index) => {
+                    // playform.push('Baidu-' + it)
+                    playform.push('Baidu-' + Number(index + 1));
+                    vod_content_add.push(it);
                     const urls = data[it].map(item => item.name + "$" + [item.path, item.uk, item.shareid, item.fsid].join('*')).join('#');
                     playurls.push(urls);
                 })
+                vod.vod_content = vod_content_add.join('\n');
             }
         } else {
             playform.push('推送');

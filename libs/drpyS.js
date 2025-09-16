@@ -43,8 +43,10 @@ import {
     pageRequestCache, cachedRequest, invokeWithInjectVars,
     homeParse, homeVodParse, cateParse,
     detailParse, searchParse, playParse, proxyParse,
+    playParseAfter, detailParseAfter, cateParseAfter, searchParseAfter, homeParseAfter,
     commonClassParse, commonHomeListParse, commonCategoryListParse,
     commonDetailListParse, commonSearchListParse, commonLazyParse,
+    executeJsCodeInSandbox,
 } from './drpysParser.js'
 
 import '../libs_drpy/es6-extend.js';
@@ -655,8 +657,8 @@ async function invokeMethod(filePath, env, method, args = [], injectVars = {}) {
     if (method === 'lazy' && ((moduleObject[method] && typeof moduleObject[method] === 'function') || !moduleObject[method])) {
         return await commonLazyParse(moduleObject, method, injectVars, args)
     }
-    // 字符串lazy直接返回嗅探
-    else if (method === 'lazy' && typeof moduleObject[method] === 'string') {
+    // 字符串lazy且非js:直接返回嗅探
+    else if (method === 'lazy' && typeof moduleObject[method] === 'string' && !moduleObject[method].startsWith('js:')) {
         return {
             parse: 1,
             url: injectVars.input,
@@ -677,6 +679,26 @@ async function invokeMethod(filePath, env, method, args = [], injectVars = {}) {
     else if (moduleObject[method] && typeof moduleObject[method] === 'function') {
         // log('injectVars:', injectVars);
         return await invokeWithInjectVars(moduleObject, moduleObject[method], injectVars, args);
+    }
+    // 特殊处理js:开头的字符串，在沙箱环境中执行
+    else if (moduleObject[method] && typeof moduleObject[method] === 'string' && moduleObject[method].startsWith('js:')) {
+        let result = await executeJsCodeInSandbox(moduleObject, method, injectVars, args);
+        if (method === 'lazy') {
+            result = await playParseAfter(moduleObject, result, args[1], args[0]);
+            let ret_str = JSON.stringify(result);
+            log(`[invokeMethod js:] 免嗅 ${injectVars.input} 执行完毕,结果为:`, ret_str.length < 100 ? ret_str : ret_str.slice(0, 100) + '...');
+        } else if (method === '二级') {
+            result = await detailParseAfter(result);
+        } else if (method === '一级') {
+            result = await cateParseAfter(moduleObject, result, args[1]);
+            log(`[invokeMethod js:] 一级 ${injectVars.input} 执行完毕,结果为:`, JSON.stringify(result.list.slice(0, 2)));
+        } else if (method === '搜索') {
+            result = await searchParseAfter(moduleObject, result, args[2]);
+            log(`[invokeMethod js:] 搜索 ${injectVars.input} 执行完毕,结果为:`, JSON.stringify(result.list.slice(0, 2)));
+        } else if (method === 'class_parse') {
+            result = await homeParseAfter(result, moduleObject.类型, moduleObject.hikerListCol, moduleObject.hikerClassListCol, injectVars);
+        }
+        return result;
     }
     // 特殊处理一级字符串
     else if (method === '一级' && moduleObject[method] && typeof moduleObject[method] === 'string') {
@@ -704,6 +726,7 @@ async function invokeMethod(filePath, env, method, args = [], injectVars = {}) {
         }
     }
 }
+
 
 async function initParse(rule, env, vm, context) {
     rule.host = (rule.host || '').rstrip('/');

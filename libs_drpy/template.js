@@ -1,8 +1,9 @@
+import {$js} from '../utils/utils.js'
 // 通用免嗅探播放
-let common_lazy = async function (flag, id, flags) {
-    let {input} = this;
-    console.log('[common_lazy] input:', input);
+let common_lazy = $js.toString(async () => {
+    log('[common_lazy] input:', input);
     let html = await request(input);
+    let result = input;
     let hconf = html.match(/r player_.*?=(.*?)</)[1];
     let json = JSON5.parse(hconf);
     let url = json.url;
@@ -12,43 +13,43 @@ let common_lazy = async function (flag, id, flags) {
         url = unescape(base64Decode(url));
     }
     if (/\\.(m3u8|mp4|m4a|mp3)/.test(url)) {
-        input = {
+        result = {
             parse: 0,
             jx: 0,
             url: url,
         };
     } else {
-        input = url && url.startsWith('http') && tellIsJx(url) ? {parse: 0, jx: 1, url: url} : input;
+        result = url && url.startsWith('http') && tellIsJx(url) ? {parse: 0, jx: 1, url: url} : input;
     }
-    console.log('[common_lazy] result:', input);
+    log('[common_lazy] result:', result);
     return input;
-}
+});
 // 默认嗅探播放
-
-let def_lazy = async function (flag, id, flags) {
-    let {input} = this;
+let def_lazy = $js.toString(async () => {
     return {parse: 1, url: input, js: ''}
-}
+});
+
 // 采集站播放
 
-let cj_lazy = async function (flag, id, flags) {
-    let {input} = this;
+let cj_lazy = $js.toString(async () => {
+    let result = input;
     if (/\.(m3u8|mp4)/.test(input)) {
-        input = {parse: 0, url: input};
+        result = {parse: 0, url: input};
     } else {
         if (rule.parse_url.startsWith('json:')) {
             let purl = rule.parse_url.replace('json:', '') + input;
             let html = await request(purl);
             let json = JSON.parse(html);
             if (json.url) {
-                input = {parse: 0, url: json.url};
+                result = {parse: 0, url: json.url};
             }
         } else {
-            input = rule.parse_url + input;
+            result = rule.parse_url + input;
         }
     }
-    return input;
-};
+    log(`[cj_lazy] result:`, result);
+    return result;
+});
 
 function getMubans() {
     const mubanDict = { // 模板字典
@@ -391,18 +392,29 @@ function getMubans() {
             lazy: cj_lazy,
             推荐: '*',
             一级: 'json:list;vod_name;vod_pic;vod_remarks;vod_id;vod_play_from',
-            二级: `js:
-            let html=request(input);
-            html=JSON.parse(html);
-            let data=html.list;
-            VOD=data[0];`,
+            // 二级: `js:
+            // log('input:',input);
+            // let html=await request(input);
+            // html=JSON.parse(html);
+            // let data=html.list;
+            // let VOD=data[0];
+            // return VOD;
+            // `,
+            二级: $js.toString(async () => {
+                log('input:', input);
+                let html = await request(input);
+                html = JSON.parse(html);
+                let data = html.list;
+                let VOD = data[0];
+                return VOD;
+            }),
             搜索: '*',
         },
     };
     return JSON.parse(JSON.stringify(mubanDict));
 }
 
-let mubanDict = getMubans();
+// let mubanDict = getMubans();
 let muban = getMubans();
 const template = {
     muban, getMubans, common_lazy, def_lazy, cj_lazy

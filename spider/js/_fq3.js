@@ -105,6 +105,14 @@ const rule = {
         await database.startDb();
         // console.log('database:',database);
         await database.endDb();
+
+        // let {cookie} = await reqCookie('https://www.03yy.live',{headers:{
+        let {cookie} = await reqCookie('https://www.baidu.com', {
+            headers: {
+                'user-agent': PC_UA
+            }
+        });
+        log('cookie:', cookie);
     },
     class_parse2: async function () {
         let {proxyUrl, getRule} = this;

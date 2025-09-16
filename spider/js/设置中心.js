@@ -72,7 +72,7 @@ let quick_data = {
     直链1: 'https://vdse.bdstatic.com//628ca08719cef5987ea2ae3c6f0d2386.mp4',
     嗅探1: 'https://www.6080kk.cc/haokanplay/178120-1-1.html',
     嗅探2: 'https://www.hahads.com/play/537106-3-1.html',
-    多集: 'https://v.qq.com/x/cover/m441e3rjq9kwpsc/m00253deqqo.html#https://pan.quark.cn/s/6c8158e258f3',
+    多集: 'https://v.qq.com/x/cover/m441e3rjq9kwpsc/m00253deqqo.html@https://pan.quark.cn/s/6c8158e258f3@https://pan.baidu.com/s/1TdbgcwaMG1dK7B5pQ1LbBg?pwd=1234',
     海阔二级单线路: gzip(JSON.stringify({
         "actor": "剧集",
         "content": "【道长DR】　　围绕上世纪30年代的上海滩，讲述了两位坚韧勇敢的女性在波澜诡谲的民国时代相互救赎、完成蜕变的动人故事。 收起",
