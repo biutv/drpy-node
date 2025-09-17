@@ -7,7 +7,7 @@ export default {
     schedule: {
         // cron: '0 0 1 * * *', // UTC时间1点对应北京时间9点
         // timezone: 'UTC',
-        cron: '0 0 8 * * *',       // 每天 8:00
+        cron: '0 0 10 * * *',       // 每天 10:00
         // cron: '0 31 17 * * *',       // 每天 17:30
         timezone: 'Asia/Shanghai', // 直接用北京时间时区
         runOnInit: false // 启动时立即执行一次

@@ -499,7 +499,7 @@ class Spider(BaseSpider):
 
     def __init__(self, query_params=None, t4_api=None):
         super().__init__(query_params=query_params, t4_api=t4_api)
-        self.localProxyUrl = None
+        self.localProxyUrl = self.getProxyUrl() + '&type='
         self.time_diff1 = {V: [0, 300], A0: [300, 900], AL: [900, 1800], AQ: [1800, 3600],
                            '5': [3600, 0x4ee2d6d415b85acef80ffffffff]};
         self.time_diff = L;
@@ -517,16 +517,15 @@ class Spider(BaseSpider):
 
     def init(self, extend=B):
         print('============{0}============'.format(extend))
-        self.localProxyUrl = self.getProxyUrl() + '&type='
 
-    def isVideoFormat(A, url):
-        0
+    def isVideoFormat(self, url):
+        pass
 
-    def manualVideoCheck(A):
-        0
+    def manualVideoCheck(self):
+        pass
 
-    def destroy(A):
-        0
+    def destroy(self):
+        pass
 
     def format_img(B, img):
         A = img;
@@ -2366,7 +2365,7 @@ class Spider(BaseSpider):
         C.pC_urlDic[id][Bf] = F(d(J(lambda x: x.split('=')[:2], D[0].split('?')[1].split('&'))).get(Bf, 0))
         for G in D: C.pool.submit(C._testUrl, G, id, E)
 
-    def localProxy(D, param):
+    def localProxy(D, param, *args, **kwargs):
         N = 'range';
         M = 'application/octet-stream';
         E = param;

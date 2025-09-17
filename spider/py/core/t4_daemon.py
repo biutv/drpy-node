@@ -48,7 +48,7 @@ except Exception:
 HOST = "127.0.0.1"
 PORT = 57570
 
-MAX_MSG_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_MSG_SIZE = 60 * 1024 * 1024  # 60MB
 MAX_CACHED_INSTANCES = 100  # 最大缓存实例数
 INIT_TIMEOUT = 100  # init 超时（秒）
 REQUEST_TIMEOUT = 30  # 单次请求 socket 超时（秒）
@@ -118,7 +118,7 @@ def recv_exact(rfile, n: int) -> bytes:
 def send_packet(wfile, obj: dict):
     payload = pickle.dumps(obj, protocol=pickle.HIGHEST_PROTOCOL)
     if len(payload) > MAX_MSG_SIZE:
-        raise ValueError("payload too large")
+        raise ValueError(f"payload too large:{len(payload)} > {MAX_MSG_SIZE}")
     wfile.write(struct.pack(">I", len(payload)))
     wfile.write(payload)
     wfile.flush()

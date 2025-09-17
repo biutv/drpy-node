@@ -106,7 +106,7 @@ def recv_exact(rfile, n: int) -> bytes:
 def send_packet(wfile, obj: dict):
     payload = pickle.dumps(obj, protocol=pickle.HIGHEST_PROTOCOL)
     if len(payload) > MAX_MSG_SIZE:
-        raise ValueError("payload too large")
+        raise ValueError(f"payload too large:{len(payload)} > {MAX_MSG_SIZE}")
     wfile.write(struct.pack(">I", len(payload)))
     wfile.write(payload)
     wfile.flush()
