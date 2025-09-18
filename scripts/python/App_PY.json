@@ -50,14 +50,6 @@
         "host": "https://mac.555618.xyz",
         "key": "#getapp@TMD@2025"
       },
-      "蓝光": {
-        "host": "http://122.228.193.2:9654",
-        "key": "ca94b06ca3c7d80e"
-      },
-      "若惜": {
-        "host": "http://110.40.59.188:9527",
-        "key": "ebad3f1a58b13933"
-      },
       "火猫": {
         "host": "http://154.12.90.59:14500",
         "key": "J6AIORKJ3PQOJKM3"
@@ -69,10 +61,6 @@
       "米兔-旧": {
         "host": "http://new.tkbot.fun",
         "key": "d032c12876bc6848"
-      },
-      "囧次元": {
-        "host": "http://jjjj.nilinili.org",
-        "key": "672263e98f232a05"
       },
       "OMOfun": {
         "host": "https://app.omofun1.top",
@@ -158,17 +146,6 @@
     }
   },
   {
-    "key": "Py_AppV2¹",
-    "name": "AV2¹",
-    "type": 3,
-    "detail_type": "search",
-    "changeable": 0,
-    "api": "clan://sites/lib/AppV2¹.py",
-    "exts": {
-      "酷秒至尊": "http://160.202.231.210:7080/ikumiao_api.php/v1.vod"
-    }
-  },
-  {
     "key": "Py_ApptoV⁵",
     "name": "ATV⁵",
     "type": 3,
@@ -215,10 +192,6 @@
     "type": 3,
     "api": "clan://sites/lib/getapp3.4.4.py",
     "exts": {
-      "小羊4k": {
-        "host": "https://appcms.xy4k.com",
-        "datakey": "7SDWjknU34zqFbVr"
-      },
       "鲸鱼影视": {
         "host": "https://jingyu4k-1312635929.cos.ap-nanjing.myqcloud.com/1.json",
         "datakey": "AAdgrdghjfgswerA",
@@ -241,10 +214,6 @@
         "host": "https://www.guahd.com/1.txt",
         "key": "f2A7D4B9E8C16531"
       },
-      "咕咕动漫": {
-        "host": "https://www.gugu3.com",
-        "key": "nKfZ8KX6JTNWRzTD"
-      },
       "萝卜": {
         "host": "https://apiapplbys.lbys.app:5678",
         "key": "apiapplbyskey168"
@@ -252,23 +221,6 @@
       "七月": {
         "host": "https://99.jl8.top/1.txt",
         "key": "xnybssspqtwotuwj"
-      },
-      "晴天": {
-        "host": "https://qjappcms.sun4k.top",
-        "key": "sBxqXVF5pAHbGzrH"
-      },
-      "世颜": {
-        "host": "https://sykjw.xyz",
-        "key": "sicnagduxbSfisnz",
-        "api": 2
-      },
-      "外剧": {
-        "host": "https://guowaiju.com",
-        "key": "7xv16h7qgkrs9b1p"
-      },
-      "小野": {
-        "host": "https://appcms.xy4k.com",
-        "key": "7SDWjknU34zqFbVr"
       },
       "掌上追剧": {
         "host": "http://tvb.yy-fun.cc",

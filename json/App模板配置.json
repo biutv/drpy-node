@@ -12,17 +12,6 @@
             "会员时长": "会员函数(gzip压缩)",
             "lazyheader": "视频播放请求头,JSON格式"
         },
-        "淘影电影": {
-            "muban": "AppGet",
-            "host": "",
-            "hosturl": "https://skap.oss-cn-hangzhou.aliyuncs.com/getapi.txt",
-            "key": "4990488248904884",
-            "iv": "4990488248904884",
-            "username": "自己注册",
-            "password": "自己注册",
-            "会员时长": "H4sIAAAAAAACA3VSTW/TQBC991eMqkq2IbXXzkfTREVK0w9C41IpbcOt3drTZKmza63X/ZTviAMgIegJ9U8gOHDg17TAv2CdxE04MJf1rN+8efNmaXLFAzhNeaCY4KYFNwugIxA8UTBEGqJMYG16m4dxkKBcbg2QK6MBhi+uWRRRp2oTMLuMp5dNaPFQChaCW2mC55GK67m1NqynLAqdgz23ZXtllxBdQVaacHFuQSuOI+zjyQ5TTrW8YpdrYO483/e7JYjYGcI2BmfCgkOtRYt0KrpXeyjFCB23rBO7trpat11d5YsTFiH06CmVrKB61d9cz4HEJavg+zrrbew4HvGqxCPu5Kaz4Xgr9Qr4LJDCxyRBPkDp1DV5tW579YprkkuvTki5Vd6yoI/tIVUOlaNaRSfsknHYRbV/FaPT72x1oEv5IKUDdK6HR+1daK13pmCfcbYnxUDS0SY/d+jEKqM081dbr7S5y0qT5Q5TbQ4LaL4e53UiuDGGZs3xEaGCkCqqV0QvKFMQi0SZx0s3Mo3QHuokc9JYI/DonMV2PIyPS3PLnC64UXzMZJyI8Koxh8xjMdWr53SEiw0Y8xf5IyqbaLNm4nLFWtyL3stdO6YyQTOXOwWwUzBzgB2IEGFtDTxCrLmmOQHy8Eixkf495rLzcru4bP4D1RMWUI4XsKGnNh/Ln4B+c8SyleiKgEbYU5LxgWnNKPI3L/RUkRjkDo67jfRT0GvMSg9vPty/vfv97vv9+8+6z8Pttz+ffh7/r/qws/frx8eHL3c57vZrY+mm0JYVNRlglODcsPMExjMdBjyFObMm3kpUqeTNhewvo7ie8rkDAAA=",
-            "lazyheader": {}
-        },
         "蓝鹰": {
             "muban": "AppQiji",
             "host": "",
@@ -41,24 +30,6 @@
             "host": "",
             "hosturl": "",
             "version": ""
-        },
-        "橘子": {
-            "host": "https://ajuzi.top"
-        },
-        "演员": {
-            "host": "https://vod.feiwang.cc"
-        },
-        "趣看": {
-            "host": "https://www.ququkan.cc"
-        },
-        "电影驿站": {
-            "host": "https://qqiqiyiyoukumgtvapiappdyyztvjsoni8n2o0z1ws2n7b6v3x8.68.gy:56789"
-        },
-        "火猫": {
-            "host": "http://app.789dd.cn"
-        },
-        "落功阁": {
-            "host": "https://ww.ndjdnd.icu"
         }
     },
     "AppShark": {

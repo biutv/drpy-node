@@ -1,17 +1,41 @@
+/**
+ * 图片存储管理控制器
+ * 
+ * 功能：提供图片的上传、获取、删除、更新等RESTful API接口
+ * 支持base64格式图片的内存存储和管理，包括过期清理和内存监控
+ * 
+ * @author drpy
+ * @version 1.0.0
+ */
+
 import {imageManager} from '../utils/imageManager.js'
 import {validateBasicAuth} from '../utils/api_validate.js'
 
-// Fastify插件导出
+/**
+ * Fastify插件导出
+ * 注册图片管理相关的路由和处理器
+ * 
+ * @param {Object} fastify - Fastify实例
+ * @param {Object} options - 插件配置选项
+ * @param {Function} done - 插件注册完成回调
+ */
 export default (fastify, options, done) => {
+    /**
+     * 图片上传接口
+     * POST /image/upload
+     * 
+     * 功能：接收base64格式的图片数据并存储到内存中
+     * 需要基础认证，支持图片大小限制
+     */
     fastify.post('/image/upload', {
-        preHandler: validateBasicAuth,
+        preHandler: validateBasicAuth, // 需要基础认证
         schema: {
             body: {
                 type: 'object',
                 required: ['imageId', 'base64Data'],
                 properties: {
-                    imageId: {type: 'string', minLength: 1, maxLength: 100},
-                    base64Data: {type: 'string', minLength: 1}
+                    imageId: {type: 'string', minLength: 1, maxLength: 100}, // 图片唯一标识
+                    base64Data: {type: 'string', minLength: 1}                // base64编码的图片数据
                 }
             }
         }
@@ -39,6 +63,7 @@ export default (fastify, options, done) => {
             //     });
             // }
 
+            // 存储图片到内存
             const result = imageManager.storeImage(imageId, base64Data);
 
             reply.send({
@@ -55,13 +80,19 @@ export default (fastify, options, done) => {
         }
     });
 
-    // 获取图片 - GET /image/:imageId
+    /**
+     * 获取图片接口
+     * GET /image/:imageId
+     * 
+     * 功能：根据图片ID获取图片数据，返回二进制图片内容
+     * 支持浏览器缓存和适当的HTTP头设置
+     */
     fastify.get('/image/:imageId', {
         schema: {
             params: {
                 type: 'object',
                 properties: {
-                    imageId: {type: 'string'}
+                    imageId: {type: 'string'} // 图片唯一标识
                 },
                 required: ['imageId']
             }
@@ -71,6 +102,7 @@ export default (fastify, options, done) => {
             const {imageId} = request.params;
             const imageInfo = imageManager.getImage(imageId);
 
+            // 检查图片是否存在
             if (!imageInfo) {
                 return reply.status(404).send({
                     success: false,
@@ -78,14 +110,14 @@ export default (fastify, options, done) => {
                 });
             }
 
-            // 解析base64数据
+            // 解析base64数据为二进制缓冲区
             const {mimeType, buffer} = imageManager.parseBase64ToBuffer(imageInfo.data);
 
             // 设置响应头
-            reply.header('Content-Type', `image/${mimeType}`);
-            reply.header('Content-Length', buffer.length);
-            reply.header('Cache-Control', 'public, max-age=3600'); // 缓存1小时
-            reply.header('Last-Modified', new Date(imageInfo.timestamp).toUTCString());
+            reply.header('Content-Type', `image/${mimeType}`);           // 设置MIME类型
+            reply.header('Content-Length', buffer.length);               // 设置内容长度
+            reply.header('Cache-Control', 'public, max-age=3600');       // 缓存1小时
+            reply.header('Last-Modified', new Date(imageInfo.timestamp).toUTCString()); // 最后修改时间
 
             // 返回图片数据
             reply.send(buffer);
@@ -98,7 +130,13 @@ export default (fastify, options, done) => {
         }
     });
 
-    // 获取图片列表 - GET /image/list
+    /**
+     * 获取图片列表接口
+     * GET /image/list
+     * 
+     * 功能：获取所有已存储图片的列表信息
+     * 返回图片ID、大小、时间戳等元数据
+     */
     fastify.get('/image/list', async (request, reply) => {
         try {
             const images = imageManager.getAllImages();
@@ -106,8 +144,8 @@ export default (fastify, options, done) => {
             reply.send({
                 success: true,
                 data: {
-                    images: images,
-                    total: images.length
+                    images: images,      // 图片列表
+                    total: images.length // 图片总数
                 }
             });
 
@@ -119,14 +157,20 @@ export default (fastify, options, done) => {
         }
     });
 
-    // 删除图片 - DELETE /image/:imageId
+    /**
+     * 删除图片接口
+     * DELETE /image/:imageId
+     * 
+     * 功能：根据图片ID删除指定图片
+     * 需要基础认证，支持释放内存空间
+     */
     fastify.delete('/image/:imageId', {
-        preHandler: validateBasicAuth,
+        preHandler: validateBasicAuth, // 需要基础认证
         schema: {
             params: {
                 type: 'object',
                 properties: {
-                    imageId: {type: 'string'}
+                    imageId: {type: 'string'} // 图片唯一标识
                 },
                 required: ['imageId']
             }
@@ -135,6 +179,7 @@ export default (fastify, options, done) => {
         try {
             const {imageId} = request.params;
 
+            // 尝试删除图片
             if (imageManager.deleteImage(imageId)) {
                 reply.send({
                     success: true,
@@ -155,7 +200,13 @@ export default (fastify, options, done) => {
         }
     });
 
-    // 获取内存使用情况 - GET /image/memory
+    /**
+     * 获取内存使用情况接口
+     * GET /image/memory
+     * 
+     * 功能：获取图片存储的内存使用统计信息
+     * 包括图片数量、总内存占用等信息
+     */
     fastify.get('/image/memory', async (request, reply) => {
         try {
             const usage = imageManager.getMemoryUsage();
@@ -173,14 +224,20 @@ export default (fastify, options, done) => {
         }
     });
 
-    // 清理过期图片 - POST /image/cleanup
+    /**
+     * 清理过期图片接口
+     * POST /image/cleanup
+     * 
+     * 功能：清理超过指定时间的过期图片，释放内存空间
+     * 需要基础认证，支持自定义过期时间
+     */
     fastify.post('/image/cleanup', {
-        preHandler: validateBasicAuth,
+        preHandler: validateBasicAuth, // 需要基础认证
         schema: {
             body: {
                 type: 'object',
                 properties: {
-                    maxAge: {type: 'number', minimum: 1000} // 最小1秒
+                    maxAge: {type: 'number', minimum: 1000} // 最大存活时间（毫秒），最小1秒
                 }
             }
         }
@@ -193,8 +250,8 @@ export default (fastify, options, done) => {
                 success: true,
                 message: `清理完成，删除了 ${cleanedCount} 张过期图片`,
                 data: {
-                    cleanedCount: cleanedCount,
-                    remainingCount: imageManager.getMemoryUsage().imageCount
+                    cleanedCount: cleanedCount,                              // 清理的图片数量
+                    remainingCount: imageManager.getMemoryUsage().imageCount // 剩余图片数量
                 }
             });
 
@@ -206,14 +263,20 @@ export default (fastify, options, done) => {
         }
     });
 
-    // 更新图片 - PUT /image/:imageId
+    /**
+     * 更新图片接口
+     * PUT /image/:imageId
+     * 
+     * 功能：更新指定ID的图片数据
+     * 需要基础认证，支持图片大小限制
+     */
     fastify.put('/image/:imageId', {
-        preHandler: validateBasicAuth,
+        preHandler: validateBasicAuth, // 需要基础认证
         schema: {
             params: {
                 type: 'object',
                 properties: {
-                    imageId: {type: 'string'}
+                    imageId: {type: 'string'} // 图片唯一标识
                 },
                 required: ['imageId']
             },
@@ -221,7 +284,7 @@ export default (fastify, options, done) => {
                 type: 'object',
                 required: ['base64Data'],
                 properties: {
-                    base64Data: {type: 'string', minLength: 1}
+                    base64Data: {type: 'string', minLength: 1} // base64编码的新图片数据
                 }
             }
         }
@@ -249,6 +312,7 @@ export default (fastify, options, done) => {
                 });
             }
 
+            // 更新图片数据
             const result = imageManager.storeImage(imageId, base64Data);
 
             reply.send({
@@ -265,5 +329,5 @@ export default (fastify, options, done) => {
         }
     });
 
-    done();
+    done(); // 插件注册完成
 };

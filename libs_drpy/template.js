@@ -1,17 +1,33 @@
+/**
+ * DRPY模板系统
+ * 提供各种网站的解析模板和播放器配置
+ * @module template
+ */
+
 import {$js} from '../utils/utils.js'
-// 通用免嗅探播放
+
+/**
+ * 通用免嗅探播放器
+ * 用于解析常见的视频播放页面，支持加密URL解码
+ */
 let common_lazy = $js.toString(async () => {
     log('[common_lazy] input:', input);
+    // 请求播放页面HTML
     let html = await request(input);
     let result = input;
+    // 提取播放器配置信息
     let hconf = html.match(/r player_.*?=(.*?)</)[1];
     let json = JSON5.parse(hconf);
     let url = json.url;
+    
+    // 根据加密类型解码URL
     if (json.encrypt == '1') {
         url = unescape(url);
     } else if (json.encrypt == '2') {
         url = unescape(base64Decode(url));
     }
+    
+    // 判断是否为直链视频
     if (/\\.(m3u8|mp4|m4a|mp3)/.test(url)) {
         result = {
             parse: 0,
@@ -19,23 +35,32 @@ let common_lazy = $js.toString(async () => {
             url: url,
         };
     } else {
+        // 判断是否需要解析
         result = url && url.startsWith('http') && tellIsJx(url) ? {parse: 0, jx: 1, url: url} : input;
     }
     log('[common_lazy] result:', result);
     return input;
 });
-// 默认嗅探播放
+
+/**
+ * 默认嗅探播放器
+ * 使用默认的嗅探方式播放视频
+ */
 let def_lazy = $js.toString(async () => {
     return {parse: 1, url: input, js: ''}
 });
 
-// 采集站播放
-
+/**
+ * 采集站播放器
+ * 用于处理采集站的视频播放链接
+ */
 let cj_lazy = $js.toString(async () => {
     let result = input;
+    // 检查是否为直链视频
     if (/\.(m3u8|mp4)/.test(input)) {
         result = {parse: 0, url: input};
     } else {
+        // 处理JSON解析接口
         if (rule.parse_url.startsWith('json:')) {
             let purl = rule.parse_url.replace('json:', '') + input;
             let html = await request(purl);
@@ -44,6 +69,7 @@ let cj_lazy = $js.toString(async () => {
                 result = {parse: 0, url: json.url};
             }
         } else {
+            // 使用解析接口
             result = rule.parse_url + input;
         }
     }
@@ -51,8 +77,18 @@ let cj_lazy = $js.toString(async () => {
     return result;
 });
 
+/**
+ * 获取模板字典
+ * 返回包含各种网站解析模板的字典对象
+ * @returns {Object} 模板字典，包含各种网站的解析配置
+ */
 function getMubans() {
-    const mubanDict = { // 模板字典
+    // 模板字典 - 包含各种网站的解析配置
+    const mubanDict = { 
+        /**
+         * MX模板 - 通用苹果CMS模板
+         * 适用于大部分苹果CMS网站
+         */
         mx: {
             title: '',
             host: '',
@@ -81,6 +117,11 @@ function getMubans() {
             },
             搜索: '*',
         },
+        
+        /**
+         * MXPro模板 - 增强版苹果CMS模板
+         * 适用于新版苹果CMS网站
+         */
         mxpro: {
             title: '',
             host: '', // homeUrl:'/',
@@ -414,9 +455,28 @@ function getMubans() {
     return JSON.parse(JSON.stringify(mubanDict));
 }
 
-// let mubanDict = getMubans();
+/**
+ * 模板实例
+ * 获取所有可用的网站解析模板
+ * @type {Object}
+ */
 let muban = getMubans();
+
+/**
+ * 模板系统导出对象
+ * 包含模板字典、获取函数和各种播放器
+ * @type {Object}
+ */
 const template = {
-    muban, getMubans, common_lazy, def_lazy, cj_lazy
+    muban, // 模板字典
+    getMubans, // 获取模板函数
+    common_lazy, // 通用免嗅探播放器
+    def_lazy, // 默认嗅探播放器
+    cj_lazy // 采集站播放器
 }
+
+/**
+ * 导出模板系统
+ * 供其他模块使用的模板配置和播放器
+ */
 export default template;

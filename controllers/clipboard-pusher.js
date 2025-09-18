@@ -1,8 +1,18 @@
+/**
+ * 剪贴板推送控制器
+ * 提供剪贴板内容的添加、清空、读取功能
+ */
+
 import fs from 'fs/promises';
 import path from 'path';
 import {validateVercel} from '../utils/api_validate.js';
 
-// 认证中间件（callback 风格，方便跟 validateVercel 一致）
+/**
+ * 认证中间件（callback 风格，方便跟 validateVercel 一致）
+ * @param {Object} request 请求对象
+ * @param {Object} reply 响应对象
+ * @param {Function} done 回调函数
+ */
 function authenticate(request, reply, done) {
     const SECURITY_CODE = process.env.CLIPBOARD_SECURITY_CODE;
     if (!SECURITY_CODE) return done(); // 不启用安全码
@@ -20,7 +30,13 @@ function authenticate(request, reply, done) {
     done();
 }
 
+/**
+ * 剪贴板推送插件
+ * @param {Object} fastify Fastify实例
+ * @param {Object} options 选项
+ */
 export default async function (fastify, options) {
+    // 配置参数
     const MAX_TEXT_SIZE = parseInt(process.env.CLIPBOARD_MAX_SIZE) || 100 * 1024;
     const SECURITY_CODE = process.env.CLIPBOARD_SECURITY_CODE;
     const ALLOWED_CHARSET = process.env.CLIPBOARD_ALLOWED_CHARSET || 'utf8';
@@ -31,6 +47,12 @@ export default async function (fastify, options) {
     }
 
     // ===== 工具函数 =====
+    
+    /**
+     * 检查文本是否包含可执行模式
+     * @param {string} text 待检查文本
+     * @returns {boolean} 是否包含可执行模式
+     */
     function containsExecutablePatterns(text) {
         const executablePatterns = [
             /\x4D\x5A/, // MZ
@@ -45,6 +67,12 @@ export default async function (fastify, options) {
         return executablePatterns.some(pattern => pattern.test(text));
     }
 
+    /**
+     * 验证字符集是否有效
+     * @param {string} text 待验证文本
+     * @param {string} allowedCharset 允许的字符集
+     * @returns {boolean} 字符集是否有效
+     */
     function isValidCharset(text, allowedCharset) {
         try {
             if (allowedCharset === 'utf8') {
@@ -62,6 +90,7 @@ export default async function (fastify, options) {
     }, async (request, reply) => {
         const {text, mode = 'append'} = request.body;
 
+        // 验证输入参数
         if (!text || typeof text !== 'string') {
             return reply.code(400).send('Valid text content is required');
         }
@@ -69,10 +98,12 @@ export default async function (fastify, options) {
             return reply.code(400).send('Mode must be either "append" or "overwrite"');
         }
 
+        // 检查文本大小
         const textSize = Buffer.byteLength(text, 'utf8');
         if (textSize > MAX_TEXT_SIZE) {
             return reply.code(413).send(`Text exceeds maximum size of ${MAX_TEXT_SIZE} bytes`);
         }
+        // 安全检查
         if (containsExecutablePatterns(text)) {
             return reply.code(400).send('Content contains suspicious patterns');
         }
@@ -80,6 +111,7 @@ export default async function (fastify, options) {
             return reply.code(400).send('Text contains invalid characters');
         }
 
+        // 文件路径安全检查
         const filePath = path.resolve(process.cwd(), 'clipboard.txt');
         if (!filePath.startsWith(process.cwd())) {
             return reply.code(500).send('Invalid file path');
@@ -87,6 +119,7 @@ export default async function (fastify, options) {
 
         try {
             if (mode === 'append') {
+                // 追加模式
                 await fs.appendFile(filePath, text + '\n');
             } else {
                 // 覆盖模式：先备份
@@ -122,10 +155,12 @@ export default async function (fastify, options) {
         const filePath = path.resolve(process.cwd(), 'clipboard.txt');
         const backupPath = path.resolve(process.cwd(), 'clipboard.txt.bak');
 
+        // 文件路径安全检查
         if (!filePath.startsWith(process.cwd()) || !backupPath.startsWith(process.cwd())) {
             return reply.code(500).send('Invalid file path');
         }
 
+        // 检查文件是否存在
         try {
             await fs.access(filePath);
         } catch {
@@ -136,10 +171,12 @@ export default async function (fastify, options) {
         }
 
         try {
+            // 备份当前内容
             const currentContent = await fs.readFile(filePath, 'utf8');
             await fs.writeFile(backupPath, currentContent);
             fastify.log.info(`Clipboard content backed up to ${backupPath}`);
 
+            // 清空文件
             await fs.writeFile(filePath, '');
             return reply.send({
                 success: true,
@@ -157,13 +194,16 @@ export default async function (fastify, options) {
         preHandler: [validateVercel, authenticate],
     }, async (request, reply) => {
         const filePath = path.resolve(process.cwd(), 'clipboard.txt');
+        // 文件路径安全检查
         if (!filePath.startsWith(process.cwd())) {
             return reply.code(500).send('Invalid file path');
         }
 
         try {
+            // 检查文件是否存在
             await fs.access(filePath).catch(() => null);
 
+            // 检查文件大小
             const stats = await fs.stat(filePath).catch(() => ({size: 0}));
             if (stats.size === 0) {
                 return reply.type('text/plain;charset=utf-8').send('');
@@ -172,6 +212,7 @@ export default async function (fastify, options) {
                 return reply.code(413).send(`File size exceeds maximum read size of ${MAX_READ_SIZE} bytes`);
             }
 
+            // 读取文件内容
             const content = await fs.readFile(filePath, 'utf8');
             return reply.type('text/plain;charset=utf-8').send(content);
         } catch (err) {

@@ -1,3 +1,8 @@
+/**
+ * 百度网盘API处理模块
+ * 提供百度网盘分享链接解析、文件下载、保存等功能
+ * 支持分享链接验证、文件列表获取、下载地址生成等操作
+ */
 import req from '../req.js';
 import {ENV} from '../env.js';
 import COOKIE from '../cookieManager.js';
@@ -6,47 +11,70 @@ import {join} from 'path';
 import fs from 'fs';
 import {PassThrough} from 'stream';
 
+/**
+ * 百度网盘处理类
+ * 负责处理百度网盘分享链接的解析、验证、文件操作等功能
+ */
 class BaiduHandler {
+    /**
+     * 构造函数 - 初始化百度网盘处理器
+     */
     constructor() {
         // 初始化百度云盘处理类
-        this._cookie = ENV.get('baidu_cookie') || '';
-        this.regex = /https:\/\/pan\.baidu\.com\/s\/([^\\|#/]+)/;
+        this._cookie = ENV.get('baidu_cookie') || ''; // 百度网盘Cookie
+        this.regex = /https:\/\/pan\.baidu\.com\/s\/([^\\|#/]+)/; // 分享链接正则表达式
+        // 默认请求头配置
         this.baseHeader = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
             'Accept-Encoding': 'gzip',
             'Referer': 'https://pan.baidu.com',
             'Content-Type': 'application/x-www-form-urlencoded'
         };
-        this.apiUrl = 'https://pan.baidu.com/';
-        this.shareTokenCache = {};
-        this.saveDirName = 'drpy';
-        this.saveDirId = null;
+        this.apiUrl = 'https://pan.baidu.com/'; // API基础URL
+        this.shareTokenCache = {}; // 分享Token缓存
+        this.saveDirName = 'drpy'; // 保存目录名称
+        this.saveDirId = null; // 保存目录ID
+        // 支持的字幕文件扩展名
         this.subtitleExts = ['.srt', '.ass', '.scc', '.stl', '.ttml'];
+        // 支持的视频文件扩展名
         this.subvideoExts = ['.mp4', '.mkv', '.avi', '.rmvb', '.mov', '.flv', '.wmv', '.webm', '.3gp', '.mpeg', '.mpg', '.ts', '.mts', '.m2ts', '.vob', '.divx', '.xvid', '.m4v', '.ogv', '.f4v', '.rm', '.asf', '.dat', '.dv', '.m2v'];
-        // 2小时自动清理
+        // 2小时自动清理保存目录
         this.cleanupInterval = setInterval(() => {
             this.clearSaveDir();
         }, 2 * 60 * 60 * 1000);
     }
 
-    // 获取完整的 cookie
+    /**
+     * 获取完整的Cookie
+     * @returns {string} Cookie字符串
+     */
     get cookie() {
         return (this._cookie || '').trim();
     }
 
+    /**
+     * 设置新的Cookie
+     * @param {string} newCookie - 新的Cookie值
+     */
     set cookie(newCookie) {
         console.log('更新cookie');
         this._cookie = newCookie;
     }
 
+    /**
+     * 解析分享链接获取分享数据
+     * @param {string} url - 百度网盘分享链接
+     * @returns {Object|null} 分享数据对象，包含shareId和sharePwd
+     */
     getShareData(url) {
-        this.clearSaveDir();
+        this.clearSaveDir(); // 清理保存目录
         // 解析分享链接获取分享ID和密码
         try {
-            url = decodeURIComponent(url).replace(/\s+/g, '');
+            url = decodeURIComponent(url).replace(/\s+/g, ''); // 解码并移除空白字符
 
             let shareId = '';
             let sharePwd = '';
+            // 匹配分享链接格式
             const match = url.match(/pan\.baidu\.com\/(s\/|wap\/init\?surl=)([^?&#]+)/);
             if (!match) {
                 return null;
@@ -63,6 +91,11 @@ class BaiduHandler {
         }
     }
 
+    /**
+     * 初始化百度网盘处理器
+     * @param {Object} db - 数据库实例
+     * @param {Object} cfg - 配置对象
+     */
     async initBaidu(db, cfg) {
         // 初始化百度云盘
         if (this.cookie) {
@@ -70,6 +103,10 @@ class BaiduHandler {
         }
     }
 
+    /**
+     * 创建保存目录
+     * @returns {string|null} 保存目录ID，失败时返回null
+     */
     async createSaveDir() {
         // 创建保存目录
         if (!this.cookie) {
@@ -117,6 +154,15 @@ class BaiduHandler {
         }
     }
 
+    /**
+     * 发送API请求
+     * @param {string} url - API端点URL
+     * @param {Object} data - 请求数据
+     * @param {Object} headers - 请求头
+     * @param {string} method - 请求方法 (get/post)
+     * @param {number} retry - 重试次数
+     * @returns {Promise<Object>} API响应数据
+     */
     async api(url, data = {}, headers = {}, method = 'post', retry = 3) {
         // 发送API请求
         const objectToQuery = (obj) => {
@@ -151,7 +197,13 @@ class BaiduHandler {
         return resp.data !== undefined ? resp.data : resp;
     }
 
-    // 新增验证分享链接的函数
+    /**
+     * 验证分享链接
+     * @param {Object} shareData - 分享数据对象
+     * @param {string} shareData.shareId - 分享ID
+     * @param {string} shareData.sharePwd - 分享密码
+     * @returns {Promise<Object>} 验证结果
+     */
     async verifyShare(shareData) {
         try {
             const shareVerify = await this.api(`share/verify?t=${Date.now()}&surl=${shareData.shareId}`, {
@@ -181,6 +233,13 @@ class BaiduHandler {
         }
     }
 
+    /**
+     * 获取分享Token
+     * @param {Object} shareData - 分享数据对象
+     * @param {string} shareData.shareId - 分享ID
+     * @param {string} shareData.sharePwd - 分享密码
+     * @returns {Promise<Object>} 分享Token数据
+     */
     async getShareToken(shareData) {
         // 先检查缓存，存在则直接返回
         if (this.shareTokenCache[shareData.shareId]) {
@@ -228,6 +287,12 @@ class BaiduHandler {
     }
 
 
+    /**
+     * 生成签名
+     * @param {string} shareId - 分享ID
+     * @param {string} sharePwd - 分享密码
+     * @returns {string} MD5签名字符串
+     */
     generateSign(shareId, sharePwd) {
         // 生成签名
         const timestamp = Date.now();
@@ -235,6 +300,11 @@ class BaiduHandler {
         return CryptoJS.MD5(str).toString();
     }
 
+    /**
+     * 获取分享链接中的文件列表
+     * @param {string|Object} shareInfo - 分享链接或分享数据对象
+     * @returns {Promise<Object>} 包含视频文件和字幕文件的对象
+     */
     async getFilesByShareUrl(shareInfo) {
         // 获取分享链接中的文件列表
         const shareData = typeof shareInfo === 'string' ? this.getShareData(shareInfo) : shareInfo;
@@ -336,6 +406,13 @@ class BaiduHandler {
         return {videos: videosWithSubtitles};
     }
 
+    /**
+     * 获取文件下载链接
+     * @param {string} shareId - 分享ID
+     * @param {string} fileId - 文件ID
+     * @param {string} filename - 文件名
+     * @returns {Promise<Object|null>} 下载信息对象，失败时返回null
+     */
     async getDownload(shareId, fileId, filename) {
         // 获取文件下载链接
         if (!this.shareTokenCache[shareId]) {
@@ -398,6 +475,12 @@ class BaiduHandler {
         return null;
     }
 
+    /**
+     * 保存文件到指定目录
+     * @param {Object} shareData - 分享数据对象
+     * @param {string} fileFsId - 文件系统ID
+     * @returns {Promise<boolean>} 保存是否成功
+     */
     async save(shareData, fileFsId) {
         // 保存文件到指定目录
         if (!this.cookie) {
@@ -447,11 +530,21 @@ class BaiduHandler {
         }
     }
 
+    /**
+     * 延迟函数
+     * @param {number} ms - 延迟毫秒数
+     * @returns {Promise<void>} Promise对象
+     */
     delay(ms) {
         // 延迟函数
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
+    /**
+     * 清理保存目录
+     * 删除保存目录中的所有文件，释放存储空间
+     * @returns {Promise<void>} Promise对象
+     */
     async clearSaveDir() {
         // 清理保存目录
         if (!this.cookie) {

@@ -1,26 +1,46 @@
+/**
+ * GB18030编码转换模块
+ * 提供GB18030字符编码的解码功能，支持CommonJS、AMD和全局环境
+ * GB18030是中华人民共和国国家标准，是中文编码的扩展标准
+ */
 ;(function (root, factory) {
+    // 检测CommonJS环境（如Node.js）
     if (typeof exports === "object") {
-        // CommonJS
+        // CommonJS导出
         module.exports = exports = factory();
-    } else if (typeof define === "function" && define.amd) {
-        // AMD
+    } 
+    // 检测AMD环境（如RequireJS）
+    else if (typeof define === "function" && define.amd) {
+        // AMD模块定义
         define([], factory);
-    } else {
-        // Global (browser)
+    } 
+    // 全局环境（浏览器）
+    else {
+        // 将模块挂载到全局对象
         globalThis.gbkTool = factory();
     }
 }(this, function () {
+    /**
+     * 处理压缩的编码映射数据
+     * @param {string} zipData - 压缩的十六进制编码数据字符串
+     * @returns {string} 处理后的编码数据
+     */
     var data = function (zipData) {
             var re = zipData
+                // 替换数字标记为对应数量的#号
                 .replace(/#(\d+)\$/g, function (a, b) {
                     return Array(+b + 3).join('#');
                 })
+                // 将#号替换为四个#号
                 .replace(/#/g, '####')
+                // 处理编码映射格式：前缀:数据
                 .replace(/(\w\w):([\w#]+)(?:,|$)/g, function (a, hd, dt) {
                     return dt.replace(/../g, function (a) {
                         if (a != '##') {
+                            // 添加前缀到每个字节对
                             return hd + a;
                         } else {
+                            // 保持##不变
                             return a;
                         }
                     });

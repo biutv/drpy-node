@@ -1,3 +1,9 @@
+/**
+ * UC网盘处理器模块
+ * 提供UC网盘分享链接解析、文件下载、转存等功能
+ * @module uc-handler
+ */
+
 import req from '../req.js';
 import {ENV} from '../env.js';
 import COOKIE from '../cookieManager.js';
@@ -6,29 +12,52 @@ import {join} from 'path';
 import fs from 'fs';
 import {PassThrough} from 'stream';
 
+/**
+ * UC网盘处理器类
+ * 负责处理UC网盘的各种操作，包括分享链接解析、文件下载、转存等
+ */
 class UCHandler {
+    /**
+     * 构造函数 - 初始化UC处理器
+     * 设置基础配置、API地址、缓存等
+     */
     constructor() {
+        // UC分享链接正则表达式
         this.regex = /https:\/\/drive\.uc\.cn\/s\/([^\\|#/]+)/;
+        // 请求参数
         this.pr = 'pr=UCBrowser&fr=pc';
+        // 基础请求头
         this.baseHeader = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/1.8.5 Chrome/100.0.4896.160 Electron/18.3.5.16-b62cf9c50d Safari/537.36 Channel/ucpan_other_ch',
             Referer: 'https://drive.uc.cn/',
         };
+        // API基础地址
         this.apiUrl = 'https://pc-api.uc.cn/1/clouddrive';
+        // 分享令牌缓存
         this.shareTokenCache = {};
+        // 保存目录名称
         this.saveDirName = 'drpy';
+        // 保存目录ID
         this.saveDirId = null;
+        // 保存文件ID缓存
         this.saveFileIdCaches = {};
+        // 当前URL键
         this.currentUrlKey = '';
+        // 缓存根目录
         this.cacheRoot = (process.env['NODE_PATH'] || '.') + '/uc_cache';
+        // 最大缓存大小
         this.maxCache = 1024 * 1024 * 100;
+        // URL头部缓存
         this.urlHeadCache = {};
+        // 字幕文件扩展名
         this.subtitleExts = ['.srt', '.ass', '.scc', '.stl', '.ttml'];
+        // 附加配置
         this.Addition = {
             DeviceID: '07b48aaba8a739356ab8107b5e230ad4',
             RefreshToken: '',
             AccessToken: ''
         }
+        // 配置信息
         this.conf = {
             api: "https://open-api-drive.uc.cn",
             clientID: "5acf882d27b74502b7040b0c65519aa7",
@@ -40,18 +69,32 @@ class UCHandler {
 
     }
 
-    // 使用 getter 定义动态属性
+    /**
+     * 获取UC Cookie
+     * 使用 getter 定义动态属性，从环境变量中获取
+     * @returns {string} UC Cookie字符串
+     */
     get cookie() {
         // console.log('env.cookie.uc:',ENV.get('uc_cookie'));
         return ENV.get('uc_cookie');
     }
 
+    /**
+     * 获取UC Token Cookie
+     * @returns {string} UC Token Cookie字符串
+     */
     get token() {
         return ENV.get('uc_token_cookie');
     }
 
+    /**
+     * 解析UC分享链接，提取分享ID和文件夹ID
+     * @param {string} url - UC分享链接
+     * @returns {Object|null} 包含shareId和folderId的对象，解析失败返回null
+     */
     getShareData(url) {
         let matches = this.regex.exec(url);
+        // 处理URL中的查询参数
         if (matches[1].indexOf("?") > 0) {
             matches[1] = matches[1].split('?')[0];
         }
@@ -64,6 +107,11 @@ class UCHandler {
         return null;
     }
 
+    /**
+     * 初始化UC处理器
+     * @param {Object} db - 数据库实例
+     * @param {Object} cfg - 配置对象
+     */
     async initUC(db, cfg) {
         if (this.cookie) {
             console.log("cookie 获取成功");
@@ -72,7 +120,15 @@ class UCHandler {
         }
     }
 
+    /**
+     * 最长公共子序列算法
+     * 用于文件名匹配，找到两个字符串的最长公共子序列
+     * @param {string} str1 - 第一个字符串
+     * @param {string} str2 - 第二个字符串
+     * @returns {Object} 包含长度、序列和偏移量的对象
+     */
     lcs(str1, str2) {
+        // 处理空字符串情况
         if (!str1 || !str2) {
             return {
                 length: 0,
@@ -83,9 +139,11 @@ class UCHandler {
         var sequence = '';
         var str1Length = str1.length;
         var str2Length = str2.length;
+        // 创建动态规划数组
         var num = new Array(str1Length);
         var maxlen = 0;
         var lastSubsBegin = 0;
+        // 初始化二维数组
         for (var i = 0; i < str1Length; i++) {
             var subArray = new Array(str2Length);
             for (var j = 0; j < str2Length; j++) {
@@ -95,6 +153,7 @@ class UCHandler {
 
         }
         var thisSubsBegin = null;
+        // 动态规划计算最长公共子序列
         for (i = 0; i < str1Length; i++) {
             for (j = 0; j < str2Length; j++) {
                 if (str1[i] !== str2[j]) {
@@ -135,44 +194,55 @@ class UCHandler {
     }
 
 
+    /**
+     * 查找最佳匹配的文件项
+     * 使用最长公共子序列算法找到与主文件最匹配的目标文件
+     * @param {Object} mainItem - 主文件项
+     * @param {Array} targetItems - 目标文件项数组
+     * @returns {Object} 包含所有匹配结果、最佳匹配和最佳匹配索引的对象
+     */
     findBestLCS(mainItem, targetItems) {
-
+        // 存储所有匹配结果
         const results = [];
-
+        // 最佳匹配索引
         let bestMatchIndex = 0;
 
-
+        // 遍历所有目标文件，计算与主文件的匹配度
         for (let i = 0; i < targetItems.length; i++) {
-
             const currentLCS = this.lcs(mainItem.name, targetItems[i].name);
-
             results.push({target: targetItems[i], lcs: currentLCS});
-
+            // 更新最佳匹配
             if (currentLCS.length > results[bestMatchIndex].lcs.length) {
-
                 bestMatchIndex = i;
-
             }
-
         }
 
-
         const bestMatch = results[bestMatchIndex];
-
-
         return {allLCS: results, bestMatch: bestMatch, bestMatchIndex: bestMatchIndex};
-
     }
 
-
+    /**
+     * 延迟函数
+     * 返回一个在指定毫秒后解析的Promise
+     * @param {number} ms - 延迟毫秒数
+     * @returns {Promise} 延迟Promise
+     */
     delay(ms) {
-
         return new Promise((resolve) => setTimeout(resolve, ms));
-
     }
 
-
+    /**
+     * API请求方法
+     * 统一处理UC网盘API请求，包含重试机制
+     * @param {string} url - API端点URL
+     * @param {Object} data - 请求数据
+     * @param {Object} headers - 请求头
+     * @param {string} method - 请求方法(get/post)
+     * @param {number} retry - 重试次数
+     * @returns {Object} API响应数据
+     */
     async api(url, data, headers, method, retry) {
+        // 设置默认请求头
         headers = headers || {};
         Object.assign(headers, this.baseHeader);
         Object.assign(headers, {
@@ -180,6 +250,8 @@ class UCHandler {
             Cookie: this.cookie || '',
         });
         method = method || 'post';
+
+        // 根据方法类型发送请求
         const resp =
             method === 'get' ? await req.get(`${this.apiUrl}/${url}`, {
                 headers: headers,
@@ -192,6 +264,8 @@ class UCHandler {
                 console.error(err);
                 return err.response || {status: 500, data: {}};
             });
+
+        // 处理429状态码(请求过于频繁)，进行重试
         const leftRetry = retry || 3;
         if (resp.status === 429 && leftRetry > 0) {
             await this.delay(1000);
@@ -200,10 +274,15 @@ class UCHandler {
         return resp.data || {};
     }
 
-
+    /**
+     * 清空保存目录
+     * 删除保存目录中的所有文件
+     */
     async clearSaveDir() {
+        // 获取保存目录中的文件列表
         const listData = await this.api(`file/sort?${this.pr}&pdir_fid=${this.saveDirId}&_page=1&_size=200&_sort=file_type:asc,updated_at:desc`, {}, {}, 'get');
         if (listData.data && listData.data.list && listData.data.list.length > 0) {
+            // 批量删除文件
             const del = await this.api(`file/delete?${this.pr}`, {
                 action_type: 2,
                 filelist: listData.data.list.map((v) => v.fid),
@@ -213,12 +292,19 @@ class UCHandler {
         }
     }
 
+    /**
+     * 创建保存目录
+     * 如果目录不存在则创建，存在则可选择清空
+     * @param {boolean} clean - 是否清空已存在的目录
+     */
     async createSaveDir(clean) {
+        // 如果目录ID已存在
         if (this.saveDirId) {
             if (clean) await this.clearSaveDir();
             return;
-
         }
+
+        // 获取根目录文件列表，查找保存目录
         const listData = await this.api(`file/sort?${this.pr}&pdir_fid=0&_page=1&_size=200&_sort=file_type:asc,updated_at:desc`, {}, {}, 'get');
         if (listData.data && listData.data.list)
             for (const item of listData.data.list) {
@@ -227,9 +313,9 @@ class UCHandler {
                     await this.clearSaveDir();
                     break;
                 }
-
             }
 
+        // 如果目录不存在，创建新目录
         if (!this.saveDirId) {
             const create = await this.api(`file?${this.pr}`, {
                 pdir_fid: '0',
@@ -244,53 +330,87 @@ class UCHandler {
         }
     }
 
+    /**
+     * 获取分享令牌
+     * 从UC网盘获取访问分享链接所需的令牌
+     * @param {Object} shareData - 分享数据，包含shareId和sharePwd
+     */
     async getShareToken(shareData) {
+        // 如果缓存中没有该分享ID的令牌
         if (!this.shareTokenCache[shareData.shareId]) {
             delete this.shareTokenCache[shareData.shareId];
+            // 请求分享令牌
             const shareToken = await this.api(`share/sharepage/token?${this.pr}`, {
                 pwd_id: shareData.shareId,
                 passcode: shareData.sharePwd || '',
             });
+            // 缓存令牌
             if (shareToken.data && shareToken.data.stoken) {
                 this.shareTokenCache[shareData.shareId] = shareToken.data;
             }
-
         }
-
     }
 
+    /**
+     * 通过分享URL获取文件列表
+     * 解析分享链接，获取其中的视频文件和字幕文件
+     * @param {string|Object} shareInfo - 分享链接或分享信息对象
+     * @returns {Array} 视频文件列表，包含匹配的字幕信息
+     */
     async getFilesByShareUrl(shareInfo) {
+        // 解析分享数据
         const shareData = typeof shareInfo === 'string' ? this.getShareData(shareInfo) : shareInfo;
         if (!shareData) return [];
+
+        // 获取分享令牌
         await this.getShareToken(shareData);
         if (!this.shareTokenCache[shareData.shareId]) return [];
+
         const videos = [];
         const subtitles = [];
+
+        /**
+         * 递归获取文件列表
+         * @param {string} shareId - 分享ID
+         * @param {string} folderId - 文件夹ID
+         * @param {number} page - 页码
+         * @returns {Array} 文件列表
+         */
         const listFile = async (shareId, folderId, page) => {
             const prePage = 200;
             page = page || 1;
+            // 获取文件列表
             const listData = await this.api(`share/sharepage/detail?${this.pr}&pwd_id=${shareId}&stoken=${encodeURIComponent(this.shareTokenCache[shareId].stoken)}&pdir_fid=${folderId}&force=0&_page=${page}&_size=${prePage}&_sort=file_type:asc,file_name:asc`, {}, {}, 'get');
             if (!listData.data) return [];
             const items = listData.data.list;
             if (!items) return [];
+
             const subDir = [];
+            // 遍历文件项
             for (const item of items) {
                 if (item.dir === true) {
+                    // 收集子目录
                     subDir.push(item);
                 } else if (item.file === true && item.obj_category === 'video') {
+                    // 过滤小于5MB的视频文件
                     if (item.size < 1024 * 1024 * 5) continue;
                     item.stoken = this.shareTokenCache[shareData.shareId].stoken;
                     videos.push(item);
                 } else if (item.type === 'file' && this.subtitleExts.some((x) => item.file_name.endsWith(x))) {
+                    // 收集字幕文件
                     subtitles.push(item);
                 }
             }
+
+            // 处理分页
             if (page < Math.ceil(listData.metadata._total / prePage)) {
                 const nextItems = await listFile(shareId, folderId, page + 1);
                 for (const item of nextItems) {
                     items.push(item);
                 }
             }
+
+            // 递归处理子目录
             for (const dir of subDir) {
                 const subItems = await listFile(shareId, dir.fid);
                 for (const item of subItems) {
@@ -299,7 +419,11 @@ class UCHandler {
             }
             return items;
         };
+
+        // 开始获取文件列表
         await listFile(shareData.shareId, shareData.folderId);
+
+        // 为视频文件匹配字幕
         if (subtitles.length > 0) {
             videos.forEach((item) => {
                 var matchSubtitle = this.findBestLCS(item, subtitles);
@@ -311,6 +435,16 @@ class UCHandler {
         return videos;
     }
 
+    /**
+     * 保存文件到UC网盘
+     * 将分享文件转存到自己的网盘中
+     * @param {string} shareId - 分享ID
+     * @param {string} stoken - 分享令牌
+     * @param {string} fileId - 文件ID
+     * @param {string} fileToken - 文件令牌
+     * @param {boolean} clean - 是否清空目标目录
+     * @returns {Object} 保存结果
+     */
     async save(shareId, stoken, fileId, fileToken, clean) {
         await this.createSaveDir(clean);
         if (clean) {
@@ -1008,4 +1142,9 @@ class UCHandler {
     }
 }
 
+/**
+ * UC网盘处理器实例
+ * 导出一个UCHandler类的单例实例，供其他模块使用
+ * @type {UCHandler}
+ */
 export const UC = new UCHandler();

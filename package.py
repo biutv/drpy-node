@@ -41,28 +41,51 @@ def filter_green_files(script_dir):
     return green_files
 
 
-def compress_directory(script_dir, green=False):
+def generate_archive_name(script_dir, green=False):
+    """
+    生成压缩包文件名
+    
+    Args:
+        script_dir (str): 脚本所在目录
+        green (bool): 是否为green模式
+        
+    Returns:
+        str: 压缩包的完整路径
+    """
     # 获取当前目录名
     current_dir = os.path.basename(script_dir)
-
+    
     # 获取当前时间
     current_time = datetime.datetime.now().strftime("%Y%m%d")
-
+    
     # 根据是否传入 green 参数生成压缩包文件名
     archive_suffix = "-green" if green else ""
     archive_name = f"{current_dir}-{current_time}{archive_suffix}.7z"
-
+    
     # 压缩包输出路径 (脚本所在目录的外面)
     parent_dir = os.path.abspath(os.path.join(script_dir, ".."))
     archive_path = os.path.join(parent_dir, archive_name)
+    
+    return archive_path
 
-    # 构建 7z 压缩命令
+
+def build_exclude_params(script_dir, green=False):
+    """
+    构建7z压缩命令的排除参数
+    
+    Args:
+        script_dir (str): 脚本所在目录
+        green (bool): 是否为green模式
+        
+    Returns:
+        list: 排除参数列表
+    """
     exclude_params = []
-
+    
     # 排除目录
     for exclude_dir in EXCLUDE_DIRS:
         exclude_params.append(f"-xr!{exclude_dir}")
-
+    
     # 排除文件
     for exclude_file in EXCLUDE_FILES:
         # 使用相对路径来确保文件的准确性
@@ -71,25 +94,55 @@ def compress_directory(script_dir, green=False):
             exclude_params.append(f"-xr!{exclude_file}")
         else:
             print(f"警告: {exclude_file} 不存在!")
-
+    
     # 如果启用 green 筛选，排除不符合条件的文件
     if green:
         green_files = filter_green_files(script_dir)
         for file in green_files:
             exclude_params.append(f"-x!{file}")
+    
+    return exclude_params
 
+
+def execute_compression(archive_path, script_dir, exclude_params):
+    """
+    执行7z压缩命令
+    
+    Args:
+        archive_path (str): 压缩包输出路径
+        script_dir (str): 脚本所在目录
+        exclude_params (list): 排除参数列表
+    """
     # 构建命令，打包目录内容而不包含目录本身
     command = f"7z a \"{archive_path}\" \"{script_dir}\\*\" " + " ".join(exclude_params)
-
+    
     # 打印构建的命令进行调试
     print(f"构建的 7z 命令: {command}")
-
+    
     try:
         # 执行压缩命令
         os.system(command)
         print(f"压缩完成: {archive_path}")
     except Exception as e:
         print(f"压缩失败: {e}")
+
+
+def compress_directory(script_dir, green=False):
+    """
+    压缩目录为7z包
+    
+    Args:
+        script_dir (str): 要压缩的目录路径
+        green (bool): 是否启用green模式，筛选带[密]的文件
+    """
+    # 生成压缩包文件名和路径
+    archive_path = generate_archive_name(script_dir, green)
+    
+    # 构建排除参数
+    exclude_params = build_exclude_params(script_dir, green)
+    
+    # 执行压缩
+    execute_compression(archive_path, script_dir, exclude_params)
 
 
 if __name__ == "__main__":

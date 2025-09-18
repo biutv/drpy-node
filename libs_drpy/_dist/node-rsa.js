@@ -1,3 +1,16 @@
+/**
+ * Node-RSA 加密库
+ * 提供RSA加密、解密、签名和验证功能
+ * 这是一个打包压缩后的库文件，包含完整的RSA加密实现
+ * 
+ * 主要功能：
+ * - RSA密钥生成和管理
+ * - 数据加密和解密
+ * - 数字签名和验证
+ * - 支持多种密钥格式（PEM、DER等）
+ * - ASN.1编码解码支持
+ */
+
 /*! For license information please see node-rsa.bundle.js.LICENSE.txt */ ! function(t, e) {
 "object" == typeof exports && "object" == typeof module ? module.exports = e() : "function" == typeof define && define.amd ? define([], e) : "object" == typeof exports ? exports.NODERSA = e() : t.NODERSA = e()
 }(globalThis, (() => (() => {

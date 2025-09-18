@@ -1,19 +1,40 @@
+/**
+ * HTML解析器工具
+ * 基于cheerio提供HTML和JSON解析功能，支持类似海阔视界的解析语法
+ */
+
 import * as cheerio from 'cheerio';
 // import jsonpath from 'jsonpath';
 import {urljoin} from "../utils/utils.js";
 import '../libs_drpy/jsonpathplus.min.js'
 
+/**
+ * JSONPath查询工具
+ */
 export const jsonpath = {
     query(jsonObject, path) {
         return JSONPath.JSONPath({path: path, json: jsonObject})
     }
 };
+
+// 解析缓存开关
 const PARSE_CACHE = true; // 解析缓存
+// 不自动加eq下标索引的选择器
 const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|:not|:even|:odd|:has|:contains|:matches|:empty|^body$|^#'; // 不自动加eq下标索引
+// 需要自动urljoin的属性
 const URLJOIN_ATTR = '(url|src|href|-original|-src|-play|-url|style)$|^(data-|url-|src-)'; // 需要自动urljoin的属性
+// 过滤特殊链接,不走urlJoin
 const SPECIAL_URL = '^(ftp|magnet|thunder|ws):'; // 过滤特殊链接,不走urlJoin
 
+/**
+ * HTML解析器类
+ * 提供类似海阔视界的HTML解析语法
+ */
 class Jsoup {
+    /**
+     * 构造函数
+     * @param {string} MY_URL 基础URL
+     */
     constructor(MY_URL = '') {
         this.MY_URL = MY_URL;
         this.pdfh_html = '';
@@ -22,15 +43,33 @@ class Jsoup {
         this.pdfa_doc = null;
     }
 
+    /**
+     * 正则测试
+     * @param {string} text 正则表达式
+     * @param {string} string 测试字符串
+     * @returns {boolean} 是否匹配
+     */
     test(text, string) {
         const searchObj = new RegExp(text, 'mi').exec(string);
         return searchObj ? true : false;
     }
 
+    /**
+     * 检查字符串是否包含指定内容
+     * @param {string} text 源字符串
+     * @param {string} match 匹配内容
+     * @returns {boolean} 是否包含
+     */
     contains(text, match) {
         return text.indexOf(match) !== -1;
     }
 
+    /**
+     * 将海阔视界解析语法转换为jQuery选择器
+     * @param {string} parse 解析规则
+     * @param {boolean} first 是否只取第一个
+     * @returns {string} 转换后的选择器
+     */
     parseHikerToJq(parse, first = false) {
         if (this.contains(parse, '&&')) {
             const parses = parse.split('&&');
@@ -59,6 +98,11 @@ class Jsoup {
         return parse;
     }
 
+    /**
+     * 获取解析信息
+     * @param {string} nparse 解析规则
+     * @returns {Object} 解析信息对象
+     */
     getParseInfo(nparse) {
         let excludes = [];
         let nparse_index = 0;
@@ -86,6 +130,11 @@ class Jsoup {
         return {nparse_rule, nparse_index, excludes};
     }
 
+    /**
+     * 重新排序相邻的:gt和:lt选择器
+     * @param {string} selector 选择器
+     * @returns {string} 重排后的选择器
+     */
     reorderAdjacentLtAndGt(selector) {
         const adjacentPattern = /:gt\((\d+)\):lt\((\d+)\)/;
         let match;
@@ -97,6 +146,13 @@ class Jsoup {
         return selector;
     }
 
+    /**
+     * 解析单个规则
+     * @param {Object} doc cheerio文档对象
+     * @param {string} nparse 解析规则
+     * @param {Object} ret 上一步结果
+     * @returns {Object} 解析结果
+     */
     parseOneRule(doc, nparse, ret) {
         let {nparse_rule, nparse_index, excludes} = this.getParseInfo(nparse);
         nparse_rule = this.reorderAdjacentLtAndGt(nparse_rule);
@@ -115,6 +171,11 @@ class Jsoup {
         return ret;
     }
 
+    /**
+     * 解析文本内容
+     * @param {string} text 原始文本
+     * @returns {string} 处理后的文本
+     */
     parseText(text) {
         text = text.replace(/[\s]+/gm, '\n');
         text = text.replace(/\n+/g, '\n').replace(/^\s+/, '');
@@ -122,6 +183,12 @@ class Jsoup {
         return text;
     }
 
+    /**
+     * 解析HTML获取数组结果
+     * @param {string} html HTML内容
+     * @param {string} parse 解析规则
+     * @returns {Array} 解析结果数组
+     */
     pdfa(html, parse) {
         if (!html || !parse) return [];
         parse = this.parseHikerToJq(parse);
@@ -148,6 +215,15 @@ class Jsoup {
         return res;
     }
 
+    /**
+     * 解析HTML获取列表数据
+     * @param {string} html HTML内容
+     * @param {string} parse 解析规则
+     * @param {string} list_text 标题解析规则
+     * @param {string} list_url 链接解析规则
+     * @param {string} MY_URL 基础URL
+     * @returns {Array} 列表数据
+     */
     pdfl(html, parse, list_text, list_url, MY_URL) {
         if (!html || !parse) return [];
         parse = this.parseHikerToJq(parse, false);
@@ -172,7 +248,13 @@ class Jsoup {
         return new_vod_list;
     }
 
-
+    /**
+     * 解析HTML获取单个值
+     * @param {string} html HTML内容
+     * @param {string} parse 解析规则
+     * @param {string} baseUrl 基础URL
+     * @returns {string} 解析结果
+     */
     pdfh(html, parse, baseUrl = '') {
         if (!html || !parse) return '';
 
@@ -184,6 +266,7 @@ class Jsoup {
             }
         }
 
+        // 处理特殊解析规则
         if (parse === 'body&&Text' || parse === 'Text') {
             return this.parseText(doc.text());
         } else if (parse === 'body&&Html' || parse === 'Html') {
@@ -219,6 +302,7 @@ class Jsoup {
                     const options = option.split('||');
                     for (const opt of options) {
                         ret = originalRet?.attr(opt) || '';
+                        // 处理style中的url
                         if (this.contains(opt.toLowerCase(), 'style') && this.contains(ret, 'url(')) {
                             try {
                                 ret = ret.match(/url\((.*?)\)/)[1];
@@ -226,6 +310,7 @@ class Jsoup {
                             } catch {
                             }
                         }
+                        // 自动拼接URL
                         if (ret && baseUrl) {
                             const needAdd = this.test(URLJOIN_ATTR, opt) && !this.test(SPECIAL_URL, ret);
                             if (needAdd) {
@@ -242,15 +327,34 @@ class Jsoup {
         return ret;
     }
 
+    /**
+     * 解析HTML并自动拼接URL
+     * @param {string} html HTML内容
+     * @param {string} parse 解析规则
+     * @param {string} baseUrl 基础URL
+     * @returns {string} 解析结果
+     */
     pd(html, parse, baseUrl = '') {
         if (!baseUrl) baseUrl = this.MY_URL;
         return this.pdfh(html, parse, baseUrl);
     }
 
+    /**
+     * 获取cheerio对象
+     * @param {string} html HTML内容
+     * @returns {Object} cheerio对象
+     */
     pq(html) {
         return cheerio.load(html);
     }
 
+    /**
+     * 解析JSON获取单个值
+     * @param {string|Object} html JSON字符串或对象
+     * @param {string} parse JSONPath解析规则
+     * @param {boolean} addUrl 是否自动拼接URL
+     * @returns {string} 解析结果
+     */
     pjfh(html, parse, addUrl = false) {
         if (!html || !parse) return '';
 
@@ -275,10 +379,22 @@ class Jsoup {
         return ret;
     }
 
+    /**
+     * 解析JSON并自动拼接URL
+     * @param {string|Object} html JSON字符串或对象
+     * @param {string} parse JSONPath解析规则
+     * @returns {string} 解析结果
+     */
     pj(html, parse) {
         return this.pjfh(html, parse, true);
     }
 
+    /**
+     * 解析JSON获取数组结果
+     * @param {string|Object} html JSON字符串或对象
+     * @param {string} parse JSONPath解析规则
+     * @returns {Array} 解析结果数组
+     */
     pjfa(html, parse) {
         if (!html || !parse) return [];
 
@@ -299,5 +415,6 @@ class Jsoup {
     }
 }
 
+// 导出jsoup实例
 export const jsoup = Jsoup;
 // export default Jsoup;

@@ -1,13 +1,12 @@
 import fileHeaderManager from "../utils/fileHeaderManager.js";
 import {base64Decode, base64Encode} from "./crypto-util.js";
 import './pako.min.js';
-import './gb18030.js';
 import './jsencrypt.js';
-import './node-rsa.js';
-import './json5.js';
 import './jinja.js';
 import './abba.js'
-
+import './_dist/node-rsa.js';
+import './_dist/gb18030.js';
+import './_dist/json5.js';
 
 // User Agent 常量
 export const MOBILE_UA = 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36';
