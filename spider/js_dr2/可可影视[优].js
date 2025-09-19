@@ -5,13 +5,13 @@
   quickSearch: 0,
   title: '可可影视[优]',
   '类型': '影视',
-  lang: 'ds'
+  lang: 'dr2'
 })
 */
 
 var rule = {
     title: '可可影视[优]',
-    host: 'https://www.keke8.app',
+    host: 'https://www.keke1.app',
     //host: 'https://www.kkys01.com',
     url: '/show/fyclass-----2-fypage.html',
     //url: '/show/fyclass-fyfilter-fypage.html',
@@ -38,7 +38,7 @@ var rule = {
     limit: 20,
     推荐: '.section-box:eq(2)&&.module-box-inner&&.module-item;*;*;*;*',
     double: false,
-    一级: '.module-box-inner&&.module-item;.v-item-title&&Text;img:last-of-type&&data-original;.v-item-bottom&&span&&Text;a&&href',
+    一级: '.module-box-inner&&.module-item;.v-item-title:eq(1)&&Text;img:last-of-type&&data-original;.v-item-bottom&&span&&Text;a&&href',
     二级: {
         title: '.detail-pic&&img&&alt;.detail-tags&&a&&Text',
         img: '.detail-pic&&img&&data-original',
@@ -49,18 +49,19 @@ var rule = {
         lists: '.episode-list:eq(#id) a',
     },
     搜索: '.search-result-list&&a;.title:eq(1)&&Text;*;.search-result-item-header&&Text;a&&href;.desc&&Text',
-    预处理: $js.toString(() => {
-        let html = request(rule.host);
-        let scripts = pdfa(html, 'script');
-        let img_script = scripts.find(it => pdfh(it, 'script&&src').includes('rdul.js'));
-        if (img_script) {
-            let img_url = img_script.match(/src="(.*?)"/)[1];
-            //console.log(img_url);
-            let img_html = request(img_url);
-            let img_host = img_html.match(/'(.*?)'/)[1];
-            log(img_host);
-            rule.图片替换 = rule.host + '=>' + img_host;
-        }
-    }),
+    图片替换:'https://www.keke1.app=>https://vres.cfaqcgj.com',
+    // 预处理: $js.toString(() => {
+    //     let html = request(rule.host);
+    //     let scripts = pdfa(html, 'script');
+    //     let img_script = scripts.find(it => pdfh(it, 'script&&src').includes('rdul.js'));
+    //     if (img_script) {
+    //         let img_url = img_script.match(/src="(.*?)"/)[1];
+    //         //console.log(img_url);
+    //         let img_html = request(img_url);
+    //         let img_host = img_html.match(/'(.*?)'/)[1];
+    //         log(img_host);
+    //         rule.图片替换 = rule.host + '=>' + img_host;
+    //     }
+    // }),
     
 }

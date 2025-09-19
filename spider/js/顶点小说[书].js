@@ -13,10 +13,12 @@ var rule = {
     类型: '小说',//影视|听书|漫画|小说
     title: '顶点小说[书]',
     host: 'https://www.23ddw.cc/',
-    编码: 'gb18030',
-    url: '/fyclass/#fypage',
+    // 编码: 'gb18030',
+    编码: 'utf-8',
+    url: '/class/fyclass_fypage/',
 
-    searchUrl: '/modules/article/search.php?searchkey=**&page=fypage',
+    // searchUrl: '/modules/article/search.php?searchkey=**&page=fypage',
+    searchUrl: '/searchss/?searchkey=**&page=fypage',
     searchable: 2,
     quickSearch: 0,
     filterable: 1,
@@ -34,23 +36,25 @@ var rule = {
     class_parse: '.nav&&ul&&li;a&&Text;a&&href;class/(.*?)_',
     cate_exclude: '',
     play_parse: true,
-    lazy: $js.toString(() => {
-        let html = request(input);
-        let title = pdfh(html, '.bookname&&h1&&Text');
+    lazy: $js.toString(async () => {
+        log('input:', input);
+        let html = await request(input);
+        let title = pdfh(html, '.bookname&&Text');
         let content = pdfh(html, '#content&&Html').replace(/\n/g, "").split("<br>").filter(v => v).slice(0).join("\n").replace(/&nbsp;/g, ' ');
         let ret = JSON.stringify({
             title,
             content
         });
         input = {parse: 0, url: 'novel://' + ret, js: ''};
+        return input;
     }),
     double: false,
     推荐: '#newscontent&&ul&&li;.s2&&Text;;.s5&&Text;a&&href',
-    一级: $js.toString(() => {
+    一级: $js.toString(async () => {
         let d = [];
         if (MY_CATE == '0') {
             input = urljoin(rule.host, '/quanben/' + MY_PAGE);
-            let html = request(input);
+            let html = await request(input);
             let lis = pdfa(html, 'table.grid&&tr:gt(0)');
             lis.forEach(it => {
                 d.push({
@@ -61,7 +65,7 @@ var rule = {
                 });
             });
         } else {
-            let html = request(input.split('#')[0]);
+            let html = await request(input.split('#')[0]);
             let lis = pdfa(html, '#newscontent&&ul&&li');
             lis.forEach(it => {
                 d.push({
@@ -72,7 +76,7 @@ var rule = {
                 });
             });
         }
-        setResult(d);
+        return setResult(d);
     }),
     二级: {
         title: 'h1&&Text',
@@ -80,11 +84,11 @@ var rule = {
         desc: '#info&&p:eq(-1)&&Text',
         content: '#intro&&p&&Text',
         tabs: '#list&&dt',
-        lists: '#list&&dd',
-        tab_text: 'body&&Text',
+        lists: '#list&&a',
+        tab_text: 'dd&&Text',
         list_text: 'body&&Text',
         list_url: 'a&&href',
         list_url_prefix: '',
     },
-    搜索: 'table.grid&&tr:gt(0);a&&Text;;.odd:eq(1)&&Text;a&&href;a:eq(1)&&Text',
+    搜索: '#hotcontent&&.item;a&&title;img&&data-original;.blue.visible-xs&&Text;a&&href;dd&&Text',
 }

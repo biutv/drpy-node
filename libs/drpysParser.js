@@ -672,9 +672,11 @@ export async function playParseAfter(rule, obj, playUrl, flag) {
         jx: tellIsJx(playUrl)
     };
     let lazy_play;
+    const is_lazy_function = rule.play_parse && rule.lazy && typeof (rule.lazy) === 'function';
+    const is_lazy_function_str = rule.play_parse && rule.lazy && typeof (rule.lazy) === 'string' && rule.lazy.startsWith('js:');
     if (!rule.play_parse || !rule.lazy) {
         lazy_play = common_play;
-    } else if (rule.play_parse && rule.lazy && typeof (rule.lazy) === 'function') {
+    } else if (is_lazy_function || is_lazy_function_str) {
         try {
             lazy_play = typeof (obj) === 'object' ? obj : {
                 parse: SPECIAL_URL.test(obj) || /^(push:)/.test(obj) ? 0 : 1,

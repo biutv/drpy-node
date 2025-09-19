@@ -5,7 +5,7 @@
   quickSearch: 0,
   title: '丫丫电子书[书]',
   '类型': '小说',
-  lang: 'ds'
+  lang: 'dr2'
 })
 */
 

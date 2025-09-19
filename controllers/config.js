@@ -1,59 +1,36 @@
 /**
- * 配置控制器模块
- * 
- * 功能描述：
- * - 负责生成和管理各种配置JSON文件
- * - 处理站点配置、解析器配置、直播配置等
- * - 支持订阅模式和健康检查
- * - 提供Fastify路由接口
- * 
+ * 配置管理控制器
+ *
  * 主要功能：
- * 1. 站点配置生成 - 扫描JS源文件生成站点配置
- * 2. 解析器配置 - 管理视频解析器配置
- * 3. 直播配置 - 处理直播源配置
- * 4. 播放器配置 - 管理播放器相关配置
- * 5. 订阅管理 - 支持多订阅码模式
- * 6. 健康检查 - 过滤失效源站
- * 
- * API接口：
- * - GET /index - 获取索引配置
- * - GET /config* - 获取完整配置（支持订阅和健康检查）
- * 
- * @author drpy-node
- * @version 1.0.0
+ * - 生成和管理drpy-node项目的配置文件
+ * - 支持多种源类型：DS源、DR2源、Python源、CatVod源
+ * - 提供配置订阅和健康检查功能
+ * - 生成解析器、直播源、播放器等配置
+ * - 处理配置文件的动态生成和缓存
  */
 
-// 文件系统操作模块
 import {readdirSync, readFileSync, writeFileSync, existsSync} from 'fs';
 import {readFile} from 'fs/promises';
 import path from 'path';
-
-// 核心功能模块
 import * as drpyS from '../libs/drpyS.js';
 import '../libs_drpy/jinja.js'
-
-// 工具函数模块
 import {naturalSort, urljoin, updateQueryString} from '../utils/utils.js'
 import {md5} from "../libs_drpy/crypto-util.js";
 import {ENV} from "../utils/env.js";
 import FileHeaderManager from "../utils/fileHeaderManager.js";
 import {extractNameFromCode} from "../utils/python.js";
-
-// 验证和映射模块
 import {validateBasicAuth, validatePwd} from "../utils/api_validate.js";
 import {getSitesMap} from "../utils/sites-map.js";
 import {getParsesDict} from "../utils/file.js";
 import batchExecute from '../libs_drpy/batchExecute.js';
 
-// 解构获取编码器
 const {jsEncoder} = drpyS;
 
 /**
- * 解析扩展参数
- * 尝试将字符串解析为JSON对象或数组，失败则返回原字符串
- * 
+ * 解析扩展参数字符串
+ * 尝试将字符串解析为JSON对象或数组，如果解析失败则返回原字符串
  * @param {string} str - 待解析的字符串
- * @returns {any} 解析后的对象、数组或原字符串
+ * @returns {any} 解析后的对象/数组或原字符串
  */
 function parseExt(str) {
     try {
@@ -62,15 +39,14 @@ function parseExt(str) {
             return parsed;
         }
     } catch (e) {
-        // 忽略JSON解析错误
+        // 忽略错误
     }
     return str;
 }
 
 /**
- * 记录扩展参数
- * 将对象或数组转换为JSON字符串用于日志记录
- * 
+ * 格式化扩展参数用于日志输出
+ * 将对象或数组转换为JSON字符串，其他类型直接返回
  * @param {any} _ext - 扩展参数
  * @returns {string} 格式化后的字符串
  */
@@ -79,14 +55,14 @@ function logExt(_ext) {
 }
 
 /**
- * 生成站点配置JSON
- * 扫描指定目录下的JS文件，生成站点配置信息
- * 
- * @param {Object} options - 配置选项
- * @param {string} options.jsDir - JS源文件目录
+ * 生成站点配置JSON数据
+ * 扫描各种类型的源文件并生成统一的配置格式
+ *
+ * @param {Object} options - 配置选项对象
+ * @param {string} options.jsDir - DS源文件目录
  * @param {string} options.dr2Dir - DR2源文件目录
  * @param {string} options.pyDir - Python源文件目录
- * @param {string} options.catDir - Cat源文件目录
+ * @param {string} options.catDir - CatVod源文件目录
  * @param {string} options.configDir - 配置文件目录
  * @param {string} options.jsonDir - JSON配置目录
  * @param {string} options.subFilePath - 订阅文件路径
@@ -94,9 +70,8 @@ function logExt(_ext) {
  * @param {string} requestHost - 请求主机地址
  * @param {Object|null} sub - 订阅配置对象
  * @param {string} pwd - 访问密码
- * @returns {Promise<Object>} 包含站点配置的对象
+ * @returns {Promise<Object>} 包含sites数组和spider配置的对象
  */
-// 工具函数：生成 JSON 数据
 async function generateSiteJSON(options, requestHost, sub, pwd) {
     const jsDir = options.jsDir;
     const dr2Dir = options.dr2Dir;
@@ -107,23 +82,21 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
     const subFilePath = options.subFilePath;
     const rootDir = options.rootDir;
 
-    // 读取JS源文件目录
     const files = readdirSync(jsDir);
     let valid_files = files.filter((file) => file.endsWith('.js') && !file.startsWith('_')); // 筛选出不是 "_" 开头的 .js 文件
     let sort_list = [];
-    
-    // 确定排序文件路径
+    // 获取排序配置文件路径
     let sort_file = path.join(path.dirname(subFilePath), `./order_common.html`);
     if (!existsSync(sort_file)) {
         sort_file = path.join(path.dirname(subFilePath), `./order_common.example.html`);
     }
-    
-    // 处理订阅过滤和排序
+    // 处理订阅过滤规则
     if (sub) {
-        // 根据订阅模式过滤文件
         if (sub.mode === 0) {
+            // 包含模式：只保留匹配正则的文件
             valid_files = valid_files.filter(it => (new RegExp(sub.reg || '.*')).test(it));
         } else if (sub.mode === 1) {
+            // 排除模式：排除匹配正则的文件
             valid_files = valid_files.filter(it => !(new RegExp(sub.reg || '.*')).test(it));
         }
 
@@ -135,8 +108,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
             }
         }
     }
-    
-    // 读取排序配置
     if (existsSync(sort_file)) {
         console.log('sort_file:', sort_file);
         let sort_file_content = readFileSync(sort_file, 'utf-8');
@@ -146,13 +117,12 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
     }
     let sites = [];
 
-    // 以下为自定义APP模板部分
+    //以下为自定义APP模板部分
     try {
         const templateConfigPath = path.join(jsonDir, './App模板配置.json');
         if (existsSync(templateConfigPath)) {
             const templateContent = readFileSync(templateConfigPath, 'utf-8');
             const templateConfig = JSON.parse(templateContent);
-            // 生成模板配置站点
             sites = Object.entries(templateConfig).filter(([key]) => valid_files.includes(`${key}[模板].js`))
                 .flatMap(([key, config]) =>
                     Object.entries(config)
@@ -171,32 +141,25 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
     } catch (e) {
         console.error('读取App模板配置失败:', e.message);
     }
-    // 以上为自定义APP[模板]配置自动添加代码
+    //以上为自定义APP[模板]配置自动添加代码
 
-// ... existing code ...
-
-    // 环境变量配置
     let link_jar = '';
-    let enableRuleName = ENV.get('enable_rule_name', '0') === '1'; // 是否启用规则名称
-    let enableOldConfig = Number(ENV.get('enable_old_config', '0')); // 是否启用旧配置
-    let isLoaded = await drpyS.isLoaded(); // 检查drpyS是否已加载
-    let forceHeader = Number(process.env.FORCE_HEADER) || 0; // 是否强制重新读取头部信息
+    let enableRuleName = ENV.get('enable_rule_name', '0') === '1';
+    let enableOldConfig = Number(ENV.get('enable_old_config', '0'));
+    let isLoaded = await drpyS.isLoaded();
+    let forceHeader = Number(process.env.FORCE_HEADER) || 0;
     let dr2ApiType = Number(process.env.DR2_API_TYPE) || 0; // 0 ds里的api 1壳子内置
-    
-    // 成人内容过滤
+    // console.log('hide_adult:', ENV.get('hide_adult'));
     if (ENV.get('hide_adult') === '1') {
         valid_files = valid_files.filter(it => !(new RegExp('\\[[密]\\]|密+')).test(it));
     }
-    
-    // 获取站点映射配置
     let SitesMap = getSitesMap(configDir);
     let mubanKeys = Object.keys(SitesMap);
-    
+    // console.log(SitesMap);
+    // console.log(mubanKeys);
     // 排除模板后缀的DS源
     valid_files = valid_files.filter(it => !/\[模板]\.js$/.test(it));
     log(`开始生成ds的t4配置，jsDir:${jsDir},源数量: ${valid_files.length}`);
-    
-    // 创建批处理任务
     const tasks = valid_files.map((file) => {
         return {
             func: async ({file, jsDir, requestHost, pwd, drpyS, SitesMap, jsEncoder}) => {
@@ -205,27 +168,22 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                 if (pwd) {
                     api += `?pwd=${pwd}`;
                 }
-                
-                // 初始化规则对象
                 let ruleObject = {
                     searchable: 0, // 固定值
                     filterable: 0, // 固定值
                     quickSearch: 0, // 固定值
                 };
                 let ruleMeta = {...ruleObject};
-                
-                // 读取或生成文件头部信息
+                // if (baseName.includes('抖音直播弹幕')) {
                 const filePath = path.join(jsDir, file);
                 const header = await FileHeaderManager.readHeader(filePath);
-                
+                // console.log('ds header:', header);
                 if (!header || forceHeader) {
                     try {
                         ruleObject = await drpyS.getRuleObject(filePath);
                     } catch (e) {
                         throw new Error(`Error parsing rule object for file: ${file}, ${e.message}`);
                     }
-                    
-                    // 更新规则元数据
                     Object.assign(ruleMeta, {
                         title: ruleObject.title,
                         author: ruleObject.author,
@@ -237,33 +195,24 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         logo: ruleObject.logo,
                         lang: 'ds',
                     });
-                    
-                    // 写入头部信息缓存
+                    // console.log('ds ruleMeta:', ruleMeta);
                     await FileHeaderManager.writeHeader(filePath, ruleMeta);
                 } else {
                     Object.assign(ruleMeta, header);
                 }
-                
-                // 记录文件加载信息
                 if (!isLoaded) {
                     const sizeInBytes = await FileHeaderManager.getFileSize(filePath, {humanReadable: true});
                     console.log(`Loading RuleObject: ${filePath} fileSize:${sizeInBytes}`);
                 }
-                
-                // 设置标题
                 ruleMeta.title = enableRuleName ? ruleMeta.title || baseName : baseName;
 
                 let fileSites = [];
                 const isMuban = mubanKeys.includes(baseName);
-                
-                // 处理不同类型的源
                 if (baseName === 'push_agent') {
-                    // 推送代理源
                     let key = 'push_agent';
                     let name = `${ruleMeta.title}(DS)`;
                     fileSites.push({key, name});
                 } else if (isMuban && SitesMap.hasOwnProperty(baseName) && Array.isArray(SitesMap[baseName])) {
-                    // 模板源
                     SitesMap[baseName].forEach((it) => {
                         let key = `drpyS_${it.alias}`;
                         let name = `${it.alias}(DS)`;
@@ -276,13 +225,11 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                 } else if (isMuban) {
                     return
                 } else {
-                    // 普通源
                     let key = `drpyS_${ruleMeta.title}`;
                     let name = `${ruleMeta.title}(DS)`;
                     fileSites.push({key, name});
                 }
 
-                // 生成站点配置
                 fileSites.forEach((fileSite) => {
                     const site = {
                         key: fileSite.key,
@@ -300,7 +247,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
         };
     });
 
-    // 批处理监听器
     const listener = {
         func: (param, id, error, result) => {
             if (error) {
@@ -312,7 +258,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
         param: {}, // 外部参数可以在这里传入
     };
 
-    // 执行批处理任务
     await batchExecute(tasks, listener);
 
     // 根据用户是否启用dr2源去生成对应配置
@@ -320,9 +265,9 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
     if ((enable_dr2 === '1' || enable_dr2 === '2')) {
         const dr2_files = readdirSync(dr2Dir);
         let dr2_valid_files = dr2_files.filter((file) => file.endsWith('.js') && !file.startsWith('_')); // 筛选出不是 "_" 开头的 .js 文件
+        // log(dr2_valid_files);
         console.log(`开始生成dr2配置，dr2Dir:${dr2Dir},源数量: ${dr2_valid_files.length}, 启用模式: ${enable_dr2 === '1' ? 'T3配置' : 'T4风格API配置'}`);
 
-        // 创建DR2批处理任务
         const dr2_tasks = dr2_valid_files.map((file) => {
             return {
                 func: async ({file, dr2Dir, requestHost, pwd, drpyS, SitesMap}) => {
@@ -335,8 +280,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                     let ruleMeta = {...ruleObject};
                     const filePath = path.join(dr2Dir, file);
                     const header = await FileHeaderManager.readHeader(filePath);
-                    
-                    // 处理DR2文件头部信息
+                    // console.log('dr2 header:', header);
                     if (!header || forceHeader) {
                         try {
                             ruleObject = await drpyS.getRuleObject(path.join(filePath));
@@ -354,11 +298,11 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                             logo: ruleObject.logo,
                             lang: 'dr2',
                         });
+                        // console.log('dr2 ruleMeta:', ruleMeta);
                         await FileHeaderManager.writeHeader(filePath, ruleMeta);
                     } else {
                         Object.assign(ruleMeta, header);
                     }
-                    
                     if (!isLoaded) {
                         const sizeInBytes = await FileHeaderManager.getFileSize(filePath, {humanReadable: true});
                         console.log(`Loading RuleObject: ${filePath} fileSize:${sizeInBytes}`);
@@ -366,7 +310,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                     ruleMeta.title = enableRuleName ? ruleMeta.title || baseName : baseName;
 
                     let fileSites = [];
-                    // 处理DR2源类型
                     if (baseName === 'push_agent') {
                         let key = 'push_agent';
                         let name = `${ruleMeta.title}(DR2)`;
@@ -383,7 +326,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         fileSites.push({key, name});
                     }
 
-                    // 生成DR2站点配置
                     fileSites.forEach((fileSite) => {
                         if (enable_dr2 === '1') {
                             // dr2ApiType=0 使用接口drpy2 dr2ApiType=1 使用壳子内置的drpy2
@@ -401,8 +343,9 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                                 key: fileSite.key,
                                 name: fileSite.name,
                                 type: 3, // 固定值
-
-                                api: fileSite.ext || "", // 固定为空字符串
+                                api,
+                                ...ruleMeta,
+                                ext: ext || "", // 固定为空字符串
                             };
                             sites.push(site);
                         } else if (enable_dr2 === '2') {
@@ -411,7 +354,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                                 key: fileSite.key,
                                 name: fileSite.name,
                                 type: 4, // 固定值
-
                                 api: `${requestHost}/api/${baseName}`,
                                 ...ruleMeta,
                                 ext: "", // 固定为空字符串
@@ -494,7 +436,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
 
                     let fileSites = [];
                     ext = ext || ruleMeta.ext || '';
-                    const isMuban = mubanKeys.includes(baseName) || /^(APP|getapp3)/i.test(baseName);
+                    const isMuban = mubanKeys.includes(baseName) || /^(APP|getapp3)/.test(baseName);
                     if (baseName === 'push_agent') {
                         let key = 'push_agent';
                         let name = `${ruleMeta.title}(hipy)`;
@@ -646,8 +588,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
             let link_data = readFileSync(path.join(rootDir, './data/settings/link_data.json'), 'utf-8');
             let link_config = JSON.parse(link_data);
             link_sites = link_config.sites.filter(site => site.type = 4);
-            
-            // 处理外部JAR文件
             if (link_config.spider && enable_link_jar === '1') {
                 let link_spider_arr = link_config.spider.split(';');
                 link_jar = urljoin(link_url, link_spider_arr[0]);
@@ -656,21 +596,16 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                 }
                 log(`开始挂载外部T4 Jar: ${link_jar}`);
             }
-            
-            // 处理外部站点配置
             link_sites.forEach((site) => {
                 if (site.key === 'push_agent' && enable_link_push !== '1') {
                     return
                 }
-                // 处理相对路径API
                 if (site.api && !site.api.startsWith('http')) {
                     site.api = urljoin(link_url, site.api)
                 }
-                // 处理相对路径扩展配置
                 if (site.ext && site.ext.startsWith('.')) {
                     site.ext = urljoin(link_url, site.ext)
                 }
-                // 推送代理覆盖处理
                 if (site.key === 'push_agent' && enable_link_push === '1') { // 推送覆盖
                     let pushIndex = sites.findIndex(s => s.key === 'push_agent');
                     if (pushIndex > -1) {
@@ -683,7 +618,6 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                 }
             });
         } catch (e) {
-            // 忽略外部数据读取错误
         }
     }
 
@@ -699,23 +633,21 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
     if (ENV.get('hide_adult') === '1') {
         sites = sites.filter(it => !(new RegExp('\\[[密]\\]|密+')).test(it.name));
     }
-    
-    // 自然排序处理
+    // console.log('sort_list:', sort_list);
     sites = naturalSort(sites, 'name', sort_list);
     return {sites, spider: link_jar};
 }
 
 /**
- * 生成解析器配置JSON
- * 扫描解析器目录，生成视频解析器配置信息
- * 
+ * 生成解析器配置JSON数据
+ * 扫描解析器文件并生成解析器配置列表
+ *
  * @param {string} jxDir - 解析器文件目录
  * @param {string} requestHost - 请求主机地址
- * @returns {Promise<Object>} 包含解析器配置的对象
+ * @returns {Promise<Object>} 包含parses数组的对象
  */
 async function generateParseJSON(jxDir, requestHost) {
     const files = readdirSync(jxDir);
-
     const jx_files = files.filter((file) => file.endsWith('.js') && !file.startsWith('_')) // 筛选出不是 "_" 开头的 .js 文件
     const jx_dict = getParsesDict(requestHost);
     let parses = [];
@@ -792,20 +724,47 @@ async function generateParseJSON(jxDir, requestHost) {
     return {parses};
 }
 
+/**
+ * 生成直播源配置JSON数据
+ * 根据环境变量配置生成直播源列表
+ *
+ * @param {string} requestHost - 请求主机地址
+ * @returns {Object} 包含lives数组的对象
+ */
 function generateLivesJSON(requestHost) {
-    // 直播源配置
-    const lives = [
-        {
-            name: "直播",
-            type: 0,
-            url: `${requestHost}/lives/iptv.m3u`,
-            epg: "",
-            logo: ""
-        }
-    ];
-    return {lives};
+    let lives = [];
+    let live_url = process.env.LIVE_URL || '';
+    let epg_url = process.env.EPG_URL || ''; // 从.env文件读取
+    let logo_url = process.env.LOGO_URL || ''; // 从.env文件读取
+    if (live_url && !live_url.startsWith('http')) {
+        let public_url = urljoin(requestHost, 'public/');
+        live_url = urljoin(public_url, live_url);
+    }
+    // console.log('live_url:', live_url);
+    if (live_url) {
+        lives.push(
+            {
+                "name": "直播",
+                "type": 0,
+                "url": live_url,
+                "playerType": 1,
+                "ua": "okhttp/3.12.13",
+                "epg": epg_url,
+                "logo": logo_url
+            }
+        )
+    }
+    return {lives}
 }
 
+/**
+ * 生成播放器配置JSON数据
+ * 读取播放器配置文件并返回配置对象
+ *
+ * @param {string} configDir - 配置文件目录
+ * @param {string} requestHost - 请求主机地址
+ * @returns {Object} 播放器配置对象
+ */
 function generatePlayerJSON(configDir, requestHost) {
     let playerConfig = {};
     let playerConfigPath = path.join(configDir, './player.json');
@@ -813,12 +772,19 @@ function generatePlayerJSON(configDir, requestHost) {
         try {
             playerConfig = JSON.parse(readFileSync(playerConfigPath, 'utf-8'))
         } catch (e) {
-            // 忽略配置文件读取错误
+
         }
     }
     return playerConfig
 }
 
+/**
+ * 获取订阅配置列表
+ * 读取订阅配置文件并解析为JSON对象
+ *
+ * @param {string} subFilePath - 订阅文件路径
+ * @returns {Array} 订阅配置数组
+ */
 function getSubs(subFilePath) {
     let subs = [];
     try {
@@ -831,19 +797,18 @@ function getSubs(subFilePath) {
 }
 
 /**
- * Fastify插件 - 配置控制器
- * 注册配置相关的路由处理器
- * 
+ * 配置管理路由注册函数
+ * 注册配置相关的API路由，包括配置获取和索引文件访问
+ *
  * @param {Object} fastify - Fastify实例
- * @param {Object} options - 插件选项
- * @param {Function} done - 完成回调
+ * @param {Object} options - 配置选项
+ * @param {Function} done - 完成回调函数
  */
 export default (fastify, options, done) => {
 
     /**
-     * 获取索引配置
-     * GET /index
-     * 返回预生成的index.json配置文件
+     * 获取索引配置接口
+     * 返回预生成的index.json配置文件内容
      */
     fastify.get('/index', {preHandler: validatePwd}, async (request, reply) => {
         if (!existsSync(options.indexFilePath)) {
@@ -856,16 +821,10 @@ export default (fastify, options, done) => {
     });
 
     /**
-     * 获取完整配置
-     * GET /config*
-     * 动态生成完整的配置JSON，支持订阅和健康检查
-     * 
-     * 查询参数：
-     * - pwd: 访问密码
-     * - sub: 订阅码
-     * - healthy: 健康检查标志（1启用）
+     * 动态配置生成接口
+     * 根据请求参数动态生成配置JSON，支持订阅过滤、健康检查等功能
+     * 同时将生成的配置写入index.json文件进行缓存
      */
-    // 接口：返回配置 JSON，同时写入 index.json
     fastify.get('/config*', {preHandler: [validatePwd, validateBasicAuth]}, async (request, reply) => {
         let t1 = (new Date()).getTime();
         const query = request.query; // 获取 query 参数
@@ -881,20 +840,50 @@ export default (fastify, options, done) => {
             const hostname = request.hostname;  // 主机名，不包含端口
             const port = request.socket.localPort;  // 获取当前服务的端口
             console.log(`cfg_path:${cfg_path},port:${port}`);
-            
-            // 判断是否为外部访问
+            // 判断是否为外部访问（非本地访问）
             let not_local = cfg_path.startsWith('/1') || cfg_path.startsWith('/index');
+            // 根据访问类型生成对应的主机地址
             let requestHost = not_local ? `${protocol}://${hostname}` : `http://127.0.0.1:${options.PORT}`; // 动态生成根地址
             let requestUrl = not_local ? `${protocol}://${hostname}${request.url}` : `http://127.0.0.1:${options.PORT}${request.url}`; // 动态生成请求链接
-            
-            // 处理特殊文件请求的工具函数
+            // console.log('requestUrl:', requestUrl);
+            // if (cfg_path.endsWith('.js')) {
+            //     if (cfg_path.includes('index.js')) {
+            //         // return reply.sendFile('index.js', path.join(options.rootDir, 'data/cat'));
+            //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.js'), 'utf-8');
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
+            //         return reply.type('application/javascript;charset=utf-8').send(content);
+            //     } else if (cfg_path.includes('index.config.js')) {
+            //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.config.js'), 'utf-8');
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
+            //         return reply.type('application/javascript;charset=utf-8').send(content);
+            //     }
+            // }
+            // if (cfg_path.endsWith('.js.md5')) {
+            //     if (cfg_path.includes('index.js')) {
+            //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.js'), 'utf-8');
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
+            //         let contentHash = md5(content);
+            //         console.log('index.js contentHash:', contentHash);
+            //         return reply.type('text/plain;charset=utf-8').send(contentHash);
+            //     } else if (cfg_path.includes('index.config.js')) {
+            //         let content = readFileSync(path.join(options.rootDir, 'data/cat/index.config.js'), 'utf-8');
+            //         // content = jinja.render(content, {config_url: requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`)});
+            //         content = content.replace('$config_url', requestUrl.replace(cfg_path, `/1?sub=all&healthy=1&pwd=${process.env.API_PWD || ''}`));
+            //         let contentHash = md5(content);
+            //         console.log('index.config.js contentHash:', contentHash);
+            //         return reply.type('text/plain;charset=utf-8').send(contentHash);
+            //     }
+            // }
             const getFilePath = (cfgPath, rootDir, fileName) => path.join(rootDir, `data/cat/${fileName}`);
             const processContent = (content, cfgPath, requestUrl, requestHost) => {
                 const $config_url = requestUrl.replace(cfgPath, `/1?sub=${cat_sub_code}&healthy=1&pwd=${process.env.API_PWD || ''}`);
                 return content.replaceAll('$config_url', $config_url).replaceAll('$host', requestHost);
             }
 
-            // 处理JavaScript文件请求
+
             const handleJavaScript = (cfgPath, requestUrl, requestHost, options, reply) => {
                 const fileMap = {
                     'index.js': 'index.js',
@@ -911,7 +900,6 @@ export default (fastify, options, done) => {
                 }
             };
 
-            // 处理JavaScript MD5校验请求
             const handleJsMd5 = (cfgPath, requestUrl, options, reply) => {
                 const fileMap = {
                     'index.js': 'index.js',
@@ -929,23 +917,20 @@ export default (fastify, options, done) => {
                     }
                 }
             };
-            
-            // 处理JavaScript文件请求
             if (cfg_path.endsWith('.js')) {
                 return handleJavaScript(cfg_path, requestUrl, requestHost, options, reply);
             }
 
-            // 处理JavaScript MD5校验请求
             if (cfg_path.endsWith('.js.md5')) {
                 return handleJsMd5(cfg_path, requestUrl, options, reply);
             }
-            
-            // 处理订阅验证
+            // 处理订阅码验证
             let sub = null;
             if (sub_code) {
                 let subs = getSubs(options.subFilePath);
                 sub = subs.find(it => it.code === sub_code);
                 console.log('sub:', sub);
+                // 检查订阅码状态
                 if (sub && sub.status === 0) {
                     return reply.status(500).send({error: `此订阅码:【${sub_code}】已禁用`});
                 } else if (!sub && must_sub_code) {
@@ -955,7 +940,7 @@ export default (fastify, options, done) => {
                 return reply.status(500).send({error: `缺少订阅码参数`});
             }
 
-            // 生成站点配置
+            // 生成站点配置数据
             let siteJSON = await generateSiteJSON(options, requestHost, sub, pwd);
 
             // 处理healthy参数，过滤失效源
@@ -987,31 +972,29 @@ export default (fastify, options, done) => {
                 }
             }
 
-            // 生成各种配置
+            // 生成各类配置数据
             const parseJSON = await generateParseJSON(options.jxDir, requestHost);
             const livesJSON = generateLivesJSON(requestHost);
             const playerJSON = generatePlayerJSON(options.configDir, requestHost);
-            
-            // 合并配置对象
+            // 合并所有配置数据
             const configObj = {sites_count: siteJSON.sites.length, ...playerJSON, ...siteJSON, ...parseJSON, ...livesJSON};
             if (!configObj.spider) {
                 configObj.spider = playerJSON.spider
             }
-            
-            // 生成配置字符串
+            // console.log(configObj);
             const configStr = JSON.stringify(configObj, null, 2);
-            
-            // 写入配置文件（非Vercel环境）
+            // 写入配置文件（Vercel环境除外）
             if (!process.env.VERCEL) { // Vercel 环境不支持写文件，关闭此功能
                 writeFileSync(options.indexFilePath, configStr, 'utf8'); // 写入 index.json
                 if (cfg_path === '/1') {
-                    writeFileSync(options.customFilePath, configStr, 'utf8'); // 写入自定义配置
+                    writeFileSync(options.customFilePath, configStr, 'utf8'); // 写入 index.json
                 }
             }
-            
             // 计算处理耗时并返回结果
             let t2 = (new Date()).getTime();
             let cost = t2 - t1;
+            // configObj.cost = cost;
+            // reply.send(configObj);
             reply.send(Object.assign({cost}, configObj));
         } catch (error) {
             reply.status(500).send({error: 'Failed to generate site JSON', details: error.message});
