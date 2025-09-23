@@ -970,3 +970,4 @@ globalThis.base64Encode = base64Encode;
 globalThis.base64Decode = base64Decode;
 globalThis.gzip = gzip;
 globalThis.ungzip = ungzip;
+globalThis.parseQueryString = parseQueryString;

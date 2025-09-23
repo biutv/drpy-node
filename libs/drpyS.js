@@ -14,7 +14,7 @@ import AIS from '../utils/ais.js';
 import PanS from '../utils/pans.js';
 import {ENV} from '../utils/env.js';
 import {getContentType, getMimeType} from "../utils/mime-type.js";
-import {getParsesDict, SitesMap, pathLib, es6_extend_code, req_extend_code} from "../utils/file.js";
+import {getParsesDict, getSitesMap, pathLib, es6_extend_code, req_extend_code} from "../utils/file.js";
 import {getFirstLetter} from "../utils/pinyin-tool.js";
 import {reqs} from "../utils/req.js";
 import "../utils/random-http-ua.js";
@@ -364,6 +364,7 @@ export async function init(filePath, env = {}, refresh) {
         // 计算文件的 hash 值
         const fileHash = computeHash(fileContent);
         const moduleName = path.basename(filePath, '.js');
+        const SitesMap = getSitesMap();
         let moduleExt = env.ext || '';
         // log('moduleName:', moduleName);
         // log('moduleExt:', moduleExt);
