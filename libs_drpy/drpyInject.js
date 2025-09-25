@@ -226,7 +226,7 @@ async function request(url, opt = {}) {
         return {code: resp.status, headers: resHeader, content: responseData};
     } catch (error) {
         const {response: resp} = error;
-        console.error(`[request]Request error: ${error.message}`);
+        console.error(`[request] Request error: ${error.message}`);
         let responseData = '';
         // console.log('responseData:',responseData);
         try {
@@ -238,7 +238,7 @@ async function request(url, opt = {}) {
                 responseData = buffer.toString('utf-8');
             }
         } catch (e) {
-            console.error(`[request]get error response Text failed: ${e.message}`);
+            console.error(`[request] get error response Text failed: ${e.message}`);
         }
         // console.log('responseData:',responseData);
         return {

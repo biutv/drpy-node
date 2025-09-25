@@ -127,6 +127,7 @@ var rule = {
             }
         })).content;
         let jsonStr = cut(html, 'window.__INITIAL_STATE__=', '};').replace(/;$/, "").replaceAll('undefined', 'null');
+        // pathLib.writeFile('./temp/jsonStr.json', jsonStr);
         let book_info = jsonStr.parseX.page;
         let list = book_info.chapterListWithVolume.flat();
         let urls = [];

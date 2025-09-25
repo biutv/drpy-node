@@ -1,9 +1,9 @@
 /**
  * 全局模块注册器
- * 
+ *
  * 将drpy-node项目中的核心模块和工具库注册到全局对象（globalThis）上，
  * 使得这些模块可以在整个应用程序中直接访问，无需重复导入。
- * 
+ *
  * 主要功能：
  * - 注册网络请求工具（reqs）
  * - 注册加密工具（forge）
@@ -12,12 +12,12 @@
  * - 注册各大网盘服务接口（夸克、UC、阿里、百度等）
  * - 注册压缩工具和网络通信组件
  * - 注册结果处理函数
- * 
+ *
  * 使用场景：
  * - 在drpy源解析器中直接使用全局工具
  * - 在插件开发中访问核心功能
  * - 在脚本执行环境中提供统一的API接口
- * 
+ *
  * @module dsGlobal
  * @author drpy-node
  * @since 1.0.0
@@ -88,3 +88,12 @@ globalThis.WebSocketServer = WebSocketServer;
 
 // 结果设置函数 - 用于设置和处理执行结果
 globalThis.setResult = setResult;
+
+// ds沙箱文件读写函数
+globalThis.pathLib = pathLib;
+
+// UA
+globalThis.MOBILE_UA = MOBILE_UA;
+globalThis.PC_UA = PC_UA;
+// 其他常用
+globalThis.$js = $js;

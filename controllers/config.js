@@ -158,7 +158,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
     // console.log(SitesMap);
     // console.log(mubanKeys);
     // 排除模板后缀的DS源
-    valid_files = valid_files.filter(it => !/\[模板]\.js$/.test(it));
+    valid_files = valid_files.filter(it => !/^APP.*\[模板]\.js$/i.test(it));
     log(`开始生成ds的t4配置，jsDir:${jsDir},源数量: ${valid_files.length}`);
     const tasks = valid_files.map((file) => {
         return {

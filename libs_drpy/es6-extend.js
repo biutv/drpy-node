@@ -1,9 +1,9 @@
 /**
  * ES6扩展和Polyfill库
- * 
+ *
  * 该文件提供了ES6+特性的polyfill实现，确保在旧版本JavaScript环境中的兼容性
  * 包含Object、String、Array等原生对象的方法扩展和自定义工具函数
- * 
+ *
  * @author drpy
  * @version 1.0.0
  */
@@ -264,19 +264,48 @@ function matchesAll(str, pattern, flatten) {
 Object.defineProperties(String.prototype, {
     replaceX: {
         /**
-         * 增强的字符串替换方法
+         * 增强的字符串替换方法 - 支持高级替换逻辑
          * @param {RegExp|string} regex - 匹配模式
          * @param {string|Function} replacement - 替换内容
          * @returns {string} 替换后的字符串
          */
         value: function (regex, replacement) {
+            // 处理字符串类型的正则表达式
             if (typeof regex === 'string') {
                 regex = new RegExp(regex, 'g');
             }
+
+            // 处理函数类型的替换内容
             if (typeof replacement === 'function') {
                 return this.replace(regex, replacement);
             }
-            return this.replace(regex, replacement || '');
+
+            // 处理 null/undefined 的替换内容
+            replacement = replacement == null ? '' : String(replacement);
+
+            // 创建正则表达式副本以避免修改原始对象的 lastIndex
+            const regexCopy = new RegExp(regex.source, regex.flags);
+
+            // 获取所有匹配项
+            let matches = matchesAll(this, regexCopy, true);
+
+            // 如果有多个匹配项，进行高级替换处理
+            if (matches && matches.length > 1) {
+                const hasCaptureGroup = /\$\d/.test(replacement);
+
+                if (hasCaptureGroup) {
+                    // 有捕获组引用时，使用标准替换
+                    return this.replace(regex, replacement);
+                } else {
+                    // 无捕获组引用时，对每个完整匹配进行替换
+                    return this.replace(regex, function (match) {
+                        return replacement;
+                    });
+                }
+            }
+
+            // 单个匹配或无匹配时，使用标准替换
+            return this.replace(regex, replacement);
         },
         writable: true,
         configurable: true,
@@ -289,8 +318,9 @@ Object.defineProperties(String.prototype, {
          */
         get: function () {
             try {
-                return JSON.parse(this);
+                return JSON5.parse(this);
             } catch (e) {
+                log(`String.parseX error: ${e.message}`);
                 return null;
             }
         },
@@ -304,23 +334,23 @@ Object.defineProperties(String.prototype, {
  * @param {string} text - 要处理的文本
  * @param {string} start - 开始标记
  * @param {string} end - 结束标记
- * @param {string} method - 处理方法
+ * @param {function|null|undefined} method - 处理方法函数，用于对截取结果进行后处理
  * @param {boolean} All - 是否处理所有匹配项
- * @returns {string|Array} 处理结果
+ * @returns {string|Array} 处理结果，单个匹配返回字符串，多个匹配返回数组
  */
 function cut(text, start, end, method, All) {
     // 实现复杂的文本截取逻辑
     if (!text || typeof text !== 'string') return '';
-    
+
     let startIndex = text.indexOf(start);
     if (startIndex === -1) return All ? [] : '';
-    
+
     startIndex += start.length;
     let endIndex = text.indexOf(end, startIndex);
     if (endIndex === -1) return All ? [] : '';
-    
-    let result = text.substring(startIndex, endIndex);
-    
+
+    let result = text.substring(startIndex, endIndex) + end; // 包含 end 标记
+
     if (All) {
         let results = [result];
         let remainingText = text.substring(endIndex + end.length);
@@ -330,7 +360,12 @@ function cut(text, start, end, method, All) {
         }
         return results;
     }
-    
+
+    // 应用 method 处理函数（如果提供）
+    if (method && typeof method === 'function') {
+        result = method(result);
+    }
+
     return result;
 }
 

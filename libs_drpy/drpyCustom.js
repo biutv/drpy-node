@@ -681,7 +681,7 @@ export const objectToQueryString = (obj) => {
 
 /**
  * 获取加密前的原始的js源文本
- * @param js_code
+ * @param {string} js_code
  */
 export async function getOriginalJs(js_code) {
     // let current_match = /var rule|[\u4E00-\u9FA5]+|function|let |var |const |\(|\)|"|'/;
@@ -825,8 +825,8 @@ export const jsDecoder = {
 
 /**
  * vodDeal函数 - 处理播放源排序和重命名
- * @param vod
- * @param rule
+ * @param {Object} vod
+ * @param {Object} rule
  * @returns {*}
  */
 export function vodDeal(vod, rule) {

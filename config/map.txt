@@ -12,6 +12,14 @@
 UC分享@@?type=url&params=../json/UC分享.json@@UC分享[盘]
 16wMV[听]@@?type=url&params=../json/十六万歌曲.txt
 点歌欢唱[B]@@?type=url&params=../json/十六万歌曲.txt
+网盘[模板]@@?type=url&params=../json/域名配置.json$蜡笔@@蜡笔ᵐ[盘]
+网盘[模板]@@?type=url&params=../json/域名配置.json$木偶@@木偶ᵐ[盘]
+网盘[模板]@@?type=url&params=../json/域名配置.json$玩偶$1@@玩偶ᵐ[盘]
+网盘[模板]@@?type=url&params=../json/域名配置.json$虎斑@@虎斑ᵐ[盘]
+网盘[模板]@@?type=url&params=../json/域名配置.json$二小@@二小ᵐ[盘]
+网盘[模板]@@?type=url&params=../json/域名配置.json$多多@@多多ᵐ[盘]
+网盘[模板]@@?type=url&params=../json/域名配置.json$欧歌@@欧歌ᵐ[盘]
+网盘[模板]@@?type=url&params=../json/域名配置.json$至臻@@至臻ᵐ[盘]
 AppFox@@http://app.hktvyb.cc@@TVB云播[AFX]
 AppFox@@{"host":"https://cunchu8.obs.cn-north-4.myhuaweicloud.com/config.json","parse":{"JL4K":"http://194.147.100.155:7891/?url="}}@@火猫影视[AFX]
 AppFox@@{"host":"http://kumiao.yzbao.com.cn","parse":{"qq|qiyi|mgtv|youku|bilibili":"https://api.qljson.xyz/api/?key=67f6a108dc6d84eaf81ac58417c1f72a&url="}}@@未来影视[AFX]

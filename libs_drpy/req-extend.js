@@ -4,10 +4,10 @@ const RKEY = typeof (key) !== 'undefined' && key ? key : 'drpyS_' + (rule.title 
 
 /**
  * 海阔网页请求函数完整封装
- * @param url 请求链接
- * @param obj 请求对象 {headers:{},method:'',timeout:5000,body:'',withHeaders:false}
- * @param ocr_flag 标识此flag是用于请求ocr识别的,自动过滤content-type指定编码
- * @returns {string|string|DocumentFragment|*}
+ * @param {string} url 请求链接
+ * @param {Object} obj 请求对象 {headers:{},method:'',timeout:5000,body:'',withHeaders:false}
+ * @param {boolean} ocr_flag 标识此flag是用于请求ocr识别的,自动过滤content-type指定编码
+ * @returns {string|DocumentFragment|*}
  */
 async function request(url, obj = {}, ocr_flag = false) {
     if (typeof (obj) === 'undefined' || !obj || (typeof obj === 'object' && obj !== null && Object.keys(obj).length === 0)) {
@@ -90,8 +90,8 @@ async function request(url, obj = {}, ocr_flag = false) {
 
 /**
  *  快捷post请求
- * @param url 地址
- * @param obj 对象
+ * @param {string} url 地址
+ * @param {Object} obj 对象
  * @returns {string|DocumentFragment|*}
  */
 async function post(url, obj = {}) {
@@ -102,9 +102,9 @@ async function post(url, obj = {}) {
 /**
  * 快捷获取特殊地址cookie|一般用作搜索过验证
  * 用法 let {cookie,html} = reqCookie(url);
- * @param url 能返回cookie的地址
- * @param obj 常规请求参数
- * @param all_cookie 返回全部cookie.默认false只返回第一个,一般是PhpSessionId
+ * @param {string} url 能返回cookie的地址
+ * @param {Object} obj 常规请求参数
+ * @param {boolean} all_cookie 返回全部cookie.默认false只返回第一个,一般是PhpSessionId
  * @returns {{cookie: string, html: (*|string|DocumentFragment)}}
  */
 async function reqCookie(url, obj = {}, all_cookie = false) {
@@ -130,9 +130,9 @@ async function reqCookie(url, obj = {}, all_cookie = false) {
 
 /**
  * 检查宝塔验证并自动跳过获取正确源码
- * @param html 之前获取的html
- * @param url 之前的来源url
- * @param obj 来源obj
+ * @param {string} html 之前获取的html
+ * @param {string} url 之前的来源url
+ * @param {Object} obj 来源obj
  * @returns {string|DocumentFragment|*}
  */
 async function checkHtml(html, url, obj = {}) {
@@ -147,8 +147,8 @@ async function checkHtml(html, url, obj = {}) {
 
 /**
  *  带一次宝塔验证的源码获取
- * @param url 请求链接
- * @param obj 请求参数
+ * @param {string} url 请求链接
+ * @param {Object} obj 请求参数
  * @returns {string|DocumentFragment}
  */
 async function getCode(url, obj = {}) {
@@ -159,7 +159,7 @@ async function getCode(url, obj = {}) {
 
 /**
  * 源rule专用的请求方法,自动注入cookie
- * @param url 请求链接
+ * @param {string} url 请求链接
  * @returns {string|DocumentFragment}
  */
 async function getHtml(url) {
@@ -189,7 +189,7 @@ async function getHtml(url) {
 
 /**
  * 验证码识别,暂未实现
- * @param url 验证码图片链接
+ * @param {string} url 验证码图片链接
  * @returns {string} 验证成功后的cookie
  */
 async function verifyCode(url) {
@@ -239,8 +239,8 @@ async function verifyCode(url) {
 
 /**
  * 存在数据库配置表里, key字段对应值value,没有就新增,有就更新,调用此方法会清除key对应的内存缓存
- * @param k 键
- * @param v 值
+ * @param {string} k 键
+ * @param {*} v 值
  */
 function setItem(k, v) {
     local.set(RKEY, k, v);
@@ -250,8 +250,8 @@ function setItem(k, v) {
 
 /**
  *  获取数据库配置表对应的key字段的value，没有这个key就返回value默认传参.需要有缓存,第一次获取后会存在内存里
- * @param k 键
- * @param v 值
+ * @param {string} k 键
+ * @param {*} v 值
  * @returns {*}
  */
 function getItem(k, v) {
@@ -260,7 +260,7 @@ function getItem(k, v) {
 
 /**
  *  删除数据库key对应的一条数据,并清除此key对应的内存缓存
- * @param k
+ * @param {string} k
  */
 function clearItem(k) {
     local.delete(RKEY, k);

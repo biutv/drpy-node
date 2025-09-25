@@ -30,8 +30,13 @@ var rule = {
     },
     预处理: async function () {
         log('rule.params:', rule.params);
-        let extObject = JSON5.parse(rule.params);
-        log('extObject:', extObject);
+        try {
+            let extObject = JSON5.parse(rule.params);
+            log('extObject:', extObject);
+        } catch (err) {
+            // log('[ERR] extObject:', err);
+            log(`[ERR] extObject: ${err.message}`);
+        }
     },
     class_parse: async function () {
         let {input, pdfa, pdfh, pd} = this;
@@ -42,8 +47,12 @@ var rule = {
         return input
     },
     推荐: async function () {
-        let {input, pdfa, pdfh, pd} = this;
+        let {input, pdfa, pdfh, pd, getProxyUrl} = this;
         let d = [];
+        let url = getProxyUrl();
+        log('url:', getProxyUrl());
+        let html = await request(url, {withHeaders: true, redirect: 0});
+        log('html:', html);
         return setResult(d)
     },
     一级: async function () {
@@ -60,5 +69,8 @@ var rule = {
         let {input, pdfa, pdfh, pd} = this;
         let d = [];
         return setResult(d)
+    },
+    proxy_rule: async function () {
+        return [302, 'text/html', '', {Location: 'https://www.baidu.com'}]
     }
 }
