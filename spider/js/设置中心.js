@@ -64,7 +64,7 @@ let quick_data = {
     UC: 'https://drive.uc.cn/s/59023f57d3ce4?public=1',
     阿里: 'https://www.alipan.com/s/vgXMcowK8pQ',
     天翼: 'https://cloud.189.cn/web/share?code=INJbU3NbqyUj',
-    百度: 'https://pan.baidu.com/s/1TdbgcwaMG1dK7B5pQ1LbBg?pwd=1234',
+    百度: 'https://pan.baidu.com/s/1L0UIv4p0X0QrbbKErJuc_w?pwd=2pwj',
     移动1: 'https://yun.139.com/shareweb/#/w/i/0i5CLQ7BpV7Ai',
     移动2: 'https://caiyun.139.com/m/i?2jexC1gcjeN7q',
     移动3: 'https://yun.139.com/shareweb/#/w/i/2i2MoE9ZHn9p1',

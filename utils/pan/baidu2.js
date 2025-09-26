@@ -135,7 +135,9 @@ class BaiduDrive {
                 }
                 return it
             }).join(';')
-            ENV.set('baidu_cookie', cookie);
+            if (cookie !== this.cookie) {
+                ENV.set('baidu_cookie', cookie);
+            }
             return randsk
         }
     }
@@ -169,7 +171,7 @@ class BaiduDrive {
                     const fileName = item.server_filename || item.path.split('/').pop();
                     videos.push({
                         name: fileName, // 只使用文件名
-                        path: item.path, // 保留完整路径用于内部处理
+                        path: item.path.replaceAll('#', '\0'), // 如果路径里含有#,替换为非法文本\0，所有系统的路径都不可能存在这个文本
                         uk: this.uk,
                         shareid: this.shareid,
                         fsid: item.fs_id || item.fsid
@@ -209,7 +211,7 @@ class BaiduDrive {
         await this.getRandsk()
         this.headers['cookie'] = this.cookie
         // 获取指定目录下的文件列表
-        let data = (await axios.get(`${this.api}/share/list?is_from_web=true&uk=${this.uk}&shareid=${this.shareid}&order=name&desc=0&showempty=0&view_mode=${this.view_mode}&web=1&page=1&num=100&dir=${path}&channel=${this.channel}&web=1&app_id=${this.app_id}`, {
+        let data = (await axios.get(`${this.api}/share/list?is_from_web=true&uk=${this.uk}&shareid=${this.shareid}&order=name&desc=0&showempty=0&view_mode=${this.view_mode}&web=1&page=1&num=100&dir=${encodeURIComponent(path)}&channel=${this.channel}&web=1&app_id=${this.app_id}`, {
             headers: this.headers
         })).data
         if (data.errno === 0 && data.list.length > 0) {
@@ -227,7 +229,7 @@ class BaiduDrive {
                     const fileName = item.server_filename || item.path.split('/').pop();
                     videos.push({
                         name: fileName, // 只使用文件名
-                        path: item.path, // 保留完整路径用于内部处理
+                        path: item.path.replaceAll('#', '\0'), // 如果路径里含有#,替换为非法文本\0，所有系统的路径都不可能存在这个文本
                         uk: this.uk,
                         shareid: this.shareid,
                         fsid: item.fs_id || item.fsid
@@ -259,6 +261,8 @@ class BaiduDrive {
      * @returns {Promise<Array>} 不同清晰度的播放链接数组
      */
     async getShareUrl(path, uk, shareid, fsid) {
+        path = path.replaceAll('\0', '#'); // 把真实路径还原
+        log('[baidu2][getShareUrl] path:', path);
         let sign = await this.getSign()
         let urls = []
         let t = Math.floor(new Date() / 1000); // 当前时间戳
@@ -301,6 +305,8 @@ class BaiduDrive {
      * @returns {Promise<string>} 直链地址
      */
     async getAppShareUrl(path, uk, shareid, fsid) {
+        path = path.replaceAll('\0', '#'); // 把真实路径还原
+        log('[baidu2][getAppShareUrl] path:', path);
         let BDCLND = await this.getRandsk()
         let uid = await this.getUid()
         // 设置移动端请求头
