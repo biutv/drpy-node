@@ -35,6 +35,7 @@ import {
     parseQueryString, buildQueryString, encodeIfContainsSpecialChars, objectToQueryString,
     getOriginalJs,
     pako, gbkTool, JSEncrypt, CryptoJS, NODERSA, JSON5, jinja, atob, btoa, stringify,
+    lrcToSrt, strExtract,
     jsEncoder
 } from '../libs_drpy/drpyCustom.js';
 
@@ -245,7 +246,9 @@ export async function getSandbox(env = {}) {
         buildQueryString,
         encodeIfContainsSpecialChars,
         objectToQueryString,
-        forge
+        forge,
+        lrcToSrt,
+        strExtract,
     };
 
     const libsSanbox = {
