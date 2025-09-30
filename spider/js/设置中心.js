@@ -273,7 +273,8 @@ var rule = {
                         imageHeight: 200,
                         imageType: 'card_pic_3',
                         keep: true,
-                        button: 4,
+                        // button: 3,
+                        button: 4, //故意传4,壳子应该默认视为3
                         width: 640,
                         // selectData: '腾讯:=https://v.qq.com/x/cover/m441e3rjq9kwpsc/l0045w5hv1k.html,2:=bb输入默认值bbbbb,3:=c输入默认值ddd,4:=输入默认值,5:=111,6:=22222,7:=HOHO,HELLO,world'
                         selectData: selectData

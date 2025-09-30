@@ -46,7 +46,7 @@ async function homeVod(params) {
             id: 'proxy_url',
             type: 'input',
             title: '直接用的代理m3u链接',
-            tip: '..',
+            tip: '可复制的地址',
             value: getProxy(true) + '&sitekey=' + _CFG.skey + '&flag=live'
         }),
         vod_pic: 'clan://assets/tab.png?bgcolor=0',
