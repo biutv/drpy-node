@@ -27,6 +27,8 @@
 // globalThis.JSONbig = JSONbig; // 必须在drpyS.js里引入
 
 // 网络请求工具 - 提供HTTP请求功能
+import {getFirstLetter} from "../utils/pinyin-tool.js";
+
 globalThis.reqs = reqs;
 
 // 加密工具库 - 提供各种加密算法和数字签名功能
@@ -90,10 +92,11 @@ globalThis.WebSocketServer = WebSocketServer;
 globalThis.setResult = setResult;
 
 // ds沙箱文件读写函数
-globalThis.pathLib = pathLib;
+// globalThis.pathLib = pathLib;
 
 // UA
 globalThis.MOBILE_UA = MOBILE_UA;
 globalThis.PC_UA = PC_UA;
 // 其他常用
 globalThis.$js = $js;
+globalThis.getFirstLetter = getFirstLetter;

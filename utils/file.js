@@ -193,3 +193,5 @@ export function getParsesDict(host) {
 
     return jx_list
 }
+
+globalThis.pathLib = pathLib

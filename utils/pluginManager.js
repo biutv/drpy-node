@@ -39,7 +39,7 @@ function getPluginBinary(rootDir, pluginPath, pluginName) {
 
     let binaryName = null;
     if (platform === "win32") {
-        binaryName = `${pluginName}-windows.exe`;
+        binaryName = `${pluginName}-win.exe`;
     } else if (platform === "linux") {
         binaryName = `${pluginName}-linux`;
     } else if (platform === "darwin") {

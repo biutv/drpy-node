@@ -159,10 +159,32 @@ async function request(url, opt = {}) {
     }
 
     // 根据 postType 处理数据
-    if (postType === 'form' && data != null) {
+    // 如果没有明确指定 postType，尝试从 Content-Type 推断
+    let effectivePostType = postType;
+    if (!effectivePostType) {
+        // 查找不区分大小写的 Content-Type 头
+        const contentTypeKey = Object.keys(headers).find(key => 
+            key.toLowerCase() === 'content-type'
+        );
+        
+        if (contentTypeKey && headers[contentTypeKey]) {
+            const contentType = headers[contentTypeKey].toLowerCase();
+            if (contentType.includes('application/x-www-form-urlencoded')) {
+                effectivePostType = 'form';
+            } else if (contentType.includes('multipart/form-data')) {
+                effectivePostType = 'form-data';
+            }
+        }
+    }
+    
+    // 根据有效的 postType 处理数据
+    if (effectivePostType === 'form' && data != null) {
         data = qs.stringify(data, {encode: false});
-    } else if (postType === 'form-data') {
+    } else if (effectivePostType === 'form-data' && data != null) {
         data = toFormData(data);
+    }
+    if (data) {
+        console.log(`[req] postType:${effectivePostType},data:`, data);
     }
 
     // 配置代理或 HTTPS Agent
@@ -173,7 +195,7 @@ async function request(url, opt = {}) {
     const respType = returnBuffer ? 'arraybuffer' : 'arraybuffer';
 
     if (ENV.get('show_req', '0') === '1') {
-        console.log(`req: ${url} headers: ${JSON.stringify(headers)} data: ${JSON.stringify(data)}`);
+        console.log(`req[${method}]: ${url} headers: ${JSON.stringify(headers)} data: ${JSON.stringify(data)}`);
     }
     try {
         // 发送请求
