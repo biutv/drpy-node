@@ -88,6 +88,11 @@ let quick_data1 = {
     '十日终焉': 'https://fanqienovel.com/page/7143038691944959011',
     '斩神': 'https://fanqienovel.com/page/6982529841564224526',
 };
+let quick_data1Q = {
+    '掌门怀孕': 'https://www.qimao.com/shuku/2014393/',
+    '史上最强师父': 'https://www.qimao.com/shuku/1817221/',
+    '被逐出宗门后，美人师尊跪求我原谅': 'https://www.qimao.com/shuku/1886669/',
+};
 let quick_data2 = {
     '推送': 'push',
     '夸克': 'quark',
@@ -99,24 +104,18 @@ let quick_data2 = {
     '测试': 'test',
 };
 
-let selectDataList = [];
-let selectDataList1 = [];
-let selectDataList2 = [];
+let selectData = renderSelect(quick_data);
+let selectData1 = renderSelect(quick_data1);
+let selectDataList1Q = renderSelect(quick_data1Q);
+let selectData2 = renderSelect(quick_data2);
 
-for (let key of Object.keys(quick_data)) {
-    selectDataList.push(`${key}:=${quick_data[key]}`);
+function renderSelect(quick_data1) {
+    let selectDataList1 = [];
+    for (let key of Object.keys(quick_data1)) {
+        selectDataList1.push(`${key}:=${quick_data1[key]}`);
+    }
+    return selectDataList1.join(',')
 }
-let selectData = selectDataList.join(',');
-
-for (let key of Object.keys(quick_data1)) {
-    selectDataList1.push(`${key}:=${quick_data1[key]}`);
-}
-let selectData1 = selectDataList1.join(',');
-
-for (let key of Object.keys(quick_data2)) {
-    selectDataList2.push(`${key}:=${quick_data2[key]}`);
-}
-let selectData2 = selectDataList2.join(',');
 
 var rule = {
     类型: '设置',
@@ -300,6 +299,26 @@ var rule = {
                         selectData: selectData1
                     }),
                     vod_name: '推送番茄小说',
+                    vod_pic: images.read,
+                    vod_tag: 'action'
+                },);
+
+                d.push({
+                    vod_id: JSON.stringify({
+                        actionId: '推送七猫小说',
+                        id: 'push',
+                        type: 'input',
+                        title: '推送七猫小说网页目录链接进行解析',
+                        tip: '支持七猫小说网页版链接',
+                        value: 'https://www.qimao.com/shuku/2014393/',
+                        msg: '请输入待推送的七猫小说网页版链接',
+                        imageUrl: images.read,
+                        imageHeight: 200,
+                        imageType: 'card_pic_3',
+                        keep: false,
+                        selectData: selectDataList1Q
+                    }),
+                    vod_name: '推送七猫小说',
                     vod_pic: images.read,
                     vod_tag: 'action'
                 },);
@@ -1218,6 +1237,21 @@ var rule = {
                 });
             } catch (e) {
                 return '推送番茄小说发生错误：' + e.message;
+            }
+        }
+        if (action === '推送七猫小说') {
+            try {
+                const obj = JSON.parse(value);
+                return JSON.stringify({
+                    action: {
+                        actionId: '__detail__',
+                        skey: 'drpyS_七猫小说[书]',
+                        ids: obj.push,
+                    },
+                    toast: `开始解析小说:${obj.push}`
+                });
+            } catch (e) {
+                return '推送七猫小说发生错误：' + e.message;
             }
         }
         let cookie_sets = [
