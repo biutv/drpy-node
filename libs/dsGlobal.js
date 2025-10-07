@@ -69,6 +69,8 @@ globalThis.Baidu = Baidu;
 
 // 百度网盘接口2 - 百度网盘的另一个实现版本
 globalThis.Baidu2 = Baidu2;
+// webdav
+globalThis.createWebDAVClient = createWebDAVClient;
 
 // AI服务接口 - 提供人工智能相关服务
 globalThis.AIS = AIS;

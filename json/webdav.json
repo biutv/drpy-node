@@ -1,0 +1,11 @@
+[
+  {
+    "name": "本地webdav",
+    "id": "local",
+    "baseURL": "http://192.168.31.217/webdav",
+    "username": "your-username",
+    "password": "your-password",
+    "rejectUnauthorized": false,
+    "timeout": 30000
+  }
+]

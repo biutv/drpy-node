@@ -12,6 +12,7 @@ import * as misc from '../utils/misc.js';
 import COOKIE from '../utils/cookieManager.js';
 import AIS from '../utils/ais.js';
 import PanS from '../utils/pans.js';
+import { createWebDAVClient } from '../utils/webdav.js';
 import {ENV} from '../utils/env.js';
 import {getContentType, getMimeType} from "../utils/mime-type.js";
 import {getParsesDict, getSitesMap, pathLib, es6_extend_code, req_extend_code} from "../utils/file.js";
@@ -294,6 +295,7 @@ export async function getSandbox(env = {}) {
         Cloud,
         Yun,
         Pan,
+        createWebDAVClient,
         DataBase,
         database,
         require,

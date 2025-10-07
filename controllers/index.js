@@ -36,6 +36,8 @@ import cronTaskerController from './cron-tasker.js';
 import sourceCheckerController from './source-checker.js';
 // 图片存储控制器
 import imageStoreController from './image-store.js';
+// WebDAV 代理控制器
+import webdavProxyController from './webdav-proxy.js';
 
 /**
  * 注册所有路由控制器
@@ -76,4 +78,6 @@ export const registerRoutes = (fastify, options) => {
     fastify.register(sourceCheckerController, options);
     // 注册图片存储路由
     fastify.register(imageStoreController, options);
+    // 注册 WebDAV 代理路由
+    fastify.register(webdavProxyController, options);
 };

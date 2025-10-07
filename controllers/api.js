@@ -132,6 +132,7 @@ export default (fastify, options, done) => {
             const httpUrl = `${protocol}://${hostname}/http`;
             const imageApi = `${protocol}://${hostname}/image`;
             const mediaProxyUrl = `${protocol}://${hostname}/mediaProxy`;
+            const webdavProxyUrl = `${protocol}://${hostname}/webdav/`;
             const hostUrl = `${hostname.split(':')[0]}`;
             const fServer = fastify.server;
 
@@ -155,6 +156,7 @@ export default (fastify, options, done) => {
                     httpUrl,
                     imageApi,
                     mediaProxyUrl,
+                    webdavProxyUrl,
                     hostUrl,
                     hostname,
                     fServer,
@@ -408,6 +410,7 @@ export default (fastify, options, done) => {
         const httpUrl = `${protocol}://${hostname}/http`;
         const imageApi = `${protocol}://${hostname}/image`;
         const mediaProxyUrl = `${protocol}://${hostname}/mediaProxy`;
+        const webdavProxyUrl = `${protocol}://${hostname}/webdav/`;
         const hostUrl = `${hostname.split(':')[0]}`;
         const fServer = fastify.server;
 
@@ -432,6 +435,7 @@ export default (fastify, options, done) => {
                 httpUrl,
                 imageApi,
                 mediaProxyUrl,
+                webdavProxyUrl,
                 hostUrl,
                 hostname,
                 fServer,
@@ -547,6 +551,7 @@ export default (fastify, options, done) => {
         const httpUrl = `${protocol}://${hostname}/http`;
         const imageApi = `${protocol}://${hostname}/image`;
         const mediaProxyUrl = `${protocol}://${hostname}/mediaProxy`;
+        const webdavProxyUrl = `${protocol}://${hostname}/webdav/`;
         const hostUrl = `${hostname.split(':')[0]}`;
         const fServer = fastify.server;
 
@@ -571,6 +576,7 @@ export default (fastify, options, done) => {
                 httpUrl,
                 imageApi,
                 mediaProxyUrl,
+                webdavProxyUrl,
                 hostUrl,
                 hostname,
                 getProxyUrl,
