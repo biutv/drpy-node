@@ -38,6 +38,8 @@ import sourceCheckerController from './source-checker.js';
 import imageStoreController from './image-store.js';
 // WebDAV 代理控制器
 import webdavProxyController from './webdav-proxy.js';
+// FTP 代理控制器
+import ftpProxyController from './ftp-proxy.js';
 
 /**
  * 注册所有路由控制器
@@ -80,4 +82,6 @@ export const registerRoutes = (fastify, options) => {
     fastify.register(imageStoreController, options);
     // 注册 WebDAV 代理路由
     fastify.register(webdavProxyController, options);
+    // 注册 FTP 代理路由
+    fastify.register(ftpProxyController, options);
 };

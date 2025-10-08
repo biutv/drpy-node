@@ -82,6 +82,7 @@ var rule = {
             },
             body: "device=24250683a3bdb3f118dff25ba4b1cba1a&install_first_open=false&first_install_time=1723214205125&last_update_time=1723214205125&report_link_url="
         });
+        // log('html:', html);
         html = JSON.parse(html);
         try {
             rule.headers['authorization'] = html.data.token

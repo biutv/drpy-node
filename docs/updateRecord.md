@@ -1,10 +1,12 @@
 # drpyS更新记录
 
-### 20250928
+### 20251007
 
 更新至V1.3.7
 
 1. 增加一个cat源 `爱玩音乐.js`,补齐缺失的 `lrcToSrt` `strExtract` 并注入到drpys沙箱环境和cat全局变量
+2. 增加了 `ftp`,`webdav`协议支持和相关的源
+3. 升级drplayer到最新版本，支持多级目录及ftp、webdav源
 
 ### 20250927
 

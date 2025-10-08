@@ -8,6 +8,7 @@
 // @match        https://www.baidu.com/*
 // @match        https://connect.huaweicloud.com/*
 // @match        https://*.huaweicloud.com/*
+// @match        https://*.iconfont.cn/*
 // @run-at       document-end
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard

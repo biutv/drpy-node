@@ -178,9 +178,9 @@ async function request(url, opt = {}) {
     }
     
     // 根据有效的 postType 处理数据
-    if (effectivePostType === 'form' && data != null) {
+    if (effectivePostType === 'form' && data != null && typeof data === 'object') {
         data = qs.stringify(data, {encode: false});
-    } else if (effectivePostType === 'form-data' && data != null) {
+    } else if (effectivePostType === 'form-data' && data != null && typeof data === 'object') {
         data = toFormData(data);
     }
     if (data) {

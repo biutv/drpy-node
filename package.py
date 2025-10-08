@@ -4,7 +4,8 @@ import argparse
 import re
 
 # 要排除的目录列表
-EXCLUDE_DIRS = ['.git', '.idea', 'soft', 'apps/cat', 'plugins/pvideo', 'plugins/req-proxy', 'pyTools', 'drop_code',
+EXCLUDE_DIRS = ['.git', '.idea', 'soft', 'apps/cat', 'plugins/pvideo', 'plugins/req-proxy', 'plugins/pup-sniffer',
+                'pyTools', 'drop_code',
                 'jstest',
                 'local', 'logs',
                 '对话1.txt',
@@ -54,18 +55,18 @@ def generate_archive_name(script_dir, green=False):
     """
     # 获取当前目录名
     current_dir = os.path.basename(script_dir)
-    
+
     # 获取当前时间
     current_time = datetime.datetime.now().strftime("%Y%m%d")
-    
+
     # 根据是否传入 green 参数生成压缩包文件名
     archive_suffix = "-green" if green else ""
     archive_name = f"{current_dir}-{current_time}{archive_suffix}.7z"
-    
+
     # 压缩包输出路径 (脚本所在目录的外面)
     parent_dir = os.path.abspath(os.path.join(script_dir, ".."))
     archive_path = os.path.join(parent_dir, archive_name)
-    
+
     return archive_path
 
 
@@ -81,11 +82,11 @@ def build_exclude_params(script_dir, green=False):
         list: 排除参数列表
     """
     exclude_params = []
-    
+
     # 排除目录
     for exclude_dir in EXCLUDE_DIRS:
         exclude_params.append(f"-xr!{exclude_dir}")
-    
+
     # 排除文件
     for exclude_file in EXCLUDE_FILES:
         # 使用相对路径来确保文件的准确性
@@ -94,13 +95,13 @@ def build_exclude_params(script_dir, green=False):
             exclude_params.append(f"-xr!{exclude_file}")
         else:
             print(f"警告: {exclude_file} 不存在!")
-    
+
     # 如果启用 green 筛选，排除不符合条件的文件
     if green:
         green_files = filter_green_files(script_dir)
         for file in green_files:
             exclude_params.append(f"-x!{file}")
-    
+
     return exclude_params
 
 
@@ -115,10 +116,10 @@ def execute_compression(archive_path, script_dir, exclude_params):
     """
     # 构建命令，打包目录内容而不包含目录本身
     command = f"7z a \"{archive_path}\" \"{script_dir}\\*\" " + " ".join(exclude_params)
-    
+
     # 打印构建的命令进行调试
     print(f"构建的 7z 命令: {command}")
-    
+
     try:
         # 执行压缩命令
         os.system(command)
@@ -137,10 +138,10 @@ def compress_directory(script_dir, green=False):
     """
     # 生成压缩包文件名和路径
     archive_path = generate_archive_name(script_dir, green)
-    
+
     # 构建排除参数
     exclude_params = build_exclude_params(script_dir, green)
-    
+
     # 执行压缩
     execute_compression(archive_path, script_dir, exclude_params)
 

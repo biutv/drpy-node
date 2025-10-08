@@ -59,12 +59,24 @@ var rule = {
         }
     },
     推荐: async function () {
-        let {input, pdfa, pdfh, pd} = this;
+        let {input, pdfa, pdfh, pd,publicUrl} = this;
+        let vod_pic = urljoin(publicUrl, './images/icon_common/网盘.png');
         let d = [];
-        return setResult(d)
+        if (!rule.pans || rule.pans.length < 1) {
+            d.push({
+                vod_id: 'only_params',
+                vod_pic: vod_pic,
+                vod_name: '这是个传参源哦',
+                vod_tag: 'action',
+            })
+        }
+        return d
     },
     一级: async function (tid, pg, filter, extend) {
         let d = [];
+        if (Number(pg) > 1) {
+            return d
+        }
         const _id = tid.split('$')[0];
         const _tid = tid.split('$')[1] || '/';
         let pan = rule.pans.find(it => it.id === _id || it.baseURL === _id);

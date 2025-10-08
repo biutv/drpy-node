@@ -218,7 +218,7 @@
                 vod_remarks: `版本:${rule.version}`,
                 vod_play_from: '道长在线',
                 // vod_play_url: '嗅探播放$https://resource-cdn.tuxiaobei.com/video/10/8f/108fc9d1ac3f69d29a738cdc097c9018.mp4',
-                vod_play_url: '随机小视频$http://api.yujn.cn/api/zzxjj.php',
+                vod_play_url: '随机小视频$http://api.yujn.cn/api/zzxjj.php#短视频$https://v.api.aa1.cn/api/api-dy-girl/?aa1=ajdu987hrjfw',
             };
         } else {
             if (rule.classes) {
