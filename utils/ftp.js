@@ -34,6 +34,7 @@ export class FTPClient {
      * @param {number} [config.port=21] - FTP 服务器端口
      * @param {string} [config.username] - 用户名
      * @param {string} [config.password] - 密码
+     * @param {string} [config.basePath='/'] - FTP 服务器基础路径
      * @param {boolean} [config.secure=false] - 是否使用 FTPS (FTP over SSL/TLS)
      * @param {string} [config.secureOptions] - SSL/TLS 选项 ('explicit' 或 'implicit')
      * @param {boolean} [config.pasv=true] - 是否使用被动模式
@@ -43,6 +44,7 @@ export class FTPClient {
     constructor(config) {
         this.config = {
             port: 21,
+            basePath: '/',
             secure: false,
             secureOptions: 'explicit',
             pasv: true,
@@ -212,12 +214,12 @@ export class FTPClient {
             try {
                 await this._ensureConnected();
                 
-                const normalizedPath = this._normalizePath(remotePath);
-                const fileList = await this.client.list(normalizedPath);
+                const fullPath = this._getFullPath(remotePath);
+                const fileList = await this.client.list(fullPath);
 
                 return fileList.map(item => ({
                     name: item.name,
-                    path: this._joinPath(normalizedPath, item.name),
+                    path: this._joinPath(remotePath, item.name),
                     isDirectory: item.isDirectory,
                     isFile: item.isFile,
                     size: item.size || 0,
@@ -245,11 +247,11 @@ export class FTPClient {
             try {
                 await this._ensureConnected();
                 
-                const normalizedPath = this._normalizePath(remotePath);
+                const fullPath = this._getFullPath(remotePath);
                 
                 // 尝试获取父目录的文件列表来找到目标文件/目录
-                const parentPath = path.dirname(normalizedPath);
-                const fileName = path.basename(normalizedPath);
+                const parentPath = path.dirname(fullPath);
+                const fileName = path.basename(fullPath);
                 
                 const fileList = await this.client.list(parentPath === '.' ? '/' : parentPath);
                 const item = fileList.find(file => file.name === fileName);
@@ -260,7 +262,7 @@ export class FTPClient {
 
                 return {
                     name: item.name,
-                    path: normalizedPath,
+                    path: remotePath,
                     isDirectory: item.isDirectory,
                     isFile: item.isFile,
                     size: item.size || 0,
@@ -305,12 +307,12 @@ export class FTPClient {
         try {
             await this._ensureConnected();
             
-            const normalizedPath = this._normalizePath(remotePath);
+            const fullPath = this._getFullPath(remotePath);
 
             if (recursive) {
-                await this.client.ensureDir(normalizedPath);
+                await this.client.ensureDir(fullPath);
             } else {
-                await this.client.send(`MKD ${normalizedPath}`);
+                await this.client.send(`MKD ${fullPath}`);
             }
 
             return true;
@@ -334,10 +336,10 @@ export class FTPClient {
         try {
             await this._ensureConnected();
             
-            const normalizedPath = this._normalizePath(remotePath);
+            const fullPath = this._getFullPath(remotePath);
 
             // 检查文件是否存在
-            if (!overwrite && await this.exists(normalizedPath)) {
+            if (!overwrite && await this.exists(remotePath)) {
                 throw new Error(`File ${remotePath} already exists and overwrite is disabled`);
             }
 
@@ -364,7 +366,7 @@ export class FTPClient {
                 });
             }
 
-            await this.client.uploadFrom(sourceStream, normalizedPath);
+            await this.client.uploadFrom(sourceStream, fullPath);
 
             // 清除进度跟踪
             if (onProgress) {
@@ -391,7 +393,7 @@ export class FTPClient {
         try {
             await this._ensureConnected();
             
-            const normalizedPath = this._normalizePath(remotePath);
+            const fullPath = this._getFullPath(remotePath);
 
             // 设置进度跟踪
             if (onProgress) {
@@ -406,7 +408,7 @@ export class FTPClient {
             if (localPath) {
                 // 保存到本地文件
                 const writeStream = createWriteStream(localPath);
-                await this.client.downloadTo(writeStream, normalizedPath);
+                await this.client.downloadTo(writeStream, fullPath);
                 
                 // 清除进度跟踪
                 if (onProgress) {
@@ -424,7 +426,7 @@ export class FTPClient {
                     }
                 });
 
-                await this.client.downloadTo(writeStream, normalizedPath);
+                await this.client.downloadTo(writeStream, fullPath);
                 
                 // 清除进度跟踪
                 if (onProgress) {
@@ -449,11 +451,11 @@ export class FTPClient {
             try {
                 await this._ensureConnected();
                 
-                const normalizedPath = this._normalizePath(remotePath);
+                const fullPath = this._getFullPath(remotePath);
                 
                 // 首先获取文件信息（直接调用，避免队列嵌套）
-                const parentPath = path.dirname(normalizedPath);
-                const fileName = path.basename(normalizedPath);
+                const parentPath = path.dirname(fullPath);
+                const fileName = path.basename(fullPath);
                 
                 const fileList = await this.client.list(parentPath === '.' ? '/' : parentPath);
                 const item = fileList.find(file => file.name === fileName);
@@ -468,7 +470,7 @@ export class FTPClient {
                 
                 const fileInfo = {
                     name: item.name,
-                    path: normalizedPath,
+                    path: remotePath,
                     isDirectory: item.isDirectory,
                     isFile: item.isFile,
                     size: item.size || 0,
@@ -552,7 +554,7 @@ export class FTPClient {
                 });
 
                 // 使用 FTP 客户端下载文件到写入流
-                this.client.downloadTo(writeStream, normalizedPath).catch(error => {
+                this.client.downloadTo(writeStream, fullPath).catch(error => {
                     stream.destroy(error);
                 });
 
@@ -594,15 +596,15 @@ export class FTPClient {
         try {
             await this._ensureConnected();
             
-            const normalizedPath = this._normalizePath(remotePath);
+            const fullPath = this._getFullPath(remotePath);
             
             // 检查是文件还是目录
-            const info = await this.getInfo(normalizedPath);
+            const info = await this.getInfo(remotePath);
             
             if (info.isDirectory) {
-                await this.client.removeDir(normalizedPath);
+                await this.client.removeDir(fullPath);
             } else {
-                await this.client.remove(normalizedPath);
+                await this.client.remove(fullPath);
             }
             
             return true;
@@ -622,15 +624,15 @@ export class FTPClient {
         try {
             await this._ensureConnected();
             
-            const normalizedSource = this._normalizePath(sourcePath);
-            const normalizedDestination = this._normalizePath(destinationPath);
+            const fullSourcePath = this._getFullPath(sourcePath);
+            const fullDestinationPath = this._getFullPath(destinationPath);
 
             // 检查目标是否存在
-            if (!overwrite && await this.exists(normalizedDestination)) {
+            if (!overwrite && await this.exists(destinationPath)) {
                 throw new Error(`Destination ${destinationPath} already exists and overwrite is disabled`);
             }
 
-            await this.client.rename(normalizedSource, normalizedDestination);
+            await this.client.rename(fullSourcePath, fullDestinationPath);
             return true;
         } catch (error) {
             throw new Error(`Failed to move ${sourcePath} to ${destinationPath}: ${error.message}`);
@@ -647,35 +649,32 @@ export class FTPClient {
     async copy(sourcePath, destinationPath, overwrite = false) {
         try {
             await this._ensureConnected();
-            
-            const normalizedSource = this._normalizePath(sourcePath);
-            const normalizedDestination = this._normalizePath(destinationPath);
 
             // 检查源文件是否存在
-            const sourceInfo = await this.getInfo(normalizedSource);
+            const sourceInfo = await this.getInfo(sourcePath);
             if (!sourceInfo) {
                 throw new Error(`Source file does not exist: ${sourcePath}`);
             }
 
             // 检查目标是否存在
-            if (!overwrite && await this.exists(normalizedDestination)) {
+            if (!overwrite && await this.exists(destinationPath)) {
                 throw new Error(`Destination ${destinationPath} already exists and overwrite is disabled`);
             }
 
             if (sourceInfo.isDirectory) {
                 // 复制目录（递归）
-                await this.createDirectory(normalizedDestination, true);
-                const files = await this.listDirectory(normalizedSource);
+                await this.createDirectory(destinationPath, true);
+                const files = await this.listDirectory(sourcePath);
                 
                 for (const file of files) {
-                    const srcPath = this._joinPath(normalizedSource, file.name);
-                    const destPath = this._joinPath(normalizedDestination, file.name);
+                    const srcPath = this._joinPath(sourcePath, file.name);
+                    const destPath = this._joinPath(destinationPath, file.name);
                     await this.copy(srcPath, destPath, overwrite);
                 }
             } else {
                 // 复制文件
-                const buffer = await this.downloadFile(normalizedSource);
-                await this.uploadFile(buffer, normalizedDestination, { overwrite });
+                const buffer = await this.downloadFile(sourcePath);
+                await this.uploadFile(buffer, destinationPath, { overwrite });
             }
 
             return true;
@@ -720,13 +719,116 @@ export class FTPClient {
 
     /**
      * 标准化路径
+     * 将输入路径转换为相对于 FTP 基础路径的路径
      * @private
      */
     _normalizePath(remotePath) {
+        if (!remotePath) return '/';
+        
+        // 确保路径以 / 开头
         if (!remotePath.startsWith('/')) {
             remotePath = '/' + remotePath;
         }
-        return remotePath.replace(/\/+/g, '/');
+        
+        // 清理多余的斜杠
+        remotePath = remotePath.replace(/\/+/g, '/');
+        
+        // 获取 FTP 基础路径
+        let basePath = this.config.basePath || '/';
+        
+        // 确保基础路径以 / 开头和结尾
+        if (!basePath.startsWith('/')) {
+            basePath = '/' + basePath;
+        }
+        if (!basePath.endsWith('/')) {
+            basePath = basePath + '/';
+        }
+        
+        // 如果输入路径包含基础路径，则移除基础路径前缀
+        if (remotePath.startsWith(basePath)) {
+            let relativePath = remotePath.substring(basePath.length);
+            
+            // 确保相对路径以 / 开头
+            if (!relativePath.startsWith('/')) {
+                relativePath = '/' + relativePath;
+            }
+            
+            // 如果结果只是 /，保持为 /
+            return relativePath || '/';
+        }
+        
+        // 如果输入路径不包含基础路径，直接返回（假设它已经是相对路径）
+        return remotePath;
+    }
+
+    /**
+     * 获取完整的 FTP 路径
+     * 将相对路径转换为包含 basePath 的完整路径
+     * @private
+     */
+    _getFullPath(remotePath) {
+        const normalizedPath = this._normalizePath(remotePath);
+        
+        // 获取 FTP 基础路径
+        let basePath = this.config.basePath || '/';
+        
+        // 确保基础路径以 / 开头但不以 / 结尾（除非是根路径）
+        if (!basePath.startsWith('/')) {
+            basePath = '/' + basePath;
+        }
+        if (basePath !== '/' && basePath.endsWith('/')) {
+            basePath = basePath.slice(0, -1);
+        }
+        
+        // 如果基础路径是根路径，直接返回规范化的路径
+        if (basePath === '/') {
+            return normalizedPath;
+        }
+        
+        // 移除 normalizedPath 开头的斜杠，避免双斜杠
+        const cleanPath = normalizedPath.startsWith('/') ? normalizedPath.substring(1) : normalizedPath;
+        
+        // 如果 cleanPath 为空，返回基础路径
+        if (!cleanPath || cleanPath === '/') {
+            return basePath;
+        }
+        
+        return basePath + '/' + cleanPath;
+    }
+
+    /**
+     * 规范化从 FTP 响应中获取的路径
+     * 移除 FTP 基础路径前缀，返回相对路径
+     * @private
+     */
+    _normalizeResponsePath(responsePath) {
+        if (!responsePath) return '';
+
+        // 获取 FTP 基础路径
+        let basePath = this.config.basePath || '/';
+        
+        // 确保基础路径以 / 开头但不以 / 结尾（除非是根路径）
+        if (!basePath.startsWith('/')) {
+            basePath = '/' + basePath;
+        }
+        if (basePath !== '/' && basePath.endsWith('/')) {
+            basePath = basePath.slice(0, -1);
+        }
+
+        // 如果响应路径以基础路径开头，移除它
+        if (responsePath.startsWith(basePath)) {
+            let normalizedPath = responsePath.substring(basePath.length);
+
+            // 确保路径以 / 开头
+            if (!normalizedPath.startsWith('/')) {
+                normalizedPath = '/' + normalizedPath;
+            }
+
+            return normalizedPath;
+        }
+
+        // 如果不以基础路径开头，直接返回原路径
+        return responsePath;
     }
 
     /**
@@ -738,7 +840,9 @@ export class FTPClient {
         if (normalized === '/') {
             return '/' + fileName;
         }
-        return normalized + '/' + fileName;
+        // 确保不会产生双斜杠
+        const separator = normalized.endsWith('/') ? '' : '/';
+        return normalized + separator + fileName;
     }
 
     /**

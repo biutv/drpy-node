@@ -26,6 +26,12 @@ var rule = {
     class_url: '1&2&41',
     lazy: async function () {
         let {input, pdfa, pdfh, pd} = this
+        if (input.startsWith('push://')) {
+            return {
+                parse: 0,
+                url: input
+            }
+        }
         const html = JSON.parse((await req(input)).content.match(/r player_.*?=(.*?)</)[1]);
         let url = html.url;
         if (html.encrypt == "1") {

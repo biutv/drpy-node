@@ -44,7 +44,7 @@ var rule = {
         rule.pans.forEach(pan => {
             classList.push({
                 type_name: pan.name,
-                type_id: pan.id || pan.baseURL,
+                type_id: pan.id || pan.basePath,
             })
         })
         return {class: classList}
@@ -85,7 +85,7 @@ var rule = {
         }
         const _id = tid.split('$')[0];
         const _tid = tid.split('$')[1] || '/';
-        let pan = rule.pans.find(it => it.id === _id || it.baseURL === _id);
+        let pan = rule.pans.find(it => it.id === _id || it.basePath === _id);
         if (pan) {
             const ftp = createFTPClient(setAnonymous(pan));
             const isConnected = await ftp.testConnection();
@@ -117,7 +117,7 @@ var rule = {
         let tid = ids[0];
         const _id = tid.split('$')[0];
         const _tid = tid.split('$')[1] || '/';
-        let pan = rule.pans.find(it => it.id === _id || it.baseURL === _id);
+        let pan = rule.pans.find(it => it.id === _id || it.basePath === _id);
         if (pan) {
             const ftp = createFTPClient(setAnonymous(pan));
             const isConnected = await ftp.testConnection();

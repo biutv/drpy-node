@@ -454,6 +454,9 @@ var rule = {
             case 'videoParse':
                 d.push(genMultiInput('mg_hz', '设置芒果解析画质', '默认为4，可自行配置成其他值 (视频质量，9=4K, 4=1080p, 3=720p, 2=560p)', images.settings));
                 d.push(getInput('get_mg_hz', '查看芒果解析画质', images.settings));
+
+                d.push(genMultiInput('PROXY_AUTH', '设置代理播放授权', '默认为drpys，可自行配置成其他值', images.settings));
+                d.push(getInput('get_PROXY_AUTH', '查看代理播放授权', images.settings));
                 break;
         }
         return d
@@ -1286,6 +1289,7 @@ var rule = {
             'cat_sub_code',
             'must_sub_code',
             'mg_hz',
+            'PROXY_AUTH',
         ];
         let get_cookie_sets = [
             'get_quark_cookie',
@@ -1319,6 +1323,7 @@ var rule = {
             'get_cat_sub_code',
             'get_must_sub_code',
             'get_mg_hz',
+            'get_PROXY_AUTH',
         ];
         if (cookie_sets.includes(action) && value) {
             try {

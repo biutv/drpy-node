@@ -4,7 +4,8 @@ import argparse
 import re
 
 # 要排除的目录列表
-EXCLUDE_DIRS = ['.git', '.idea', 'soft', 'apps/cat', 'plugins/pvideo', 'plugins/req-proxy', 'plugins/pup-sniffer',
+EXCLUDE_DIRS = ['.git', '.idea', 'soft', 'examples', 'apps/cat', 'plugins/pvideo', 'plugins/req-proxy',
+                'plugins/pup-sniffer',
                 'pyTools', 'drop_code',
                 'jstest',
                 'local', 'logs',

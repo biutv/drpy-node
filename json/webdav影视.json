@@ -1,0 +1,29 @@
+[
+  {
+    "name": "动漫",
+    "baseURL": "https://pan.8897122.xyz/dav/动漫库",
+    "username": "webdavtv",
+    "password": "webdavtv",
+    "rejectUnauthorized": false,
+    "showAll": false,
+    "timeout": 30000
+  },
+  {
+    "name": "电影",
+    "baseURL": "https://pan.8897122.xyz/dav/电影库",
+    "username": "webdavtv",
+    "password": "webdavtv",
+    "rejectUnauthorized": false,
+    "showAll": false,
+    "timeout": 30000
+  },
+  {
+    "name": "电视剧",
+    "baseURL": "https://pan.8897122.xyz/dav/电视剧库",
+    "username": "webdavtv",
+    "password": "webdavtv",
+    "rejectUnauthorized": false,
+    "showAll": false,
+    "timeout": 30000
+  }
+]

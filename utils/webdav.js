@@ -107,7 +107,9 @@ export class WebDAVClient {
      */
     async listDirectory(remotePath = '/', depth = 1) {
         try {
+            // log('remotePath:',remotePath);
             const normalizedPath = this._normalizePath(remotePath);
+            // log('normalizedPath:',normalizedPath)
             const response = await this.client.request({
                 method: 'PROPFIND',
                 url: normalizedPath,
@@ -148,7 +150,7 @@ export class WebDAVClient {
             });
 
             // 添加调试信息
-            if (process.env.NODE_ENV === 'development' || process.env.WEBDAV_DEBUG) {
+            if (Number(process.env.WEBDAV_DEBUG)) {
                 console.log('WebDAV PROPFIND response for', remotePath, ':', response.data);
             }
 
@@ -429,7 +431,7 @@ export class WebDAVClient {
             }
 
             // 添加调试信息
-            if (process.env.NODE_ENV === 'development' || process.env.WEBDAV_DEBUG) {
+            if (Number(process.env.WEBDAV_DEBUG)) {
                 console.log('WebDAV COPY operation:');
                 console.log('  Source:', normalizedSource);
                 console.log('  Destination URL:', destinationUrl);
@@ -495,13 +497,43 @@ export class WebDAVClient {
 
     /**
      * 标准化路径
+     * 将输入路径转换为相对于 WebDAV 基础路径的路径
      * @private
      */
     _normalizePath(remotePath) {
+        if (!remotePath) return '/';
+        
+        // 确保路径以 / 开头
         if (!remotePath.startsWith('/')) {
             remotePath = '/' + remotePath;
         }
-        return remotePath.replace(/\/+/g, '/');
+        
+        // 清理多余的斜杠
+        remotePath = remotePath.replace(/\/+/g, '/');
+        
+        // 获取 WebDAV 基础路径
+        const baseUrl = new URL(this.config.baseURL);
+        const basePath = baseUrl.pathname;
+        
+        // 解码基础路径和输入路径以进行正确比较
+        const decodedBasePath = decodeURIComponent(basePath);
+        const decodedRemotePath = decodeURIComponent(remotePath);
+        
+        // 如果输入路径包含基础路径，则移除基础路径前缀
+        if (decodedRemotePath.startsWith(decodedBasePath)) {
+            let relativePath = decodedRemotePath.substring(decodedBasePath.length);
+            
+            // 确保相对路径以 / 开头
+            if (!relativePath.startsWith('/')) {
+                relativePath = '/' + relativePath;
+            }
+            
+            // 如果结果只是 /，保持为 /
+            return relativePath || '/';
+        }
+        
+        // 如果输入路径不包含基础路径，直接返回（假设它已经是相对路径）
+        return remotePath;
     }
 
     /**
@@ -514,10 +546,17 @@ export class WebDAVClient {
 
         // 获取 WebDAV 基础路径（从 baseURL 中提取）
         const baseUrl = new URL(this.config.baseURL);
-        const basePath = baseUrl.pathname;
+        let basePath = baseUrl.pathname;
+        
+        // 解码 basePath 以便正确比较
+        try {
+            basePath = decodeURIComponent(basePath);
+        } catch (e) {
+            console.warn('Failed to decode basePath:', basePath);
+        }
 
         // 添加调试信息
-        if (process.env.NODE_ENV === 'development' || process.env.WEBDAV_DEBUG) {
+        if (Number(process.env.WEBDAV_DEBUG)) {
             console.log('_normalizeResponsePath debug:');
             console.log('  Response path:', responsePath);
             console.log('  Base path:', basePath);
@@ -537,7 +576,7 @@ export class WebDAVClient {
                 normalizedPath = '';
             }
 
-            if (process.env.NODE_ENV === 'development' || process.env.WEBDAV_DEBUG) {
+            if (Number(process.env.WEBDAV_DEBUG)) {
                 console.log('  Normalized path:', normalizedPath);
             }
 
@@ -545,7 +584,7 @@ export class WebDAVClient {
         }
 
         // 如果不以基础路径开头，直接返回原路径
-        if (process.env.NODE_ENV === 'development' || process.env.WEBDAV_DEBUG) {
+        if (Number(process.env.WEBDAV_DEBUG)) {
             console.log('  No normalization needed, returning:', responsePath);
         }
 
@@ -571,7 +610,7 @@ export class WebDAVClient {
         const absoluteUrl = new URL(cleanPath, baseURL).href;
 
         // 添加调试信息
-        if (process.env.NODE_ENV === 'development' || process.env.WEBDAV_DEBUG) {
+        if (Number(process.env.WEBDAV_DEBUG)) {
             console.log('_getAbsoluteUrl debug:');
             console.log('  Input remotePath:', remotePath);
             console.log('  Normalized path:', normalizedPath);
@@ -658,8 +697,12 @@ export class WebDAVClient {
                 }
 
                 // 如果有请求路径，排除与请求路径相同的项目（即目录本身）
-                if (requestPath && normalizedPath === requestPath) {
-                    return;
+                if (requestPath) {
+                    // 将请求路径也进行相同的规范化处理，以便正确比较
+                    const normalizedRequestPath = this._normalizePath(requestPath);
+                    if (normalizedPath === normalizedRequestPath) {
+                        return;
+                    }
                 }
 
                 // 提取文件/目录名称
