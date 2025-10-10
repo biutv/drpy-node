@@ -96,7 +96,7 @@ var rule = {
                     log(item);
                     // const type = item.isDirectory ? 'folder' : undefined;
                     const type = item.isDirectory ? 'folder' : 'file';
-                    const size = item.isDirectory ? '' : `${item.size} bytes`;
+                    const size = item.isDirectory ? '' : `${get_size(item.size)}`;
                     const content = item.isDirectory ? '' : `${item.contentType}`;
                     // console.log(`  ${type} ${item.name}${size}`);
                     d.push({
@@ -112,6 +112,8 @@ var rule = {
         return d
     },
     二级: async function (ids) {
+        let {publicUrl} = this;
+        let vod_pic = urljoin(publicUrl, './images/logo_round.png');
         // log('ids:',ids);
         let VOD = {};
         let tid = ids[0];
@@ -126,11 +128,11 @@ var rule = {
                 // log('itemInfo:');
                 // log(itemInfo);
                 VOD.vod_name = itemInfo.name;
-                VOD.vod_content = itemInfo.path + '\n' + '上次修改时间:' + itemInfo.lastModified;
-                VOD.vod_remarks = itemInfo.size;
+                VOD.vod_content = itemInfo.path + '\n' + '上次修改时间:' + toBeijingTime(itemInfo.lastModified);
+                VOD.vod_remarks = get_size(itemInfo.size);
                 VOD.vod_director = itemInfo.etag;
                 VOD.vod_actor = itemInfo.contentType;
-                VOD.vod_pic = '/default-poster.svg';
+                VOD.vod_pic = vod_pic;
                 VOD.vod_play_from = '在线观看';
                 const proxy_params_url = `file?config=${encodeURIComponent(JSON.stringify(pan))}&path=${encodeURIComponent(_tid)}`;
                 VOD.vod_play_url = itemInfo.name + '$' + proxy_params_url;

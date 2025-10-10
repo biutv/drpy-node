@@ -1,5 +1,13 @@
 # drpyS更新记录
 
+### 20251010
+
+更新至V1.3.9
+
+1. 引入2个ds可用的函数 `get_size` `toBeijingTime`
+2. 优化ftp与webdav
+3. 升级drplayer支持全局动作
+
 ### 20251008
 
 更新至V1.3.8

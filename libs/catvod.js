@@ -1,7 +1,7 @@
 import path from "path";
 import {readFile} from "fs/promises";
 import {getSitesMap} from "../utils/sites-map.js";
-import {computeHash, deepCopy, getNowTime} from "../utils/utils.js";
+import {computeHash, deepCopy, getNowTime, urljoin} from "../utils/utils.js";
 import {fileURLToPath, pathToFileURL} from 'url';
 import {md5} from "../libs_drpy/crypto-util.js";
 import {fastify} from "../controllers/fastlogger.js";
@@ -110,9 +110,14 @@ const init = async function (filePath, env = {}, refresh) {
             } catch (e) {
                 log(`[${moduleName}] ungzip解密moduleExt失败: ${e.message}`);
             }
+            log(`[${moduleName}] moduleExt:`, moduleExt);
             if (!SitesMap[moduleName].find(i => i.queryStr === moduleExt) && !SitesMap[moduleName].find(i => i.queryObject.params === moduleExt)) {
                 throw new Error("moduleExt is wrong!")
             }
+            if (moduleExt.startsWith('../json')) {
+                moduleExt = urljoin(env.jsonUrl, moduleExt.slice(8));
+            }
+            default_init_cfg.ext = moduleExt;
         }
         let hashMd5 = md5(filePath + '#pAq#' + moduleExt);
         if (moduleCache.has(hashMd5) && !refresh) {

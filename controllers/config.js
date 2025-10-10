@@ -446,9 +446,13 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         SitesMap[baseName].forEach((it) => {
                             let key = `hipy_py_${it.alias}`;
                             let name = `${it.alias}(hipy)`;
-                            let _ext = it.queryStr;
-                            if (!enableOldConfig) {
-                                _ext = parseExt(_ext);
+                            let _ext = it.queryObject.type === 'url' ? it.queryObject.params : it.queryStr;
+                            if (_ext && _ext !== it.queryStr) {
+                                _ext = jsEncoder.gzip(_ext);
+                            } else {
+                                if (!enableOldConfig) {
+                                    _ext = parseExt(_ext);
+                                }
                             }
                             console.log(`[HIPY-${baseName}] alias name: ${name},typeof _ext:${typeof _ext},_ext: ${logExt(_ext)}`);
                             fileSites.push({key, name, ext: _ext});
@@ -543,9 +547,13 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         SitesMap[baseName].forEach((it) => {
                             let key = `catvod_${it.alias}`;
                             let name = `${it.alias}(cat)`;
-                            let _ext = it.queryStr;
-                            if (!enableOldConfig) {
-                                _ext = parseExt(_ext);
+                            let _ext = it.queryObject.type === 'url' ? it.queryObject.params : it.queryStr;
+                            if (_ext && _ext !== it.queryStr) {
+                                _ext = jsEncoder.gzip(_ext);
+                            } else {
+                                if (!enableOldConfig) {
+                                    _ext = parseExt(_ext);
+                                }
                             }
                             console.log(`[CAT-${baseName}] alias name: ${name},typeof _ext:${typeof _ext},_ext: ${logExt(_ext)}`);
                             fileSites.push({key, name, ext: _ext});

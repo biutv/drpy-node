@@ -245,6 +245,39 @@ export function createBasicAuthHeaders(username, password) {
     };
 }
 
+export function get_size(sz) {
+    if (sz <= 0) {
+        return "";
+    }
+    let filesize = "";
+    if (sz > 1024 * 1024 * 1024 * 1024.0) {
+        sz /= (1024 * 1024 * 1024 * 1024.0);
+        filesize = "TB";
+    } else if (sz > 1024 * 1024 * 1024.0) {
+        sz /= (1024 * 1024 * 1024.0);
+        filesize = "GB";
+    } else if (sz > 1024 * 1024.0) {
+        sz /= (1024 * 1024.0);
+        filesize = "MB";
+    } else if (sz > 1024.0) {
+        sz /= 1024.0;
+        filesize = "KB";
+    } else {
+        filesize = "B";
+    }
+    // 转成字符串
+    let sizeStr = sz.toFixed(2) + filesize,
+        // 获取小数点处的索引
+        index = sizeStr.indexOf("."),
+        // 获取小数点后两位的值
+        dou = sizeStr.substr(index + 1, 2);
+    if (dou === "00") {
+        return sizeStr.substring(0, index) + sizeStr.substr(index + 3, 2);
+    } else {
+        return sizeStr;
+    }
+}
+
 export const $js = {
     toString(func) {
         let strfun = func.toString();

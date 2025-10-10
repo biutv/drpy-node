@@ -29,6 +29,7 @@
 // 网络请求工具 - 提供HTTP请求功能
 import {getFirstLetter} from "../utils/pinyin-tool.js";
 import {createFTPClient} from "../utils/ftp.js";
+import {toBeijingTime} from "../utils/datetime-format.js";
 
 globalThis.reqs = reqs;
 
@@ -105,3 +106,6 @@ globalThis.PC_UA = PC_UA;
 // 其他常用
 globalThis.$js = $js;
 globalThis.getFirstLetter = getFirstLetter;
+globalThis.get_size = get_size;
+globalThis.urljoin = urljoin;
+globalThis.toBeijingTime = toBeijingTime;

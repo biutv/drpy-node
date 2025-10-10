@@ -12,13 +12,14 @@ import * as misc from '../utils/misc.js';
 import COOKIE from '../utils/cookieManager.js';
 import AIS from '../utils/ais.js';
 import PanS from '../utils/pans.js';
-import { createWebDAVClient } from '../utils/webdav.js';
-import { createFTPClient } from '../utils/ftp.js';
+import {createWebDAVClient} from '../utils/webdav.js';
+import {createFTPClient} from '../utils/ftp.js';
 import {ENV} from '../utils/env.js';
 import {getContentType, getMimeType} from "../utils/mime-type.js";
 import {getParsesDict, getSitesMap, pathLib, es6_extend_code, req_extend_code} from "../utils/file.js";
 import {getFirstLetter} from "../utils/pinyin-tool.js";
 import {reqs} from "../utils/req.js";
+import {toBeijingTime} from "../utils/datetime-format.js"
 import "../utils/random-http-ua.js";
 import {initializeGlobalDollar, rootRequire} from "../libs_drpy/moduleLoader.js";
 import {base64Decode, base64Encode, md5, rc4, rc4_decode, rc4Decrypt, rc4Encrypt} from "../libs_drpy/crypto-util.js";
@@ -65,7 +66,7 @@ const {Ali, Baidu, Baidu2, Cloud, Pan, Quark, UC, Yun} = PanS;
 const {
     sleep, sleepSync, getNowTime, computeHash, deepCopy,
     urljoin, urljoin2, joinUrl, keysToLowerCase, naturalSort, $js,
-    createBasicAuthHeaders
+    createBasicAuthHeaders, get_size,
 } = utils;
 // 缓存已初始化的模块和文件 hash 值
 const moduleCache = new Map();
@@ -163,6 +164,7 @@ export async function getSandbox(env = {}) {
         naturalSort,
         $js,
         createBasicAuthHeaders,
+        get_size,
         $,
         pupWebview,
         getProxyUrl,
@@ -192,6 +194,7 @@ export async function getSandbox(env = {}) {
         desX,
         req,
         reqs,
+        toBeijingTime,
         _fetch,
         XMLHttpRequest,
         simplecc,
