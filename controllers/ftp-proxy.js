@@ -6,6 +6,7 @@
 
 import {ENV} from '../utils/env.js';
 import {FTPClient} from '../utils/ftp.js';
+import {CacheManagerFactory, createHealthResponse, createStatusResponse} from '../utils/proxy-util.js';
 import {readFileSync} from 'fs';
 import path from 'path';
 
@@ -16,10 +17,10 @@ import path from 'path';
  * @param {Function} done - 完成回调
  */
 export default (fastify, options, done) => {
-    // FTP 客户端缓存
-    const ftpClients = new Map();
-    // 文件信息缓存
-    const fileCache = new Map();
+    // FTP 客户端缓存 - 使用智能缓存管理器
+    const ftpClients = CacheManagerFactory.createClientCache('FTPProxy-ClientCache');
+    // 文件信息缓存 - 使用智能缓存管理器
+    const fileCache = CacheManagerFactory.createFileCache('FTPProxy-FileCache');
     // 缓存超时时间（5分钟）
     const cacheTimeout = 5 * 60 * 1000;
 
@@ -78,15 +79,17 @@ export default (fastify, options, done) => {
     fastify.get('/ftp/health', async (request, reply) => {
         console.log(`[ftpController] Health check request`);
 
-        return reply.send({
-            status: 'ok',
-            service: 'FTP Proxy',
-            timestamp: new Date().toISOString(),
-            cache: {
-                clients: ftpClients.size,
-                files: fileCache.size
-            }
+        const healthData = createHealthResponse(ftpClients, fileCache, {
+            features: [
+                'FTP file direct link access',
+                'Smart cache management with auto-cleanup',
+                'Multiple FTP server support',
+                'File metadata caching',
+                'Range request support for large files'
+            ]
         });
+
+        return reply.send(healthData);
     });
 
     /**
@@ -367,23 +370,17 @@ export default (fastify, options, done) => {
             const config = loadDefaultConfig();
             const processedConfig = processConfig(config);
 
-            return reply.send({
-                service: 'FTP Proxy Controller',
-                version: '1.0.0',
-                status: 'running',
-                cache: {
-                    clients: ftpClients.size,
-                    files: fileCache.size,
-                    timeout: cacheTimeout
-                },
-                config: processedConfig ? {
-                    host: processedConfig.host,
-                    port: processedConfig.port || 21,
-                    username: processedConfig.username,
-                    hasPassword: !!processedConfig.password,
-                    secure: processedConfig.secure || false
-                } : null,
-                endpoints: [
+            const statusData = createStatusResponse(
+                'FTP Proxy Controller',
+                '1.0.0',
+                [
+                    'FTP file direct link access',
+                    'Smart cache management with auto-cleanup',
+                    'Multiple FTP server support',
+                    'File metadata caching',
+                    'Range request support for large files'
+                ],
+                [
                     'GET /ftp/health - Health check',
                     'GET /ftp/file?path=<file_path> - Get file direct link',
                     'GET /ftp/info?path=<file_path> - Get file information',
@@ -391,8 +388,21 @@ export default (fastify, options, done) => {
                     'POST /ftp/config - Test FTP configuration',
                     'DELETE /ftp/cache - Clear cache',
                     'GET /ftp/status - Get service status'
-                ]
-            });
+                ],
+                ftpClients,
+                fileCache,
+                {
+                    config: processedConfig ? {
+                        host: processedConfig.host,
+                        port: processedConfig.port || 21,
+                        username: processedConfig.username,
+                        hasPassword: !!processedConfig.password,
+                        secure: processedConfig.secure || false
+                    } : null
+                }
+            );
+
+            return reply.send(statusData);
         } catch (error) {
             console.error('[ftpController] Status request error:', error);
             return reply.status(500).send({error: error.message});

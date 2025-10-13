@@ -14,7 +14,10 @@ import {
     makeRemoteRequest,
     PROXY_CONSTANTS,
     setCorsHeaders,
-    verifyAuth
+    verifyAuth,
+    CacheManagerFactory,
+    createHealthResponse,
+    createStatusResponse
 } from '../utils/proxy-util.js';
 
 /**
@@ -24,8 +27,8 @@ import {
  * @param {Function} done - 完成回调
  */
 export default (fastify, options, done) => {
-    // 请求缓存
-    const requestCache = new Map();
+    // 请求缓存 - 使用智能缓存管理器防止内存泄漏
+    const requestCache = CacheManagerFactory.createRequestCache('UnifiedProxy-RequestCache');
 
     /**
      * 发起远程HEAD请求检测内容类型
@@ -376,20 +379,18 @@ export default (fastify, options, done) => {
 
         setCorsHeaders(reply);
         
+        const healthData = createHealthResponse(requestCache);
+        
         return reply.send({
-            status: 'ok',
+            ...healthData,
             service: 'Unified Smart Proxy',
-            timestamp: new Date().toISOString(),
-            cache: {
-                requests: requestCache.size,
-                timeout: PROXY_CONSTANTS.CACHE_TIMEOUT
-            },
             features: [
                 'Smart URL type detection',
                 'Automatic routing to file-proxy or m3u8-proxy',
                 'Content-Type based detection',
                 'URL pattern analysis',
-                'Fallback mechanism'
+                'Fallback mechanism',
+                'Smart cache management with auto-cleanup'
             ]
         });
     });
@@ -529,7 +530,8 @@ export default (fastify, options, done) => {
                 'Force type override',
                 'CORS support',
                 'Authentication protection',
-                'Intelligent fallback'
+                'Intelligent fallback',
+                'Smart cache management with auto-cleanup'
             ];
             
             const endpoints = [
@@ -555,23 +557,17 @@ export default (fastify, options, done) => {
                 }
             };
             
-            return reply.send({
-                service: 'Unified Smart Proxy Controller',
-                version: '1.0.0',
-                status: 'running',
-                cache: {
-                    requests: requestCache.size,
-                    timeout: PROXY_CONSTANTS.CACHE_TIMEOUT
-                },
-                features: features,
-                endpoints: endpoints,
-                auth: {
-                    required: true,
-                    parameter: 'auth',
-                    description: 'Authentication code required for proxy endpoints'
-                },
-                ...additionalInfo
-            });
+            const statusData = createStatusResponse(
+                'Unified Smart Proxy Controller',
+                '1.0.0',
+                features,
+                endpoints,
+                requestCache,
+                null,
+                additionalInfo
+            );
+            
+            return reply.send(statusData);
         } catch (error) {
             console.error('[unifiedProxyController] Status request error:', error);
             return reply.status(500).send({ error: error.message });

@@ -13,7 +13,8 @@ import {
     makeRemoteRequest,
     PROXY_CONSTANTS,
     setCorsHeaders,
-    verifyAuth
+    verifyAuth,
+    CacheManagerFactory
 } from '../utils/proxy-util.js';
 
 /**
@@ -23,8 +24,8 @@ import {
  * @param {Function} done - 完成回调
  */
 export default (fastify, options, done) => {
-    // 请求缓存
-    const requestCache = new Map();
+    // 请求缓存 - 使用智能缓存管理器防止内存泄漏
+    const requestCache = CacheManagerFactory.createRequestCache('FileProxy-RequestCache');
 
     /**
      * 远程文件代理健康检查接口
@@ -35,13 +36,18 @@ export default (fastify, options, done) => {
         
         setCorsHeaders(reply);
         
-        const healthData = createHealthResponse('Remote File Proxy', {
-            cache: {
-                requests: requestCache.size
-            }
-        });
+        const healthData = createHealthResponse(requestCache);
         
-        return reply.send(healthData);
+        return reply.send({
+            ...healthData,
+            service: 'Remote File Proxy',
+            features: [
+                'Remote file streaming',
+                'Range request support',
+                'Custom headers forwarding',
+                'Smart cache management with auto-cleanup'
+            ]
+        });
     });
 
     /**
@@ -228,13 +234,26 @@ export default (fastify, options, done) => {
     fastify.get('/file-proxy/status', async (request, reply) => {
         setCorsHeaders(reply);
         
-        const statusData = createStatusResponse('file-proxy', '1.0.0', {
-            cache: {
-                size: requestCache.size,
-                timeout: PROXY_CONSTANTS.CACHE_TIMEOUT
-            }
-        });
-        
+        const statusData = createStatusResponse(
+            'Remote File Proxy Controller',
+            '1.0.0',
+            [
+                'Remote file streaming',
+                'Range request support',
+                'Custom headers forwarding',
+                'Authentication protection',
+                'Smart cache management with auto-cleanup'
+            ],
+            [
+                'GET /file-proxy/health - Health check (no auth required)',
+                'GET /file-proxy/proxy?url=<target_url>&auth=<auth_code>&headers=<custom_headers> - Proxy remote file',
+                'HEAD /file-proxy/proxy?url=<target_url>&auth=<auth_code>&headers=<custom_headers> - Get file headers',
+                'GET /file-proxy/status - Get service status (no auth required)'
+            ],
+            requestCache,
+            null
+        );
+
         reply.send(statusData);
     });
 

@@ -6,6 +6,7 @@
 
 import {ENV} from '../utils/env.js';
 import {WebDAVClient} from '../utils/webdav.js';
+import {CacheManagerFactory, createHealthResponse, createStatusResponse} from '../utils/proxy-util.js';
 import {readFileSync} from 'fs';
 import path from 'path';
 
@@ -16,10 +17,10 @@ import path from 'path';
  * @param {Function} done - 完成回调
  */
 export default (fastify, options, done) => {
-    // WebDAV 客户端缓存
-    const webdavClients = new Map();
-    // 文件信息缓存
-    const fileCache = new Map();
+    // WebDAV 客户端缓存 - 使用智能缓存管理器
+    const webdavClients = CacheManagerFactory.createClientCache('WebDAVProxy-ClientCache');
+    // 文件信息缓存 - 使用智能缓存管理器
+    const fileCache = CacheManagerFactory.createFileCache('WebDAVProxy-FileCache');
     // 缓存超时时间（5分钟）
     const cacheTimeout = 5 * 60 * 1000;
 
@@ -65,15 +66,17 @@ export default (fastify, options, done) => {
     fastify.get('/webdav/health', async (request, reply) => {
         console.log(`[webdavController] Health check request`);
 
-        return reply.send({
-            status: 'ok',
-            service: 'WebDAV Proxy',
-            timestamp: new Date().toISOString(),
-            cache: {
-                clients: webdavClients.size,
-                files: fileCache.size
-            }
+        const healthData = createHealthResponse(webdavClients, fileCache, {
+            features: [
+                'WebDAV file direct link access',
+                'Smart cache management with auto-cleanup',
+                'Multiple WebDAV server support',
+                'File metadata caching',
+                'Range request support for large files'
+            ]
         });
+
+        return reply.send(healthData);
     });
 
     /**
@@ -330,21 +333,17 @@ export default (fastify, options, done) => {
         try {
             const config = loadDefaultConfig();
 
-            return reply.send({
-                service: 'WebDAV Proxy Controller',
-                version: '1.0.0',
-                status: 'running',
-                cache: {
-                    clients: webdavClients.size,
-                    files: fileCache.size,
-                    timeout: cacheTimeout
-                },
-                config: config ? {
-                    baseURL: config.baseURL,
-                    username: config.username,
-                    hasPassword: !!config.password
-                } : null,
-                endpoints: [
+            const statusData = createStatusResponse(
+                'WebDAV Proxy Controller',
+                '1.0.0',
+                [
+                    'WebDAV file direct link access',
+                    'Smart cache management with auto-cleanup',
+                    'Multiple WebDAV server support',
+                    'File metadata caching',
+                    'Range request support for large files'
+                ],
+                [
                     'GET /webdav/health - Health check',
                     'GET /webdav/file?path=<file_path> - Get file direct link',
                     'GET /webdav/info?path=<file_path> - Get file information',
@@ -352,8 +351,19 @@ export default (fastify, options, done) => {
                     'POST /webdav/config - Test WebDAV configuration',
                     'DELETE /webdav/cache - Clear cache',
                     'GET /webdav/status - Get service status'
-                ]
-            });
+                ],
+                webdavClients,
+                fileCache,
+                {
+                    config: config ? {
+                        baseURL: config.baseURL,
+                        username: config.username,
+                        hasPassword: !!config.password
+                    } : null
+                }
+            );
+
+            return reply.send(statusData);
         } catch (error) {
             console.error('[webdavController] Status request error:', error);
             return reply.status(500).send({error: error.message});

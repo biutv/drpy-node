@@ -5,6 +5,7 @@
  */
 
 import {
+    CacheManagerFactory,
     createHealthResponse,
     createStatusResponse,
     decodeParam,
@@ -25,10 +26,10 @@ import {
  * @param {Function} done - 完成回调
  */
 export default (fastify, options, done) => {
-    // 请求缓存
-    const requestCache = new Map();
-    // M3U8 索引缓存
-    const m3u8Cache = new Map();
+    // 请求缓存 - 使用智能缓存管理器
+    const requestCache = CacheManagerFactory.createRequestCache('M3U8Proxy-RequestCache');
+    // M3U8 索引缓存 - 使用专门的 M3U8 缓存管理器
+    const m3u8Cache = CacheManagerFactory.createM3U8Cache('M3U8Proxy-M3U8Cache');
     // M3U8 缓存超时时间（30秒，因为直播流更新频繁）
     const m3u8CacheTimeout = 30 * 1000;
 
@@ -92,13 +93,14 @@ export default (fastify, options, done) => {
     fastify.get('/m3u8-proxy/health', async (request, reply) => {
         setCorsHeaders(reply);
         
-        const healthData = createHealthResponse('M3U8 Stream Proxy', {
-            cache: {
-                requests: requestCache.size,
-                m3u8: m3u8Cache.size,
-                timeout: PROXY_CONSTANTS.CACHE_TIMEOUT,
-                m3u8Timeout: m3u8CacheTimeout
-            }
+        const healthData = createHealthResponse(requestCache, m3u8Cache, {
+            features: [
+                'M3U8 playlist proxying with link rewriting',
+                'TS segment proxying with authentication',
+                'Smart cache management with auto-cleanup',
+                'CORS support for cross-origin requests',
+                'Authentication support for protected streams'
+            ]
         });
         
         reply.send(healthData);
@@ -332,21 +334,29 @@ export default (fastify, options, done) => {
         try {
             setCorsHeaders(reply);
 
-            const statusData = createStatusResponse('M3U8 Stream Proxy Controller', '1.0.0', {
-                requests: requestCache.size,
-                m3u8: m3u8Cache.size,
-                requestTimeout: PROXY_CONSTANTS.CACHE_TIMEOUT,
-                m3u8Timeout: m3u8CacheTimeout
-            }, [
-                'GET /m3u8-proxy/health - Health check (no auth required)',
-                'GET /m3u8-proxy/proxy?url=<file_url>&auth=<auth_code>&headers=<custom_headers> - Unified proxy for M3U8 and TS files',
-                'HEAD /m3u8-proxy/proxy?url=<file_url>&auth=<auth_code>&headers=<custom_headers> - Get file headers via unified proxy',
-                'GET /m3u8-proxy/playlist?url=<m3u8_url>&auth=<auth_code>&headers=<custom_headers> - Proxy M3U8 playlist',
-                'GET /m3u8-proxy/ts?url=<ts_url>&auth=<auth_code>&headers=<custom_headers> - Proxy TS segment',
-                'HEAD /m3u8-proxy/ts?url=<ts_url>&auth=<auth_code>&headers=<custom_headers> - Get TS segment headers',
-                'DELETE /m3u8-proxy/cache?auth=<auth_code> - Clear cache',
-                'GET /m3u8-proxy/status - Get service status (no auth required)'
-            ]);
+            const statusData = createStatusResponse(
+                'M3U8 Stream Proxy Controller',
+                '1.0.0',
+                [
+                    'M3U8 playlist proxying with link rewriting',
+                    'TS segment proxying with authentication',
+                    'Smart cache management with auto-cleanup',
+                    'CORS support for cross-origin requests',
+                    'Authentication support for protected streams'
+                ],
+                [
+                    'GET /m3u8-proxy/health - Health check (no auth required)',
+                    'GET /m3u8-proxy/proxy?url=<file_url>&auth=<auth_code>&headers=<custom_headers> - Unified proxy for M3U8 and TS files',
+                    'HEAD /m3u8-proxy/proxy?url=<file_url>&auth=<auth_code>&headers=<custom_headers> - Get file headers via unified proxy',
+                    'GET /m3u8-proxy/playlist?url=<m3u8_url>&auth=<auth_code>&headers=<custom_headers> - Proxy M3U8 playlist',
+                    'GET /m3u8-proxy/ts?url=<ts_url>&auth=<auth_code>&headers=<custom_headers> - Proxy TS segment',
+                    'HEAD /m3u8-proxy/ts?url=<ts_url>&auth=<auth_code>&headers=<custom_headers> - Get TS segment headers',
+                    'DELETE /m3u8-proxy/cache?auth=<auth_code> - Clear cache',
+                    'GET /m3u8-proxy/status - Get service status (no auth required)'
+                ],
+                requestCache,
+                m3u8Cache
+            );
 
             return reply.send(statusData);
         } catch (error) {

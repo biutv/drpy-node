@@ -96,6 +96,7 @@ async function getStreamHN() {
                 'sign': sign
             }
         });
+        // log('resp.content:', resp.content)
         let channelList = JSON.parse(resp.content).map(it => {
             return `${it.name},http://$api&url=${encodeURIComponent(it.video_streams[0])}`;
         });
