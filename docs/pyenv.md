@@ -4,7 +4,7 @@
 # windows
 pip install -r spider/py/base/requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple
 # linux
-pip3 install -r spider/py/base/requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple
+pip3 install --break-system-packages -r spider/py/base/requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple
 ```
 
 # golang二进制文件

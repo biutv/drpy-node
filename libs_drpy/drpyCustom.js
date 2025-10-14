@@ -8,6 +8,11 @@ import './_dist/node-rsa.js';
 import './_dist/gb18030.js';
 import './_dist/json5.js';
 
+// 导入RSA，这样文件内部也可以使用
+import {RSA} from './drpyRsa.js';
+// 重新导出RSA供其他模块使用
+export {RSA};
+
 // User Agent 常量
 export const MOBILE_UA = 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36';
 export const PC_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36';
@@ -278,6 +283,7 @@ export const decodeStr = (input, encoding = 'gbk') => {
  */
 export const getCryptoJS = () => 'log("CryptoJS已装载");';
 
+/*
 // 封装的RSA加解密类
 export const RSA = {
     decode(data, key, option = {}) {
@@ -316,6 +322,7 @@ export const RSA = {
         return this.fixKey(key, prefix, endfix);
     }
 };
+*/
 
 /**
  * 智能对比去除广告。支持嵌套m3u8。只需要传入播放地址

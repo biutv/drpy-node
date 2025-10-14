@@ -157,3 +157,4 @@ dist
 /apps/cat/
 /data/temp/
 /scripts/mjs/index.db
+/scripts/test/rsa-test.json
