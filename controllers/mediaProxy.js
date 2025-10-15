@@ -5,16 +5,89 @@ import {ENV} from "../utils/env.js";
 import chunkStream, {testSupport} from '../utils/chunk.js';
 import createAxiosInstance from '../utils/createAxiosAgent.js';
 
-const maxSockets = 64;
+// 全局资源管理器
+const globalResourceManager = {
+    activeStreams: new Set(),
+    activeRequests: new Set(),
+    
+    addStream: function(stream) {
+        this.activeStreams.add(stream);
+        stream.on('close', () => this.activeStreams.delete(stream));
+        stream.on('end', () => this.activeStreams.delete(stream));
+        stream.on('error', () => this.activeStreams.delete(stream));
+    },
+    
+    addRequest: function(requestId) {
+        this.activeRequests.add(requestId);
+    },
+    
+    removeRequest: function(requestId) {
+        this.activeRequests.delete(requestId);
+    },
+    
+    cleanup: function() {
+        // 清理所有活跃的流
+        this.activeStreams.forEach(stream => {
+            if (stream && !stream.destroyed) {
+                stream.destroy();
+            }
+        });
+        this.activeStreams.clear();
+        this.activeRequests.clear();
+    },
+    
+    getStats: function() {
+        return {
+            activeStreams: this.activeStreams.size,
+            activeRequests: this.activeRequests.size,
+            memoryUsage: process.memoryUsage()
+        };
+    }
+};
+
+// 定期清理和内存监控
+setInterval(() => {
+    const stats = globalResourceManager.getStats();
+    if (stats.activeStreams > 50 || stats.activeRequests > 100) {
+        console.warn('[MediaProxy] High resource usage detected:', stats);
+    }
+    
+    // 强制垃圾回收（如果可用）
+    if (global.gc && stats.memoryUsage.heapUsed > 500 * 1024 * 1024) { // 500MB
+        global.gc();
+        console.log('[MediaProxy] Forced garbage collection due to high memory usage');
+    }
+}, 30000); // 每30秒检查一次
+
+const maxSockets = 32; // 减少最大连接数以防止连接池过大
 const _axios = createAxiosInstance({
         maxSockets: maxSockets,
-        rejectUnauthorized: true // 不忽略证书错误
+        rejectUnauthorized: true, // 不忽略证书错误
+        keepAlive: true,
+        keepAliveMsecs: 30000, // 30秒保持连接
+        maxFreeSockets: 10, // 最大空闲连接数
+        timeout: 30000, // 30秒超时
+        freeSocketTimeout: 15000, // 空闲连接超时时间
     },
 );
 
 export default (fastify, options, done) => {
     // 用法同 https://github.com/Zhu-zi-a/mediaProxy
     fastify.all('/mediaProxy', async (request, reply) => {
+        const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        globalResourceManager.addRequest(requestId);
+        
+        // 请求完成时清理
+        const cleanup = () => {
+            globalResourceManager.removeRequest(requestId);
+        };
+        
+        // 监听请求结束事件
+        request.raw.on('close', cleanup);
+        request.raw.on('aborted', cleanup);
+        reply.raw.on('finish', cleanup);
+        reply.raw.on('close', cleanup);
+
         const {thread = 1, form = 'urlcode', url, header, size = '128K', randUa = 0} = request.query;
 
         // console.log('url:', url)
@@ -22,6 +95,7 @@ export default (fastify, options, done) => {
 
         // Check if the URL parameter is missing
         if (!url) {
+            cleanup();
             return reply.code(400).send({error: 'Missing required parameter: url'});
         }
 
@@ -50,7 +124,10 @@ export default (fastify, options, done) => {
         } catch (error) {
             // fastify.log.error(error);
             fastify.log.error(error.message);
-            reply.code(500).send({error: error.message});
+            cleanup();
+            if (!reply.sent && !reply.raw.destroyed) {
+                reply.code(500).send({error: error.message});
+            }
         }
     });
 
@@ -59,6 +136,7 @@ export default (fastify, options, done) => {
 
 // Helper function for range-based chunk downloading
 async function fetchStream(url, userHeaders, start, end, randUa) {
+    let stream = null;
     const headers = keysToLowerCase({
         ...userHeaders,
     });
@@ -80,14 +158,208 @@ async function fetchStream(url, userHeaders, start, end, randUa) {
                 Range: `bytes=${start}-${end}`,
             },
             responseType: 'stream',
+            timeout: 30000, // 30秒超时
         });
-        return {stream: response.data, headers: response.headers};
+
+        stream = response.data;
+        
+        // 添加错误处理监听器
+        stream.on('error', (error) => {
+            console.error(`[fetchStream] Stream error for range ${start}-${end}:`, error.message);
+            if (!stream.destroyed) {
+                stream.destroy();
+            }
+        });
+
+        // 添加超时处理
+        const timeoutId = setTimeout(() => {
+            if (!stream.destroyed) {
+                console.warn(`[fetchStream] Stream timeout for range ${start}-${end}`);
+                stream.destroy();
+            }
+        }, 60000); // 60秒超时
+
+        // 清理超时定时器
+        stream.on('end', () => clearTimeout(timeoutId));
+        stream.on('close', () => clearTimeout(timeoutId));
+        stream.on('error', () => clearTimeout(timeoutId));
+
+        return {stream: stream, headers: response.headers};
     } catch (error) {
-        throw new Error(`Failed to fetch range ${start}-${end}: ${error.message}`);
+        console.error(`[fetchStream] Error fetching range ${start}-${end}:`, error.message);
+        
+        // 确保流被正确销毁
+        if (stream && !stream.destroyed) {
+            stream.destroy();
+        }
+        
+        throw error;
+    }
+}
+
+async function proxyStreamMedia(mediaUrl, reqHeaders, request, reply, randUa = 0) {
+    let responseStream = null;
+    const eventListeners = [];
+    
+    // 添加事件监听器的辅助函数
+    const addListener = (target, event, listener) => {
+        eventListeners.push({target, event, listener});
+        target.on(event, listener);
+    };
+    
+    // 清理所有事件监听器的函数
+    const cleanupListeners = () => {
+        eventListeners.forEach(({target, event, listener}) => {
+            if (target && typeof target.removeListener === 'function') {
+                target.removeListener(event, listener);
+            }
+        });
+        eventListeners.length = 0;
+    };
+    
+    try {
+        // 随机生成 UA（如果启用 randUa 参数）
+        const randHeaders = randUa
+            ? Object.assign({}, reqHeaders, {
+                'User-Agent': randomUa.generateUa(1, {
+                    // device: ['mobile', 'pc'],
+                    device: ['pc'],
+                    mobileOs: ['android']
+                })
+            })
+            : reqHeaders;
+
+        const headers = keysToLowerCase({
+            ...randHeaders,
+        });
+        // 添加accept属性防止获取网页源码编码不正确问题
+        if (!Object.keys(headers).includes('accept')) {
+            headers['accept'] = '*/*';
+        }
+
+        const response = await _axios.get(mediaUrl, {
+            headers: headers,
+            responseType: 'stream',
+            timeout: 30000, // 30秒超时
+        });
+
+        responseStream = response.data;
+        
+        // 将流添加到全局资源管理器
+        globalResourceManager.addStream(responseStream);
+
+        // 设置响应头
+        Object.entries(response.headers).forEach(([key, value]) => {
+            if (!['transfer-encoding', 'content-length'].includes(key.toLowerCase())) {
+                reply.raw.setHeader(key, value);
+            }
+        });
+
+        // 处理 range 请求
+        const range = request.headers.range;
+        if (range) {
+            const contentLength = parseInt(response.headers['content-length'], 10);
+            const [startStr, endStr] = range.replace(/bytes=/, '').split('-');
+            const start = parseInt(startStr, 10);
+            const end = endStr ? parseInt(endStr, 10) : contentLength - 1;
+
+            reply.raw.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`);
+            reply.raw.setHeader('Content-Length', end - start + 1);
+            reply.raw.writeHead(206); // 206 Partial Content
+        } else {
+            reply.raw.writeHead(200);
+        }
+
+        // 监听客户端断开连接
+        const onAbort = () => {
+            console.log('[proxyStreamMedia] Client aborted the connection');
+            if (responseStream && !responseStream.destroyed) {
+                responseStream.destroy();
+            }
+            cleanupListeners();
+        };
+
+        addListener(request.raw, 'aborted', onAbort);
+        addListener(request.raw, 'close', onAbort);
+
+        // 流错误处理
+        const onStreamError = (error) => {
+            console.error('[proxyStreamMedia] Stream error:', error.message);
+            cleanupListeners();
+            if (!reply.sent && !reply.raw.destroyed) {
+                reply.code(500).send({error: error.message});
+            }
+        };
+
+        addListener(responseStream, 'error', onStreamError);
+
+        // 流结束处理
+        const onStreamEnd = () => {
+            console.log('[proxyStreamMedia] Stream ended successfully');
+            cleanupListeners();
+        };
+
+        addListener(responseStream, 'end', onStreamEnd);
+        addListener(responseStream, 'close', onStreamEnd);
+
+        // 检查连接状态
+        if (request.raw.aborted || request.raw.destroyed) {
+            console.log('[proxyStreamMedia] Connection already aborted');
+            if (responseStream && !responseStream.destroyed) {
+                responseStream.destroy();
+            }
+            return;
+        }
+
+        // 流式传输数据
+        responseStream.pipe(reply.raw);
+
+    } catch (error) {
+        console.error('[proxyStreamMedia] Error:', error.message);
+        
+        // 清理资源
+        if (responseStream && !responseStream.destroyed) {
+            responseStream.destroy();
+        }
+        cleanupListeners();
+        
+        if (!reply.sent && !reply.raw.destroyed) {
+            reply.code(500).send({error: error.message});
+        }
     }
 }
 
 async function proxyStreamMediaMulti(mediaUrl, reqHeaders, request, reply, thread, size, randUa = 0) {
+    // 资源清理管理器
+    const resourceManager = {
+        streams: [],
+        eventListeners: [],
+        cleanup: function() {
+            // 清理所有流
+            this.streams.forEach(stream => {
+                if (stream && !stream.destroyed) {
+                    stream.destroy();
+                }
+            });
+            this.streams = [];
+            
+            // 清理所有事件监听器
+            this.eventListeners.forEach(({target, event, listener}) => {
+                if (target && typeof target.removeListener === 'function') {
+                    target.removeListener(event, listener);
+                }
+            });
+            this.eventListeners = [];
+        },
+        addStream: function(stream) {
+            this.streams.push(stream);
+        },
+        addEventListener: function(target, event, listener) {
+            this.eventListeners.push({target, event, listener});
+            target.on(event, listener);
+        }
+    };
+
     try {
         let initialHeaders;
         let contentLength;
@@ -114,7 +386,7 @@ async function proxyStreamMediaMulti(mediaUrl, reqHeaders, request, reply, threa
         const hasCookie = Object.keys(randHeaders).some(key => key.toLowerCase() === 'cookie');
         // console.log(`[proxyStreamMediaMulti] Checking for Cookie in headers: ${hasCookie}`);
 
-
+        let testStream = null;
         try {
             if (!hasCookie) {
                 // 优先尝试 HEAD 请求
@@ -138,6 +410,7 @@ async function proxyStreamMediaMulti(mediaUrl, reqHeaders, request, reply, threa
                     responseType: 'stream',
                 });
                 initialHeaders = rangeResponse.headers;
+                testStream = rangeResponse.data;
 
                 // 从 Content-Range 提取总大小
                 const contentRange = initialHeaders['content-range'];
@@ -150,7 +423,10 @@ async function proxyStreamMediaMulti(mediaUrl, reqHeaders, request, reply, threa
                 }
 
                 // 立即销毁流，防止下载文件内容
-                rangeResponse.data.destroy();
+                if (testStream && !testStream.destroyed) {
+                    testStream.destroy();
+                }
+                testStream = null;
             } catch (rangeError) {
                 console.error('[proxyStreamMediaMulti] Range GET request failed:', rangeError.message);
                 console.log('[proxyStreamMediaMulti] headers:', headers);
@@ -163,9 +439,13 @@ async function proxyStreamMediaMulti(mediaUrl, reqHeaders, request, reply, threa
                 initialHeaders = getResponse.headers;
                 contentLength = parseInt(initialHeaders['content-length'], 10);
                 console.log(`[proxyStreamMediaMulti] Full GET request successful, content-length: ${contentLength}`);
+                testStream = getResponse.data;
 
                 // 立即销毁流，防止下载文件内容
-                getResponse.data.destroy();
+                if (testStream && !testStream.destroyed) {
+                    testStream.destroy();
+                }
+                testStream = null;
             }
         }
 
@@ -221,7 +501,30 @@ async function proxyStreamMediaMulti(mediaUrl, reqHeaders, request, reply, threa
         const fetchChunks = ranges.map(range =>
             fetchStream(mediaUrl, randHeaders, range.start, range.end, randUa)
         );
-        const streams = await Promise.all(fetchChunks);
+        
+        let streams;
+        try {
+            streams = await Promise.all(fetchChunks);
+        } catch (fetchError) {
+            console.error('[proxyStreamMediaMulti] Error fetching streams:', fetchError.message);
+            throw fetchError;
+        }
+
+        // 将所有流添加到资源管理器
+        streams.forEach(({stream}) => {
+            resourceManager.addStream(stream);
+            globalResourceManager.addStream(stream);
+        });
+
+        // 设置全局中断处理
+        const globalAbortHandler = () => {
+            console.log('[proxyStreamMediaMulti] Client connection aborted, cleaning up resources');
+            resourceManager.cleanup();
+        };
+
+        // 添加中断监听器到资源管理器
+        resourceManager.addEventListener(request.raw, 'aborted', globalAbortHandler);
+        resourceManager.addEventListener(request.raw, 'close', globalAbortHandler);
 
         // 按顺序发送数据块
         let cnt = 0;
@@ -229,36 +532,52 @@ async function proxyStreamMediaMulti(mediaUrl, reqHeaders, request, reply, threa
             cnt += 1;
             // console.log(`[proxyStreamMediaMulti] Streaming chunk ${cnt}...`);
 
-            const onAbort = () => {
-                console.log('Client aborted the connection');
-                stream.destroy();
-            };
-
-            request.raw.on('aborted', onAbort);
-
             try {
+                // 检查连接状态
+                if (request.raw.aborted || request.raw.destroyed) {
+                    console.log(`[proxyStreamMediaMulti] Connection aborted before chunk ${cnt}`);
+                    break;
+                }
+
                 for await (const chunk of stream) {
-                    if (request.raw.aborted) {
+                    if (request.raw.aborted || request.raw.destroyed) {
                         // console.log(`[proxyStreamMediaMulti] Chunk ${cnt} aborted.`);
                         break;
                     }
-                    reply.raw.write(chunk);
+                    
+                    // 安全写入数据
+                    if (!reply.raw.destroyed && !reply.raw.writableEnded) {
+                        reply.raw.write(chunk);
+                    } else {
+                        console.log(`[proxyStreamMediaMulti] Response stream closed during chunk ${cnt}`);
+                        break;
+                    }
                 }
             } catch (error) {
                 console.error(`[proxyStreamMediaMulti] Error during streaming chunk ${cnt}:`, error.message);
-            } finally {
-                request.raw.removeListener('aborted', onAbort);
+                // 不要抛出错误，继续处理下一个chunk
             }
         }
 
         console.log('[proxyStreamMediaMulti] All chunks streamed successfully.');
-        reply.raw.end(); // 结束响应
+        
+        // 安全结束响应
+        if (!reply.raw.destroyed && !reply.raw.writableEnded) {
+            reply.raw.end();
+        }
 
     } catch (error) {
         console.error('[proxyStreamMediaMulti] Error:', error.message);
-        if (!reply.sent) {
+        
+        // 确保资源清理
+        resourceManager.cleanup();
+        
+        if (!reply.sent && !reply.raw.destroyed) {
             reply.code(500).send({error: error.message});
         }
+    } finally {
+        // 最终清理
+        resourceManager.cleanup();
     }
 }
 

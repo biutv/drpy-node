@@ -21,20 +21,27 @@ const plugins = [
         path: 'plugins/req-proxy',      // 插件路径
         params: '-p 57571',             // 启动参数：指定端口为57571
         desc: 'req代理服务',             // 插件描述：提供请求代理功能
-        active: true                    // 是否激活：true表示启用此插件
+        active: false                    // 是否激活：true表示启用此插件
     },
     {
         name: 'pvideo',                 // 插件名称
         path: 'plugins/pvideo',         // 插件路径
         params: '-port 57572 -dns 8.8.8.8', // 启动参数：端口57572，DNS服务器8.8.8.8
         desc: '嗷呜适配代理服务',        // 插件描述：提供视频适配代理功能
-        active: true                    // 是否激活：true表示启用此插件
+        active: false                    // 是否激活：true表示启用此插件
     },
     {
         name: 'pup-sniffer',                 // 插件名称
         path: 'plugins/pup-sniffer',         // 插件路径
         params: '-port 57573', // 启动参数：端口57573
         desc: 'drplayer嗅探服务',        // 插件描述：提供视频适配代理功能
+        active: true                    // 是否激活：true表示启用此插件
+    },
+    {
+        name: 'mediaProxy',                 // 插件名称
+        path: 'plugins/mediaProxy',         // 插件路径
+        params: '-port 57574', // 启动参数：端口57574
+        desc: 'go媒体代理服务',        // 插件描述：提供视频适配代理功能
         active: true                    // 是否激活：true表示启用此插件
     },
 ]

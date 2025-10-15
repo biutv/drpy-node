@@ -8,7 +8,6 @@ export const RSA = {
             .replace(/-----END[^-]+-----/g, '')
             .replace(/\s+/g, '');
     },
-
     // 格式化私钥为标准 PEM 格式
     formatPrivateKey: function (pem) {
         if (pem.includes('-----BEGIN')) {
@@ -299,6 +298,112 @@ export const RSA = {
             } catch (error2) {
                 return false;
             }
+        }
+    },
+};
+
+
+// 跑不通，暂时不用
+export const RSA2 = {
+    // 清理 PEM 格式，提取 base64 内容
+    cleanPEM: function (pem) {
+        // 移除头部和尾部标记
+        pem = pem.replace(/-----BEGIN [A-Z0-9 ]+-----/g, "")
+            .replace(/-----END [A-Z0-9 ]+-----/g, "");
+        // 移除所有空格和换行符
+        pem = pem.replace(/\s/g, "");
+        return pem;
+    },
+    importPrivateKey: function (pem) {
+        const binaryDer = Uint8Array.from(Buffer.from(this.cleanPEM(pem), 'base64'));
+
+        // 导入私钥
+        const importedKey = crypto.subtle.importKey(
+            "pkcs8",
+            binaryDer,
+            {
+                name: "RSA-PKCS1-v1_5",
+                hash: "SHA-256"
+            },
+            false, // 不可导出
+            ["decrypt"]
+        );
+        return importedKey;
+    },
+    importPublicKey: function (pem) {
+        const binaryDer = Uint8Array.from(Buffer.from(this.cleanPEM(pem), 'base64'));
+        const importedKey = crypto.subtle.importKey(
+            "spki", // 使用 spki 格式
+            binaryDer, // DER 格式的公钥
+            {
+                name: "RSA-PKCS1-v1_5",
+                hash: "SHA-256"  // 指定哈希算法
+            },
+            false, // 不可导出
+            ["encrypt"] // 公钥通常用于加密和验证签名
+        );
+        return importedKey;
+    },
+
+    // 分段加密
+    encryptMergedData: function (publicKey, data) {
+        // 计算每个段的最大长度
+        // 对于 RSA-PKCS1-v1_5，加密段的最大长度 = 密钥长度（字节） - 11
+        const modulusLengthBytes = (publicKey.algorithm.modulusLength + 7) >> 3;
+        //const modulusLengthBytes = 117;
+        const segmentLength = modulusLengthBytes - 11;
+        // 将数据编码为Uint8Array
+        const dataBuffer = new TextEncoder().encode(data);
+        if (dataBuffer.length > segmentLength) {
+            const segments = [];
+            for (let i = 0; i < dataBuffer.length; i += segmentLength) {
+                const segment = dataBuffer.slice(i, i + segmentLength);
+                segments.push(crypto.subtle.encrypt({name: 'RSA-PKCS1-v1_5'}, publicKey, segment));
+            }
+            return Buffer.concat(segments.map(b => Buffer.from(b))).toString('base64');
+        }
+        return Buffer.from(crypto.subtle.encrypt({name: "RSA-PKCS1-v1_5"}, publicKey, dataBuffer)).toString('base64');
+    },
+
+    // 分段解密
+    decryptMergedData: function (privateKey, mergedData) {
+        const segmentLength = (privateKey.algorithm.modulusLength + 7) >> 3; // 每个段的长度
+        //const segmentLength = 256;
+        if (mergedData.length > segmentLength) {
+            const segments = [];
+            for (let i = 0; i < mergedData.length; i += segmentLength) {
+                const segment = mergedData.slice(i, i + segmentLength);
+                segments.push(Buffer.from(crypto.subtle.decrypt({name: 'RSA-PKCS1-v1_5'}, privateKey, segment)));
+            }
+            return Buffer.concat(segments).toString('utf8');
+        }
+        return Buffer.from(crypto.subtle.decrypt({name: "RSA-PKCS1-v1_5"}, privateKey, mergedData)).toString('utf8');
+    },
+    decode: function (data, key) {
+        try {
+            const mergedDataArray = Uint8Array.from(Buffer.from(data, 'base64'));
+            const privateKey = this.importPrivateKey(key);
+            console.log(privateKey);
+            //console.time("RSA");
+            const decryptedData = this.decryptMergedData(privateKey, mergedDataArray);
+            //console.timeEnd("RSA");
+            return Buffer.from(decryptedData).toString();
+        } catch (error) {
+            console.error("解密过程中发生错误:", error);
+            throw error;
+        }
+    },
+    encode: function (plainText, publicKeyPem) {
+        try {
+            const publicKey = this.importPublicKey(publicKeyPem);
+            //console.time("RSA加密");
+            const encryptedData = this.encryptMergedData(publicKey, plainText);
+            const encryptedBase64 = Buffer.from(encryptedData).toString('base64');
+            //console.timeEnd("RSA加密");
+            return encryptedBase64;
+        } catch (error) {
+            console.error("加密过程中发生错误:", error);
+            throw error;
         }
     }
 };

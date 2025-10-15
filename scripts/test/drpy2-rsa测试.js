@@ -1,6 +1,6 @@
 import * as SRSA from './slow-rsa.js'
 // import {RSA} from './rsa-webcrypto.js';
-import {RSA} from '../../libs_drpy/drpyRsa.js';
+import {RSA, RSA2} from '../../libs_drpy/drpyRsa.js';
 import {writeFileSync} from "fs";
 
 const privateKey = `-----BEGIN RSA PRIVATE KEY-----
@@ -14,7 +14,8 @@ const encryptedData = "WuSU2/lXJVCdhElERQg1mdSjjTaLJ0K0sfg8t5rnGkAS5SvCPrTjZBmpC
 const decryptStartTime = Date.now();
 
 // 3. 执行解密操作（保持原函数调用不变）
-var decryptedText =  RSA.decode(encryptedData, privateKey);
+var decryptedText = RSA.decode(encryptedData, privateKey);
+// var decryptedText =  RSA2.decode(encryptedData, privateKey);
 // 4. 计算并打印解密耗时
 const decryptEndTime = Date.now();
 const decryptCost = decryptEndTime - decryptStartTime;
@@ -44,17 +45,17 @@ const rsa_decode2 = function (text) {
 }
 
 
-let a =  rsa_encode(decryptedText)
+let a = rsa_encode(decryptedText)
 console.log('a:', a)
-let b =  rsa_decode(a)
+let b = rsa_decode(a)
 console.log('b:', b)
 
-let c =  rsa_encode2(decryptedText)
+let c = rsa_encode2(decryptedText)
 // console.log('c:',c)
-let d =  rsa_decode2(c)
+let d = rsa_decode2(c)
 // console.log('d:',d)
-let e =  rsa_decode2(a)
-let f =  rsa_decode(c)
+let e = rsa_decode2(a)
+let f = rsa_decode(c)
 
 console.log(a === c)
 console.log(b === d)
