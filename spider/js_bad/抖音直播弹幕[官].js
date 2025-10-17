@@ -160,13 +160,13 @@ var rule = {
         }
     },
     proxy_rule: async function () {
-        let {input, hostname} = this;
+        let {input, wsName} = this;
         // log('hostname:', hostname);
         if (input) {
             input = decodeURIComponent(input);
             log(`${rule.title}代理播放:${input}`);
             if (input.includes('danmu.html')) {
-                const danmuHTML = getDmHtml(hostname);
+                const danmuHTML = getDmHtml(wsName);
                 return [200, 'text/html', danmuHTML];
             }
         }

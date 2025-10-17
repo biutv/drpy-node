@@ -3,7 +3,6 @@ import path from 'path';
 import os from 'os';
 import qs from 'qs';
 import {fileURLToPath} from 'url';
-import formBody from '@fastify/formbody';
 import {validateBasicAuth, validateJs, validatePwd, validatHtml} from "./utils/api_validate.js";
 import {startAllPlugins} from "./utils/pluginManager.js";
 // 注册自定义import钩子
@@ -11,13 +10,14 @@ import './utils/esm-register.mjs';
 // 引入python守护进程
 import {daemon} from "./utils/daemonManager.js";
 // 注册控制器
-import {registerRoutes} from './controllers/index.js';
+import {registerRoutes, registerWsRoutes} from './controllers/index.js';
 
-const {fastify} = fastlogger;
+const {fastify, wsApp} = fastlogger;
 
 // 获取当前路径
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 5757;
+const WsPORT = 57575;
 const MAX_TEXT_SIZE = process.env.MAX_TEXT_SIZE || 0.1 * 1024 * 1024; // 设置最大文本大小为 0.1 MB
 const MAX_IMAGE_SIZE = process.env.MAX_IMAGE_SIZE || 0.5 * 1024 * 1024; // 设置最大图片大小为 500 KB
 // 定义options的目录
@@ -37,9 +37,6 @@ const configDir = path.join(__dirname, 'config');
 
 const pluginProcs = startAllPlugins(__dirname);
 // console.log('pluginProcs:', pluginProcs);
-
-// 注册插件以支持 application/x-www-form-urlencoded
-fastify.register(formBody);
 
 // 添加钩子事件
 fastify.addHook('onReady', async () => {
@@ -118,14 +115,17 @@ process.on('unhandledRejection', (err) => {
 
 // 统一退出处理函数
 const handleExit = async (signal) => {
+    console.log(`\n收到信号 ${signal}，正在优雅关闭服务器...`);
     try {
-        console.log(`\nReceived ${signal}, closing server...`);
-        // Fastify 提供的关闭方法，内部会触发 onClose 钩子
         await onClose();
-        console.log('Fastify closed successfully');
+        // 停止 WebSocket 服务器
+        await stopWebSocketServer();
+        // 停止主服务器
+        await fastify.server.close();
+        console.log('🛑 所有服务器已优雅关闭');
         process.exit(0);
-    } catch (err) {
-        console.error('Error during shutdown:', err);
+    } catch (error) {
+        console.error('关闭服务器时出错:', error);
         process.exit(1);
     }
 };
@@ -158,7 +158,7 @@ process.on('exit', async (code) => {
     }
 });
 
-registerRoutes(fastify, {
+const registerOptions = {
     rootDir,
     docsDir,
     jxDir,
@@ -172,42 +172,76 @@ registerRoutes(fastify, {
     catLibDir,
     xbpqDir,
     PORT,
+    WsPORT,
     MAX_TEXT_SIZE,
     MAX_IMAGE_SIZE,
     configDir,
     indexFilePath: path.join(__dirname, 'index.json'),
     customFilePath: path.join(__dirname, 'custom.json'),
     subFilePath: path.join(__dirname, 'public/sub/sub.json'),
-});
+    wsApp,
+    fastify,
+};
+registerRoutes(fastify, registerOptions);
+registerWsRoutes(wsApp, registerOptions);
 
+// 启动WebSocket服务器
+const startWebSocketServer = async (option) => {
+    try {
+        const address = await wsApp.listen(option);
+        return wsApp;
+    } catch (err) {
+        wsApp.log.error(`WebSocket服务器启动失败,将会影响一些实时弹幕源的使用:${err.message}`);
+    }
+};
+
+// 停止WebSocket服务器
+const stopWebSocketServer = async () => {
+    try {
+        await wsApp.server.close();
+        wsApp.log.info('WebSocket服务器已停止');
+    } catch (err) {
+        wsApp.log.error(`停止WebSocket服务器失败:${err.message}`);
+    }
+};
 
 // 启动服务
 const start = async () => {
     try {
-        // 启动 Fastify 服务
+        // 启动 Fastify 主服务
         // await fastify.listen({port: PORT, host: '0.0.0.0'});
         await fastify.listen({port: PORT, host: '::'});
+        // 启动 WebSocket 服务器 (端口 57577)
+        await startWebSocketServer({port: WsPORT, host: '::'});
 
         // 获取本地和局域网地址
         const localAddress = `http://localhost:${PORT}`;
+        const wsLocalAddress = `http://localhost:${WsPORT}`;
         const interfaces = os.networkInterfaces();
         let lanAddress = 'Not available';
+        let wsLanAddress = 'Not available';
         // console.log('interfaces:', interfaces);
         for (const [key, iface] of Object.entries(interfaces)) {
             if (key.startsWith('VMware Network Adapter VMnet') || !iface) continue;
             for (const config of iface) {
                 if (config.family === 'IPv4' && !config.internal) {
                     lanAddress = `http://${config.address}:${PORT}`;
+                    wsLanAddress = `http://${config.address}:${WsPORT}`;
                     break;
                 }
             }
         }
 
-        console.log(`Server listening at:`);
-        console.log(`- Local: ${localAddress}`);
-        console.log(`- LAN:   ${lanAddress}`);
-        console.log(`- PLATFORM:   ${process.platform} ${process.arch}`);
-        console.log(`- VERSION:   ${process.version}`);
+        console.log(`🚀 服务器启动成功:`);
+        console.log(`📡 主服务 (端口 ${PORT}):`);
+        console.log(`  - Local: ${localAddress}`);
+        console.log(`  - LAN:   ${lanAddress}`);
+        console.log(`🔌 WebSocket服务 (端口 ${WsPORT}):`);
+        console.log(`  - Local: ${wsLocalAddress}`);
+        console.log(`  - LAN:   ${wsLanAddress}`);
+        console.log(`⚙️  系统信息:`);
+        console.log(`  - PLATFORM: ${process.platform} ${process.arch}`);
+        console.log(`  - VERSION:  ${process.version}`);
         if (process.env.VERCEL) {
             console.log('Running on Vercel!');
             console.log('Vercel Environment:', process.env.VERCEL_ENV); // development, preview, production
@@ -226,10 +260,13 @@ const start = async () => {
 // 停止服务
 const stop = async () => {
     try {
-        await fastify.server.close(); // 关闭服务器
-        console.log('Server stopped gracefully');
+        // 停止 WebSocket 服务器
+        await stopWebSocketServer();
+        // 停止主服务器
+        await fastify.server.close();
+        console.log('🛑 所有服务已优雅停止');
     } catch (err) {
-        fastify.log.error('Error while stopping the server:', err);
+        fastify.log.error(`停止服务器时发生错误:${err.message}`);
     }
 };
 

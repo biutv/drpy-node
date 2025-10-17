@@ -51,12 +51,13 @@ var rule = {
         return { parse: 0, url: input, danmaku: 'web://' + getProxyUrl() + '&url=danmu.html' };
     },
     proxy_rule: async function () {
-        let { input, hostname } = this;
+        let { input, wsName } = this;
         if (input) {
             input = decodeURIComponent(input);
             log(`${rule.title}代理播放:${input}`);
+            log(`[wsName] 专业弹幕代理:${wsName}`);
             if (input.includes('danmu.html')) {
-                const danmuHTML = getDmHtml(hostname);
+                const danmuHTML = getDmHtml(wsName);
                 return [200, 'text/html', danmuHTML];
             }
         }

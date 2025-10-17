@@ -4,7 +4,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/hjdhnx/drpy-node)
 
 nodejs作为服务端的drpy实现。全面升级异步写法  
-~~积极开发中，每日一更~~，当前进度 `99.999999%`  
+~~积极开发中，每日一更~~，当前进度 `100%`  
 ~~找工作中，随缘更新~~  
 上班当牛马，下班要带娃，阶段性佛系趁娃睡觉熬夜更新
 
@@ -30,6 +30,8 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 
 ### 插件应用列表
 
+* [DrPlayer](/apps/drplayer)
+* [Websocket实时日志](/apps/websocket)
 * [cookie管理插件](/apps/cookie-butler/index.html)
 * [cron表达式插件](/apps/cron-generator/index.html)
 * [剪切板智能推送插件](/apps/clipboard-pusher/index.html)
@@ -39,7 +41,6 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [DS内存图片管理器插件](/apps/image-manager/index.html)
 * [DS时钟插件-白色时钟](/apps/clock/white_clock.html)|[日历时钟](/apps/clock/index.html)
 * [DS庆祝页面-完结撒花](/apps/happy/index.html)
-* [DrPlayer](/apps/drplayer)
 * [bookReader](/apps/book-reader)
 * [代码加解密工具](/admin/encoder)
 * [央视点播解析工具](/proxy/央视大全[官]/index.html)
@@ -56,6 +57,10 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [drpy2打包项目](https://github.com/hjdhnx/drpy-webpack)
 
 ## 更新记录
+
+### 20251017
+
+更新至V1.3.14
 
 ### 20251015
 

@@ -77,7 +77,8 @@ function ensureExecutable(filePath) {
  */
 function startPlugin(plugin, rootDir) {
     if (!plugin.active) {
-        console.log(`[pluginManager] 插件 ${plugin.name} 未激活，跳过`);
+        // 这个检查主要用于直接调用startPlugin函数的情况
+        // 正常情况下startAllPlugins已经在调用前检查了激活状态
         return null;
     }
 
@@ -152,9 +153,18 @@ function getProcessKey(plugin, index) {
 export function startAllPlugins(rootDir = process.cwd()) {
     console.log("[pluginManager] 准备启动所有插件...");
     const processes = {};
+    const inactivePlugins = [];
+    
     plugins.forEach((plugin, index) => {
-        const proc = startPlugin(plugin, rootDir);
         const key = getProcessKey(plugin, index);
+        
+        // 先检查插件是否激活，未激活的插件收集到数组中
+        if (!plugin.active) {
+            inactivePlugins.push(plugin.name);
+            return;
+        }
+
+        const proc = startPlugin(plugin, rootDir);
 
         if (proc) {
             processes[key] = proc;
@@ -163,6 +173,12 @@ export function startAllPlugins(rootDir = process.cwd()) {
             console.error(`[pluginManager] 插件 ${key} 启动失败，未加入到 processes`);
         }
     });
+    
+    // 如果有未激活的插件，在一行中显示
+    if (inactivePlugins.length > 0) {
+        console.log(`[pluginManager] 跳过未激活的插件: [${inactivePlugins.map(name => `'${name}'`).join(',')}]`);
+    }
+    
     return processes;
 }
 

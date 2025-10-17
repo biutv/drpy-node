@@ -116,7 +116,10 @@ export default (fastify, options, done) => {
 
             // 检查模块文件是否存在
             if (!existsSync(modulePath)) {
-                reply.status(404).send({error: `Module ${moduleName} not found`});
+                const error_msg=`Module ${moduleName} not found`;
+                console.error(error_msg);
+                fastify.log.error(error_msg);
+                reply.status(404).send({error: error_msg});
                 return;
             }
 
@@ -126,6 +129,7 @@ export default (fastify, options, done) => {
             // 构建请求相关的URL信息
             const protocol = request.headers['x-forwarded-proto'] || (request.socket.encrypted ? 'https' : 'http');
             const hostname = request.hostname;
+            const wsName = hostname.replace(`:${options.PORT}`, `:${options.WsPORT}`);
             const requestHost = `${protocol}://${hostname}`;
             const publicUrl = `${protocol}://${hostname}/public/`;
             const jsonUrl = `${protocol}://${hostname}/json/`;
@@ -135,7 +139,8 @@ export default (fastify, options, done) => {
             const webdavProxyUrl = `${protocol}://${hostname}/webdav/`;
             const ftpProxyUrl = `${protocol}://${hostname}/ftp/`;
             const hostUrl = `${hostname.split(':')[0]}`;
-            const fServer = fastify.server;
+            // const fServer = fastify.server;
+            const fServer = options.wsApp.server;
 
             /**
              * 构建环境对象
@@ -161,6 +166,7 @@ export default (fastify, options, done) => {
                     ftpProxyUrl,
                     hostUrl,
                     hostname,
+                    wsName,
                     fServer,
                     getProxyUrl,
                     ext: moduleExt
@@ -371,8 +377,10 @@ export default (fastify, options, done) => {
 
             } catch (error) {
                 // 错误处理和日志记录
-                fastify.log.error(`Error api module ${moduleName}:${error.message}`);
-                reply.status(500).send({error: `Failed to process module ${moduleName}: ${error.message}`});
+                const error_msg=`Failed to process module ${moduleName}: ${error.message}`;
+                console.error(error_msg);
+                fastify.log.error(error_msg);
+                reply.status(500).send({error: error_msg});
             }
         }
     });
@@ -393,7 +401,10 @@ export default (fastify, options, done) => {
 
         // 检查模块文件是否存在
         if (!existsSync(modulePath)) {
-            reply.status(404).send({error: `Module ${moduleName} not found`});
+            const error_msg=`Module ${moduleName} not found`;
+            console.error(error_msg);
+            fastify.log.error(error_msg);
+            reply.status(404).send({error: error_msg});
             return;
         }
 
@@ -406,6 +417,7 @@ export default (fastify, options, done) => {
         // 构建请求相关的URL信息
         const protocol = request.headers['x-forwarded-proto'] || (request.socket.encrypted ? 'https' : 'http');
         const hostname = request.hostname;
+        const wsName = hostname.replace(`:${options.PORT}`, `:${options.WsPORT}`);
         const requestHost = `${protocol}://${hostname}`;
         const publicUrl = `${protocol}://${hostname}/public/`;
         const jsonUrl = `${protocol}://${hostname}/json/`;
@@ -415,7 +427,8 @@ export default (fastify, options, done) => {
         const webdavProxyUrl = `${protocol}://${hostname}/webdav/`;
         const ftpProxyUrl = `${protocol}://${hostname}/ftp/`;
         const hostUrl = `${hostname.split(':')[0]}`;
-        const fServer = fastify.server;
+        // const fServer = fastify.server;
+        const fServer = options.wsApp.server;
 
         /**
          * 构建代理环境对象
@@ -442,6 +455,7 @@ export default (fastify, options, done) => {
                 ftpProxyUrl,
                 hostUrl,
                 hostname,
+                wsName,
                 fServer,
                 getProxyUrl,
                 ext: moduleExt
@@ -473,7 +487,9 @@ export default (fastify, options, done) => {
                     }
                     content = Buffer.from(content, 'base64');
                 } catch (e) {
-                    fastify.log.error(`Local Proxy toBytes error: ${e}`);
+                    const error_msg = `Local Proxy toBytes error: ${e}`;
+                    fastify.log.error(error_msg);
+                    console.error(error_msg);
                 }
             }
             // 流代理 - 重定向到媒体代理服务
@@ -518,9 +534,10 @@ export default (fastify, options, done) => {
             }
 
         } catch (error) {
-            // 错误处理和日志记录
-            fastify.log.error(`Error proxy module ${moduleName}:${error.message}`);
-            reply.status(500).send({error: `Failed to proxy module ${moduleName}: ${error.message}`});
+            const error_msg = `Error proxy module ${moduleName}:${error.message}`;
+            fastify.log.error(error_msg);
+            console.error(error_msg);
+            reply.status(500).send({error: error_msg});
         }
     });
 
@@ -541,7 +558,10 @@ export default (fastify, options, done) => {
 
         // 检查解析器文件是否存在
         if (!existsSync(jxPath)) {
-            return reply.status(404).send({error: `解析 ${jxName} not found`});
+            const error_msg = `解析 ${jxName} not found`;
+            fastify.log.error(error_msg);
+            console.error(error_msg);
+            return reply.status(404).send({error: error_msg});
         }
 
         const moduleExt = query.extend || '';
@@ -549,6 +569,7 @@ export default (fastify, options, done) => {
         // 构建请求相关的URL信息
         const protocol = request.headers['x-forwarded-proto'] || (request.socket.encrypted ? 'https' : 'http');
         const hostname = request.hostname;
+        const wsName = hostname.replace(`:${options.PORT}`, `:${options.WsPORT}`);
         const requestHost = `${protocol}://${hostname}`;
         const publicUrl = `${protocol}://${hostname}/public/`;
         const jsonUrl = `${protocol}://${hostname}/json/`;
@@ -558,7 +579,8 @@ export default (fastify, options, done) => {
         const webdavProxyUrl = `${protocol}://${hostname}/webdav/`;
         const ftpProxyUrl = `${protocol}://${hostname}/ftp/`;
         const hostUrl = `${hostname.split(':')[0]}`;
-        const fServer = fastify.server;
+        // const fServer = fastify.server;
+        const fServer = options.wsApp.server;
 
         /**
          * 构建解析环境对象
@@ -585,6 +607,7 @@ export default (fastify, options, done) => {
                 ftpProxyUrl,
                 hostUrl,
                 hostname,
+                wsName,
                 getProxyUrl,
                 fServer,
                 ext: moduleExt
@@ -650,13 +673,18 @@ export default (fastify, options, done) => {
                 return reply.code(statusCode).type(`${mediaType}; charset=utf-8`).send(backRespSend);
             } else {
                 // 其他类型的响应，返回失败
-                return reply.status(404).send({error: `${jxName}解析失败`});
+                const error_msg = `${jxName}解析失败`;
+                fastify.log.error(error_msg);
+                console.error(error_msg);
+                return reply.status(404).send({error: error_msg});
             }
 
         } catch (error) {
             // 错误处理和日志记录
-            fastify.log.error(`Error proxy jx ${jxName}:${error.message}`);
-            reply.status(500).send({error: `Failed to proxy jx ${jxName}: ${error.message}`});
+            const error_msg = `Failed to proxy jx ${jxName}: ${error.message}`;
+            fastify.log.error(error_msg);
+            console.error(error_msg);
+            reply.status(500).send({error: error_msg});
         }
     });
 
