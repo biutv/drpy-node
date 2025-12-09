@@ -56,6 +56,11 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [DS web插件项目-drplayer](https://github.com/hjdhnx/DrPlayer)
 * [drpy2打包项目](https://github.com/hjdhnx/drpy-webpack)
 
+### 免费壳子推荐
+
+* [酷9](https://wwbty.lanzouv.com/iGoUV3d3hxuf)
+* [千寻](https://wwbty.lanzouv.com/iSSN93d3hyzg)
+
 ## 更新记录
 
 ### 20251017
@@ -179,6 +184,7 @@ pm2 restart drpys
 * [源动力-新](https://tvshare.cn/)
 * [源动力-老](https://sourcepower.top/index)
 * [电竞专业反应测试](https://www.arealme.com/brain-memory-game/zh/)
+* [桌面启动器](https://wwbty.lanzouv.com/iDZaP3d3i5ud)
 
 ## AI接入
 
