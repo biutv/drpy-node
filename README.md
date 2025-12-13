@@ -20,7 +20,7 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [猫源调试教程](/docs/catDebug.md)
 * [接口压测教程](/docs/httpTest.md)
 * [AI编程工具 trae](https://www.trae.ai/account-setting#subscription) | 邮编ZIP输入: 518000
-* [免费AI-360纳米](https://bot.n.cn/)|[免费AI-当贝AI](https://ai.dangbei.com/chat)
+* [免费AI-360纳米](https://bot.n.cn/)|[免费AI-当贝AI](https://ai.dangbei.com/chat)|[国外聚合全模型](https://lmarena.ai/)
 * [本站防止爬虫协议](/robots.txt)
 * [油猴脚本-反切屏检测](/public/monkey/check_screen_leave.user.js)
 * [油猴脚本-通用网页脚本框架](/public/monkey/clipboard-sender.user.js)
