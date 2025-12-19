@@ -9,6 +9,7 @@
 // @match        https://connect.huaweicloud.com/*
 // @match        https://*.huaweicloud.com/*
 // @match        https://*.iconfont.cn/*
+// @match        https://*.ziwierp.cn/*
 // @run-at       document-end
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
@@ -3480,6 +3481,9 @@
             window.commandSelector = commandSelector;
         }
         commandSelector.toggle();
+        if (commandSelector.visible) {
+            commandSelector.updateCommandButtons();
+        }
         if (btnEl) {
             btnEl.style.borderStyle = commandSelector.visible ? 'inset' : 'outset';
         }
