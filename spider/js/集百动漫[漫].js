@@ -4,16 +4,19 @@
   filterable: 0,
   quickSearch: 0,
   title: '集百动漫',
+  author: 'EylinSir/251129/修复版',
+  '类型': '影视',
   lang: 'ds'
 })
 */
 
 var rule = {
     类型: '影视',
+    author: 'EylinSir/251129/修复版',
     title: '集百动漫',
     host: 'http://www.jibai5.com',
-    url: '/bm/fyclass/fypage.html',
-    searchUrl: '/vodsearch/**----------fypage---.html',
+    url: '/vodtype/fyclass-fypage.html',
+    searchUrl: '/vodsearch/-------------.html?wd=**',
     homeUrl: '/',
     headers: {'User-Agent': 'UC_UA'},
     searchable: 1, quickSearch: 0, filterable: 0, double: true, play_parse: true, limit: 6,
@@ -21,21 +24,25 @@ var rule = {
     class_url: '20&21&22',
     lazy: async function () {
         let {input, pdfa, pdfh, pd} = this
-        const html = JSON.parse((await req(input)).content.match(/r player_.*?=(.*?)</)[1]);
+        const html = JSON.parse((await request(input)).content.match(/player_.*?=(.*?)</)[1]);
         let url = html.url;
         if (html.encrypt == "1") {
             url = unescape(url)
-            return {parse: 0, url: url}
         } else if (html.encrypt == "2") {
             url = unescape(base64Decode(url))
-            return {parse: 0, url: url}
         }
-        if (/m3u8|mp4/.test(url)) {
-            input = url
-            return {parse: 0, url: input}
-        } else {
-            return input
+        // 处理 iframe 链接，特别是 Bilibili 播放器
+        if (url.includes("player.bilibili.com") || url.includes("iframe")) {
+            // 对于 Bilibili iframe，提取 aid 参数并构建视频页面链接
+            if (url.includes("player.bilibili.com")) {
+                const aidMatch = url.match(/aid=(\d+)/);
+                if (aidMatch) {
+                    url = `https://www.bilibili.com/video/av${aidMatch[1]}/`;
+                }
+            }
+            return {parse: 1, url: url}
         }
+        return {parse: 0, url: url}
     },
     推荐: async function () {
         let {input, pdfa, pdfh, pd} = this;
