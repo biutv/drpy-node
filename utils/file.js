@@ -19,6 +19,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // 定义核心路径常量
 const _data_path = path.join(__dirname, '../data');      // 数据文件存储路径
 const _lib_path = path.join(__dirname, '../spider/js');  // 库文件路径
+const _jx_path = path.join(__dirname, '../jx');          // 解析文件路径
 
 export {getSitesMap} from "./sites-map.js";
 // ES6扩展代码路径和内容
@@ -194,4 +195,22 @@ export function getParsesDict(host) {
     return jx_list
 }
 
-globalThis.pathLib = pathLib
+/**
+ * 执行解析
+ *
+ * @param {string} name - 解析文件名 (不含.js)
+ * @param {string} host - 主机地址
+ * @param {string} url - 需要解析的URL
+ * @returns {Array} [flag, url] - flag为true表示找到解析文件，false表示未找到
+ */
+export function executeParse(name, host, url) {
+    let _file_path = path.join(_jx_path, name + '.js');
+    if (existsSync(_file_path)) {
+        return [true, host + '/parse/' + name + '?url=' + url];
+    } else {
+        return [false, url];
+    }
+}
+
+globalThis.pathLib = pathLib;
+globalThis.executeParse = executeParse;

@@ -11,7 +11,9 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 ### 常用超链接
 
 * [本项目主页-免翻](https://git-proxy.playdreamer.cn/hjdhnx/drpy-node)
-* [接口文档](docs/apidoc.md) | [接口列表如定时任务](docs/apiList.md) | [小猫影视-待对接T4](https://github.com/waifu-project/movie/pull/135)
+* [最新DS本地包-适配皮卡丘](/gh/release)
+* [接口文档](docs/apidoc.md) | [接口列表如定时任务](docs/apiList.md) |
+  ~~[小猫影视-待对接T4](https://github.com/waifu-project/movie/pull/135)~~
 * [代码质量评估工具说明](docs/codeCheck.md) | [DS项目代码评估报告](docs/codeCheckReport.md)
 * [本地配置接口-动态本地](/config?healthy=1&pwd=$pwd)
 * [本地配置接口-动态外网/局域网](/config/1?healthy=1&pwd=$pwd)
@@ -60,32 +62,17 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 
 * [酷9](https://wwbty.lanzouv.com/iGoUV3d3hxuf)
 * [千寻](https://wwbty.lanzouv.com/iSSN93d3hyzg)
+* [皮卡丘](https://github.com/ingriddaleusag-dotcom/PeekPiliRelease)
 
 ## 更新记录
+
+### 20260113
+
+更新至V1.3.16
 
 ### 20260112
 
 更新至V1.3.15
-
-### 20251017
-
-更新至V1.3.14
-
-### 20251015
-
-更新至V1.3.13
-
-### 20251014
-
-更新至V1.3.12
-
-### 20251013
-
-更新至V1.3.11
-
-### 20251012
-
-更新至V1.3.10
 
 [点此查看完整更新记录](docs/updateRecord.md)
 

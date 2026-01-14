@@ -17,7 +17,8 @@ EXCLUDE_FILES = ['config/env.json', '.env', '.claude', 'clipboard.txt', 'clipboa
                  't4_daemon.pid',
                  'spider/js/UC分享.js', 'spider/js/百忙无果[官].js',
                  'json/UC分享.json',
-                 'jx/奇奇.js', 'jx/芒果关姐.js', 'data/settings/link_data.json', 'index.json', 'custom.json']
+                 'jx/_30wmv.js', 'jx/奇奇.js', 'jx/芒果关姐.js', 'data/settings/link_data.json', 'index.json',
+                 'custom.json']
 
 
 def get_script_dir():
