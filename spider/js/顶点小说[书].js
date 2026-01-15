@@ -26,7 +26,7 @@ var rule = {
     filter_url: '',
     filter_def: {},
     headers: {
-        'User-Agent': 'MOBILE_UA',
+        'User-Agent': 'PC_UA',
     },
     timeout: 5000,
     hikerListCol: "text_1",
