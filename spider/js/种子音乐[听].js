@@ -33,8 +33,16 @@ var rule = {
         let data = JSON.parse(await request(url, {
             headers: rule.headers
         }));
-        let mp3 = data.data.mp3;
-        return {parse: 0, url: mp3, header: rule.headers};
+        let songData = data.data;
+        return {
+            parse: 0,
+            url: songData.mp3,          // 播放链接
+            header: rule.headers,        // 请求头
+            lrc: songData.lrc,           // 歌词内容
+            img: songData.pic,           // 封面图片
+            title: songData.mname,       // 歌名
+            singer: songData.sname       // 歌手
+        };
     },
     推荐: "*",
     一级: '.mobile-list&&.mobile-list-item;.songname&&Text;.lazyload&&data-src;.authorname&&Text;a&&href',

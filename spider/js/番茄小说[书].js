@@ -22,6 +22,11 @@ const {requestHtml} = $.require('./_lib.request.js');
 // const fqweb_host = 'http://fqweb.jsj66.com';
 // const fqweb_host = 'http://fanqie.mduge.com';
 const fqweb_host = 'https://qkfqapi.vv9v.cn';
+// const fqweb_host = 'http://101.35.133.34:5000/docs'; //备选
+// const fqweb_host = 'http://103.236.91.147:9999/docs'; //备选
+// const fqweb_host = 'http://47.108.80.161:5005/docs'; //备选
+// const fqweb_host = 'http://140.143.165.56:9999/docs'; //备选
+// const fqweb_host = 'http://8.148.83.169:22222/docs'; //备选
 
 var rule = {
     类型: '小说',
@@ -31,7 +36,7 @@ var rule = {
     homeUrl: 'https://fanqienovel.com/api/author/book/category_list/v0/',
     url: '/api/author/library/book_list/v0/?page_count=18&page_index=(fypage-1)&gender=1&category_id=fyclass&creation_status=-1&word_count=-1&book_type=-1&sort=0#fyfilter',
     // searchUrl: fqweb_host + '/search?query=**&page=fypage',
-    searchUrl: fqweb_host + '/api/search?key=**&tab_type=3&offset=0&page=fypage',
+    searchUrl: fqweb_host + '/api/search?key=**&tab_type=3&offset=((fypage-1)*10)',
     searchable: 2,
     quickSearch: 0,
     filterable: 1,
