@@ -13,7 +13,8 @@ var rule = {
     类型: '漫画',
     title: '番茄漫画',
     host: 'https://qkfqapi.vv9v.cn',
-    url: '',
+    homeUrl: '/api/discover/style?tab=漫画',
+    url: 'fyclass',
     searchUrl: '/api/search?key=**&tab_type=8&offset=((fypage-1)*10)',
     detailUrl: '/api/detail?book_id=fyid',
     headers: {'User-Agent': 'UC_UA'},
@@ -22,11 +23,19 @@ var rule = {
     filterable: 0,
     double: true,
     play_parse: true,
-    limit: 12,
-    // class_parse: async function () {
-    //     let {input, pdfa, pdfh, pd} = this;
-    //     return {}
-    // },
+    limit: 10,
+    class_parse: async function () {
+        let {input} = this;
+        let html = await request(input);
+        let data = html.parseX.data;
+        let d = data.filter(item => item.url.trim()).map((it) => {
+            return {
+                type_name: it.title,
+                type_id: it.url,
+            }
+        });
+        return {class: d}
+    },
     lazy: async function () {
         let {input, pdfa, pdfh} = this;
         let title = input.split('@')[1];
@@ -42,24 +51,38 @@ var rule = {
         }
         return {parse: 0, url: 'pics://' + pics.join('&&')}
     },
-    推荐: async function () {
-        return [{
-            vod_id: 'only_search',
-            vod_name: '纯搜索源哦！',
-            vod_tag: 'action',
-            vod_pic: this.publicUrl + '/images/icon_cookie/搜索.jpg'
-        }];
+    parseList(html) {
+        let data = html.parseX.data;
+        data = data.data || data;
+        let d = [];
+        data.forEach((item) => {
+            if (item && item.book_name) {
+                d.push({
+                    vod_name: item.book_name,
+                    vod_id: item.book_id || item.id,
+                    vod_pic: item.thumb_url || item.cover,
+                    vod_remarks: item.author || item.category || '',
+                    vod_content: item.abstract || item.description || ''
+                });
+            }
+        });
+        return d
     },
-    一级: async function () {
-        return [];
+    推荐: async function () {
+        let {HOST} = this;
+        let url = HOST + '/api/discover?tab=漫画&type=7&gender=2&genre_type=110&page=1';
+        let html = await request(url);
+        return this.parseList(html);
+    },
+    一级: async function (tid, pg, filter, extend) {
+        input = jinja.render(tid, {page: pg});
+        let html = await request(input);
+        return this.parseList(html);
     },
     二级: async function () {
         let {input, orId} = this;
-        // log('input', input);
-        // log('orId', orId);
         let html = await request(input);
-        let json = JSON.parse(html);
-        let data = json.data.data;
+        let data = html.parseX.data.data;
         let VOD = {};
         VOD.vod_name = data.book_name;
         VOD.type_name = data.category;
@@ -83,10 +106,6 @@ var rule = {
     },
     搜索: async function () {
         let {input, MY_PAGE} = this;
-        // if (Number(MY_PAGE) > 1) {
-        //     return []
-        // }
-        print(input)
         let html = await request(input);
         let json = JSON.parse(html);
         let data = json.data.search_tabs[3].data;
@@ -104,9 +123,4 @@ var rule = {
         }
         return setResult(d)
     },
-    action: async function (action, value) {
-        if (action === 'only_search') {
-            return '此源为纯搜索源，你直接全局搜索这个源或者使用此页面的源内搜索就好了'
-        }
-    }
 }

@@ -1,3 +1,15 @@
+/*
+@header({
+  searchable: 2,
+  filterable: 1,
+  quickSearch: 0,
+  title: '阅读助手[书]',
+  author: 'EylinSir',
+  '类型': '小说',
+  lang: 'ds'
+})
+*/
+
 var rule = {
     类型: '小说',
     author: 'EylinSir',
