@@ -26,41 +26,24 @@ var rule = {
     filterable: 0,
     timeout: 10000,
     play_parse: true,
-    headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
-    },
-    request: async function (url, obj) {
-        obj = obj || {};
-        try {
-            const response = await _fetch(url, {
-                method: obj.method || 'GET',
-                headers: obj.headers || this.headers
-            });
-            return response.text();
-        } catch (err) {
-            return '';
-        }
-    },
-    
+    headers: { 'User-Agent': 'MOBILE_UA' },
+
     一级: async function () {
         let {input, pdfa, pdfh, pd} = this;
-        let url = input.startsWith('http') ? input : this.host + '/book/' + input + '/0/1.html';
-        let html = await this.request(url);
+        let url = input.startsWith('http') ? input : `${this.host}/book/${input}/0/1.html`;
+        let html = await request(url);
         let d = [];
         let items = pdfa(html, '.blockcontent .c_row') || pdfa(html, '.c_row') || [];
         for (let item of items) {
             let title = pdfh(item, '.c_subject a:eq(1)&&Text');
-            let itemUrl = pd(item, '.c_subject a:eq(1)&&href');
-            if (!title || !itemUrl) continue;
-            let remarks = pdfh(item, '.c_tag span:eq(1)&&Text') || '';
-            let pic = pd(item, 'img&&src') || '';
-            let content = pdfh(item, '.c_description&&Text') || '';
+            let url = pd(item, '.c_subject a:eq(1)&&href');
+            if (!title || !url) continue;
             d.push({
-                title: title,
-                url: itemUrl,
-                desc: remarks,
-                pic_url: pic,
-                content: content,
+                title,
+                url,
+                desc: pdfh(item, '.c_tag span:eq(1)&&Text') || '',
+                pic_url: pd(item, 'img&&src') || '',
+                content: pdfh(item, '.c_description&&Text') || '',
             });
         }
         return setResult(d);
@@ -68,58 +51,47 @@ var rule = {
 
     二级: async function () {
         let {input, pdfa, pdfh, pd} = this;
-        let html = await this.request(input);
-        let VOD = {};
-        VOD.vod_name = pdfh(html, '[property="og:novel:book_name"]&&content') || '';
-        VOD.type_name = '';
-        VOD.vod_pic = pd(html, '.divbox.cf img&&src') || '';
-        VOD.vod_content = pdfh(html, '.tabcontent .tabvalue:eq(0)&&Text') || '';
-        VOD.vod_remarks = pdfh(html, 'h3 a&&Text') || '';
-        VOD.vod_year = '';
-        VOD.vod_area = '';
-        VOD.vod_actor = pdfh(html, '[property="og:novel:author"]&&content') || '';
-        VOD.vod_director = VOD.vod_actor;
-        VOD.vod_play_from = '去读书网';
-        let toc_url = pd(html, 'a:contains(点击阅读)&&href') || '';
-        if (toc_url && !toc_url.startsWith('http')) {
-            toc_url = this.host + toc_url;
-        }
-        let toc_html = toc_url ? await this.request(toc_url) : '';
+        let html = await request(input);
+        let VOD = {
+            vod_name: pdfh(html, '[property="og:novel:book_name"]&&content') || '',
+            vod_pic: pd(html, '.divbox.cf img&&src') || '',
+            vod_content: pdfh(html, '.tabcontent .tabvalue:eq(0)&&Text') || '',
+            vod_remarks: pdfh(html, 'h3 a&&Text') || '',
+            vod_actor: pdfh(html, '[property="og:novel:author"]&&content') || '',
+            vod_play_from: '去读书网'
+        };
+        VOD.vod_director = VOD.vod_actor; // 复用作者信息
+        let tocUrl = pd(html, 'a:contains(点击阅读)&&href') || '';
+        tocUrl = tocUrl && !tocUrl.startsWith('http') ? `${this.host}${tocUrl}` : tocUrl;
+        let tocHtml = tocUrl ? await request(tocUrl) : '';
         let chapters = [];
-        let chapterItems = pdfa(toc_html, '.index li') || [];
-        for (let chapter of chapterItems) {
-            let title = pdfh(chapter, 'a&&Text');
-            let chapter_url = pd(chapter, 'a&&href');
-            if (!title || !chapter_url) continue;
-            if (!chapter_url.startsWith('http')) {
-                chapter_url = this.host + chapter_url;
-            }
-            chapters.push(title + '$' + chapter_url);
+        let chs = pdfa(tocHtml, '.index li') || [];
+        for (let ch of chs) {
+            let title = pdfh(ch, 'a&&Text');
+            let chUrl = pd(ch, 'a&&href');
+            if (!title || !chUrl) continue;
+            chUrl = chUrl.startsWith('http') ? chUrl : `${this.host}${chUrl}`;
+            chapters.push(`${title}$${chUrl}`);
         }
         VOD.vod_play_url = chapters.join('#');
         return VOD;
     },
 
     搜索: async function () {
-        let {KEY, pdfa, pdfh, pd} = this;
-        let url = this.host + this.searchUrl.replace('**', encodeURIComponent(KEY));
-        let html = await this.request(url);
-        if (!html) {
-            url = this.host + '/modules/article/search.php?q=' + encodeURIComponent(KEY);
-            html = await this.request(url);
-        }
+        let {input, pdfa, pdfh, pd} = this;
+        let html = await request(input);
         let d = [];
         let items = pdfa(html, '#jieqi_page_contents .c_row') || [];
         for (let item of items) {
             let title = pdfh(item, '.c_subject a&&Text');
-            let itemUrl = pd(item, '.c_subject a&&href');
-            if (!title || !itemUrl) continue;
-            itemUrl = itemUrl.startsWith('http') ? itemUrl : this.host + itemUrl;
+            let url = pd(item, '.c_subject a&&href');
+            if (!title || !url) continue;
+            url = url.startsWith('http') ? url : `${this.host}${url}`;
             let pic = pd(item, 'img&&src') || '';
-            pic = pic.startsWith('http') ? pic : this.host + pic;
+            pic = pic.startsWith('http') ? pic : `${this.host}${pic}`;
             d.push({
-                title: title,
-                url: itemUrl,
+                title,
+                url,
                 desc: pdfh(item, '.c_tag span:eq(1)&&Text') || '',
                 pic_url: pic,
                 content: '',
@@ -130,25 +102,27 @@ var rule = {
 
     lazy: async function () {
         let {input, pdfh} = this;
-        let html = await this.request(input);
+        let html = await request(input);
         let title = pdfh(html, 'h1&&Text') || '';
         let content = pdfh(html, '#acontent&&Html') || '';
         if (content) {
-            content = content.replace(/<script[^>]*?>.*?<\/script>/gs, '')
-                             .replace(/<\/p>/g, '\n\n')
-                             .replace(/<br[^>]*?>/g, '\n')
-                             .replace(/<[^>]*?>/g, '')
-                             .replace(/去读书推荐各位书友阅读：.*|去读书 www\.qudushu\.la|如果您中途有事离开，请按.*以便以后接着观看！/g, '')
-                             .replace(/[()]/g, '')
-                             .replace(/&nbsp;/g, ' ')
-                             .replace(/[ \t]+/g, ' ')
-                             .replace(/\n[ \t]+|[ \t]+\n/g, '\n')
-                             .replace(/\n+/g, '\n\n')
-                             .trim();
+            const replaceRules = [
+                [/<script[^>]*?>[\s\S]*?<\/script>/gi, ''], 
+                [/<\/p>|<br\s*\/?>/g, '\n'], 
+                [/<[^>]*?>/g, ''],
+                [/去读书推荐各位书友阅读：.*|去读书 www\.qudushu\.la|如果您中途有事离开，请按.*以便以后接着观看！/g, ''], 
+                [/&nbsp;|[ \t]+/g, ' '],
+                [/\n[ \t]*\n+/g, '\n']
+            ];
+            replaceRules.forEach(([reg, val]) => content = content.replace(reg, val));
+            content = content.trim();
+            if (content.startsWith(title)) {
+                content = content.replace(title, '').trim();
+            }
         }
         return {
             parse: 0,
-            url: 'novel://' + JSON.stringify({title, content}),
+            url: `novel://${JSON.stringify({title, content})}`,
             js: ''
         };
     }

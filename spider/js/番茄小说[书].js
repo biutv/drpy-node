@@ -4,6 +4,8 @@
   filterable: 1,
   quickSearch: 0,
   title: '番茄小说[书]',
+  author: '道长',
+  '类型': '小说',
   lang: 'ds'
 })
 */
@@ -29,6 +31,7 @@ const fqweb_host = 'https://qkfqapi.vv9v.cn';
 // const fqweb_host = 'http://8.148.83.169:22222/docs'; //备选
 
 var rule = {
+    author: '道长',
     类型: '小说',
     title: '番茄小说[书]',
     desc: '番茄小说纯js版本',

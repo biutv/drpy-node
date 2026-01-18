@@ -66,6 +66,10 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 
 ## 更新记录
 
+### 20260118
+
+更新至V1.3.18
+
 ### 20260115
 
 更新至V1.3.17
@@ -180,6 +184,7 @@ pm2 restart drpys
 * [源动力-老](https://sourcepower.top/index)
 * [电竞专业反应测试](https://www.arealme.com/brain-memory-game/zh/)
 * [桌面启动器](https://wwbty.lanzouv.com/iDZaP3d3i5ud)
+* [不知名获取网盘CK工具](http://sspa8.top:8100/pan/admin/index.php)
 
 ## AI接入
 
