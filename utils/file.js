@@ -148,10 +148,22 @@ export function getParsesDict(host) {
         const jx_conf_text = readFileSync(jx_conf, 'utf-8');
         let jx_conf_content = jx_conf_text.trim();
 
-        // 准备模板变量字典
+        let hostName = host;
+        try {
+            const raw = String(host || '');
+            const hasScheme = raw.includes('://');
+            const u = new URL(hasScheme ? raw : `http://${raw}`);
+            const hostname = u.hostname || raw;
+            const safeHostname = hostname.includes(':') ? `[${hostname}]` : hostname;
+            hostName = hasScheme ? `${u.protocol}//${safeHostname}` : safeHostname;
+        } catch (e) {
+            const raw = String(host || '').replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, '').split('/')[0];
+            hostName = raw.startsWith('[') ? raw.split(']')[0] + ']' : raw.split(':')[0];
+        }
+
         let var_dict = {
             host,
-            hostName: host.split(':').length > 1 ? host.slice(0, host.lastIndexOf(":")) : host
+            hostName
         };
 
         // 使用Jinja模板引擎渲染配置内容
