@@ -6,6 +6,7 @@
   title: '番茄小说[书]',
   author: '道长',
   '类型': '小说',
+  logo: 'https://www.18zf.net/d/file/p/2023/1107/3ty5orktxrc.jpg',
   lang: 'ds'
 })
 */

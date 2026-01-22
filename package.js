@@ -37,7 +37,7 @@ const filterGreenFiles = (scriptDir) => {
 };
 
 // 压缩目录
-const compressDirectory = (scriptDir, green) => {
+const compressDirectory = (scriptDir, green, useZip) => {
     const currentDir = basename(scriptDir);
     const currentTime = new Date().toLocaleDateString('zh-CN', {
         year: 'numeric',
@@ -45,12 +45,13 @@ const compressDirectory = (scriptDir, green) => {
         day: '2-digit'
     }).replace(/\//g, '');
     const archiveSuffix = green ? '-green' : '';
-    const archiveName = `${currentDir}-${currentTime}${archiveSuffix}.7z`;
+    const archiveExt = useZip ? '.zip' : '.7z';
+    const archiveName = `${currentDir}-${currentTime}${archiveSuffix}${archiveExt}`;
 
     const parentDir = resolve(scriptDir, '..');
     const archivePath = join(parentDir, archiveName);
 
-    // 构建 7z 命令
+    // 构建压缩命令参数
     const excludeParams = [];
 
     // 排除目录
@@ -77,7 +78,7 @@ const compressDirectory = (scriptDir, green) => {
     }
 
     // 构建命令，打包目录内容而不包含目录本身
-    const command = `7z a "${archivePath}" "${join(scriptDir, '*')}" -r ${excludeParams.join(' ')}`;
+    const command = `7z a -t${useZip ? 'zip' : '7z'} "${archivePath}" "${join(scriptDir, '*')}" -r ${excludeParams.join(' ')}`;
     console.log(`构建的 7z 命令: ${command}`);
 
     try {
@@ -95,8 +96,9 @@ const main = () => {
     // 简单解析命令行参数
     const args = process.argv.slice(2);
     const green = args.includes('-g') || args.includes('--green');
+    const useZip = args.includes('-z') || args.includes('--zip');
 
-    compressDirectory(scriptDir, green);
+    compressDirectory(scriptDir, green, useZip);
 };
 
 main();

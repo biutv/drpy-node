@@ -4,6 +4,7 @@
   filterable: 0,
   quickSearch: 0,
   title: '番茄短剧',
+  logo: 'https://www.18zf.net/d/file/p/2023/1107/3ty5orktxrc.jpg',
   '类型': '影视',
   lang: 'ds'
 })

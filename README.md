@@ -11,7 +11,8 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 ### 常用超链接
 
 * [本项目主页-免翻](https://git-proxy.playdreamer.cn/hjdhnx/drpy-node)
-* [最新DS本地包-适配皮卡丘](/gh/release)
+* ~~[最新DS本地包-适配皮卡丘](/gh/release)~~
+* [DS本地包下载中心](/admin/download)
 * [接口文档](docs/apidoc.md) | [接口列表如定时任务](docs/apiList.md) |
   ~~[小猫影视-待对接T4](https://github.com/waifu-project/movie/pull/135)~~
 * [代码质量评估工具说明](docs/codeCheck.md) | [DS项目代码评估报告](docs/codeCheckReport.md)
@@ -22,6 +23,7 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [猫源调试教程](/docs/catDebug.md)
 * [接口压测教程](/docs/httpTest.md)
 * [AI编程工具 trae](https://www.trae.ai/account-setting#subscription) | 邮编ZIP输入: 518000
+* [推荐使用AI模型-GLM4.7](https://www.bigmodel.cn/glm-coding?ic=DRV3C8M5NX) | [GLM配置文档](https://docs.bigmodel.cn/cn/coding-plan/tool/trae)
 * [免费AI-360纳米](https://bot.n.cn/)|[免费AI-当贝AI](https://ai.dangbei.com/chat)|[国外聚合全模型](https://lmarena.ai/)
 * [本站防止爬虫协议](/robots.txt)
 * [油猴脚本-反切屏检测](/public/monkey/check_screen_leave.user.js)
