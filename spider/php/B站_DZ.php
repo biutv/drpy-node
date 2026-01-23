@@ -1,38 +1,44 @@
 <?php
-// B站视频爬虫 - 简洁可用版（移除search相关代码）
-header('Content-Type: application/json; charset=utf-8');
+/**
+ * B站视频爬虫 - PHP 适配版 (道长重构)
+ * 按照 BaseSpider 结构重写
+ */
 
-class BiliBiliSpider {
-    private $extendDict = [];
+require_once __DIR__ . '/spider.php';
+
+class Spider extends BaseSpider {
+    
     private $cookie = [];
-    private $header = [
-        "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36",
-        "Referer" => "https://www.bilibili.com"
-    ];
-    
-    public function __construct() {
-        $this->extendDict = $this->getExtendDict();
-        $this->cookie = $this->getCookie();
-    }
-    
-    private function getExtendDict() {
-        return [
-            'cookie' => $this->getConfigCookie(),
-            'thread' => '0'
-        ];
-    }
-    
-    private function getConfigCookie() {
-        // 配置您的B站Cookie
-        return 'buvid3=xxxx; SESSDATA=xxxx;';
-    }
-    
-    private function getCookie() {
-        $cookie = $this->extendDict['cookie'] ?? '';
-        if (empty($cookie)) return [];
+
+    public function init($extend = '') {
+        $this->headers['Referer'] = "https://www.bilibili.com";
+        // 配置初始 Cookie
+        // 实际使用时，建议通过 ext 传入 cookie
+        $configCookie = 'buvid3=xxxx; SESSDATA=xxxx;';
         
+        // 尝试从 extend 获取 cookie (假设 extend 是 JSON 字符串或直接是 cookie 字符串)
+        // 这里简化处理：如果 extend 包含 SESSDATA，则认为是 cookie
+        if (!empty($extend)) {
+            if (strpos($extend, 'SESSDATA') !== false) {
+                $configCookie = $extend;
+            } elseif (is_array($extend) && isset($extend['cookie'])) {
+                $configCookie = $extend['cookie'];
+            } else {
+                // 尝试解析 json
+                $json = json_decode($extend, true);
+                if (isset($json['cookie'])) {
+                    $configCookie = $json['cookie'];
+                }
+            }
+        }
+        
+        $this->cookie = $this->parseCookie($configCookie);
+    }
+    
+    private function parseCookie($cookieStr) {
+        if (empty($cookieStr)) return [];
         $cookies = [];
-        $pairs = explode(';', $cookie);
+        $pairs = explode(';', $cookieStr);
         foreach ($pairs as $pair) {
             $pair = trim($pair);
             if (strpos($pair, '=') !== false) {
@@ -43,34 +49,6 @@ class BiliBiliSpider {
         return $cookies;
     }
     
-    private function httpRequest($url, $params = []) {
-        $ch = curl_init();
-        
-        if (!empty($params)) {
-            $url .= '?' . http_build_query($params);
-        }
-        
-        $headers = [];
-        foreach ($this->header as $key => $value) {
-            $headers[] = $key . ': ' . $value;
-        }
-        
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_COOKIE => $this->buildCookieString(),
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_FOLLOWLOCATION => true
-        ]);
-        
-        $response = curl_exec($ch);
-        curl_close($ch);
-        
-        return json_decode($response, true) ?: [];
-    }
-    
     private function buildCookieString() {
         $pairs = [];
         foreach ($this->cookie as $name => $value) {
@@ -79,8 +57,18 @@ class BiliBiliSpider {
         return implode('; ', $pairs);
     }
     
-    // homeContent - 首页分类
-    public function homeContent() {
+    // 覆盖父类 fetch 以自动添加 cookie
+    protected function fetch($url, $options = [], $headers = []) {
+        if (!isset($options['cookie'])) {
+            $cookieStr = $this->buildCookieString();
+            if (!empty($cookieStr)) {
+                $options['cookie'] = $cookieStr;
+            }
+        }
+        return parent::fetch($url, $options, $headers);
+    }
+
+    public function homeContent($filter = []) {
         $classes = [
             ["type_id" => "沙雕仙逆", "type_name" => "傻屌仙逆"],
             ["type_id" => "沙雕动画", "type_name" => "沙雕动画"],
@@ -126,14 +114,12 @@ class BiliBiliSpider {
             ["type_id" => "软件教程", "type_name" => "软件教程"],
             ["type_id" => "Windows", "type_name" => "Windows"]
         ];
-        
         return ['class' => $classes];
     }
-    
-    // homeVideoContent - 首页推荐视频
+
     public function homeVideoContent() {
-        $url = 'https://api.bilibili.com/x/web-interface/popular';
-        $data = $this->httpRequest($url, ['ps' => 20, 'pn' => 1]);
+        $url = 'https://api.bilibili.com/x/web-interface/popular?ps=20&pn=1';
+        $data = json_decode($this->fetch($url), true);
         
         $videos = [];
         if (isset($data['data']['list'])) {
@@ -146,13 +132,11 @@ class BiliBiliSpider {
                 ];
             }
         }
-        
         return ['list' => $videos];
     }
-    
-    // categoryContent - 分类内容（使用搜索API）
-    public function categoryContent($tid, $page, $filters = []) {
-        $page = max(1, intval($page));
+
+    public function categoryContent($tid, $pg = 1, $filter = [], $extend = []) {
+        $page = max(1, intval($pg));
         
         $url = 'https://api.bilibili.com/x/web-interface/search/type';
         $params = [
@@ -160,8 +144,9 @@ class BiliBiliSpider {
             'keyword' => $tid,
             'page' => $page
         ];
+        $url .= '?' . http_build_query($params);
         
-        $data = $this->httpRequest($url, $params);
+        $data = json_decode($this->fetch($url), true);
         
         $videos = [];
         if (isset($data['data']['result'])) {
@@ -180,19 +165,19 @@ class BiliBiliSpider {
         $pageCount = $data['data']['numPages'] ?? 1;
         $total = $data['data']['numResults'] ?? count($videos);
         
-        return [
-            'list' => $videos,
-            'page' => $page,
-            'pagecount' => $pageCount,
-            'limit' => 20,
-            'total' => $total
-        ];
+        return $this->pageResult($videos, $page, $total, 20);
     }
-    
-    // detailContent - 视频详情
-    public function detailContent($vid) {
-        $url = 'https://api.bilibili.com/x/web-interface/view';
-        $data = $this->httpRequest($url, ['aid' => $vid]);
+
+    public function searchContent($key, $quick = false, $pg = 1) {
+        return $this->categoryContent($key, $pg);
+    }
+
+    public function detailContent($ids) {
+        if (empty($ids)) return ['list' => []];
+        $vid = $ids[0];
+        
+        $url = 'https://api.bilibili.com/x/web-interface/view?aid=' . $vid;
+        $data = json_decode($this->fetch($url), true);
         
         if (!isset($data['data'])) {
             return ['list' => []];
@@ -204,7 +189,7 @@ class BiliBiliSpider {
         $playUrl = '';
         foreach ($video['pages'] as $index => $page) {
             $part = $page['part'] ?: '第' . ($index + 1) . '集';
-            $duration = $this->formatDuration($page['duration']);
+            // 构造 playId: avid_cid
             $playUrl .= "{$part}\${$vid}_{$page['cid']}#";
         }
         
@@ -219,16 +204,14 @@ class BiliBiliSpider {
         
         return ['list' => [$vod]];
     }
-    
-    // playContent - 播放地址（高清优化）
-    public function playContent($vid) {
-        if (strpos($vid, '_') !== false) {
-            list($avid, $cid) = explode('_', $vid);
+
+    public function playContent($flag, $id, $vipFlags = []) {
+        if (strpos($id, '_') !== false) {
+            list($avid, $cid) = explode('_', $id);
         } else {
-            return $this->errorResponse('无效的视频ID格式');
+            return ['parse' => 0, 'url' => '', 'error' => '无效的视频ID格式'];
         }
         
-        // 使用高质量参数
         $url = 'https://api.bilibili.com/x/player/playurl';
         $params = [
             'avid' => $avid,
@@ -236,18 +219,19 @@ class BiliBiliSpider {
             'qn' => 112, // 原画质量
             'fnval' => 0,
         ];
+        $url .= '?' . http_build_query($params);
         
-        $data = $this->httpRequest($url, $params);
+        $data = json_decode($this->fetch($url), true);
         
         if (!isset($data['data']) || $data['code'] !== 0) {
-            return $this->errorResponse('获取播放地址失败');
+             return ['parse' => 0, 'url' => '', 'error' => '获取播放地址失败'];
         }
         
         // 直接返回第一个播放地址
         if (isset($data['data']['durl'][0]['url'])) {
             $playUrl = $data['data']['durl'][0]['url'];
             
-            $headers = $this->header;
+            $headers = $this->headers;
             $headers['Referer'] = 'https://www.bilibili.com/video/av' . $avid;
             $headers['Origin'] = 'https://www.bilibili.com';
             
@@ -259,9 +243,9 @@ class BiliBiliSpider {
             ];
         }
         
-        return $this->errorResponse('无法获取播放地址');
+        return ['parse' => 0, 'url' => '', 'error' => '无法获取播放地址'];
     }
-    
+
     // 工具函数
     private function formatDuration($seconds) {
         if ($seconds <= 0) return '00:00';
@@ -277,50 +261,6 @@ class BiliBiliSpider {
         }
         return '00:00';
     }
-    
-    private function errorResponse($message) {
-        return [
-            'parse' => 0,
-            'url' => '',
-            'error' => $message
-        ];
-    }
 }
 
-// 主处理逻辑
-$ac = $_GET['ac'] ?? 'detail';
-$t = $_GET['t'] ?? '';
-$pg = $_GET['pg'] ?? '1';
-$f = $_GET['f'] ?? '';
-$ids = $_GET['ids'] ?? '';
-$id = $_GET['id'] ?? '';
-
-$spider = new BiliBiliSpider();
-
-try {
-    switch ($ac) {
-        case 'detail':
-            if (!empty($ids)) {
-                echo json_encode($spider->detailContent($ids));
-            } elseif (!empty($t)) {
-                $filters = !empty($f) ? json_decode($f, true) : [];
-                echo json_encode($spider->categoryContent($t, $pg, $filters));
-            } else {
-                $result = $spider->homeContent();
-                $videoResult = $spider->homeVideoContent();
-                $result['list'] = $videoResult['list'];
-                echo json_encode($result);
-            }
-            break;
-            
-        case 'play':
-            echo json_encode($spider->playContent($id));
-            break;
-            
-        default:
-            echo json_encode(['error' => '未知操作: ' . $ac]);
-    }
-} catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
-}
-?>
+(new Spider())->run();

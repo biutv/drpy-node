@@ -1,4 +1,8 @@
 <?php
+/**
+ * Copyright 道长所有
+ * Date: 2026/01/23
+ */
 header('Content-Type: application/json; charset=utf-8');
 // http://127.0.0.1:9980/config.php
 // ==================
@@ -15,7 +19,7 @@ foreach ($files as $file) {
         continue;
     }
 
-    if ($file === $self || $file === 'index.php') {
+    if (in_array($file, [$self, 'index.php', 'spider.php', 'example_t4.php', 'test_runner.php'])) {
         continue;
     }
 
