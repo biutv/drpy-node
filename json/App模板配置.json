@@ -162,8 +162,8 @@
         },
         "顾我": {
             "muban": "AppQiji",
-            "host": "",
-            "hosturl": "https://guwozj-1319364746.cos.ap-guangzhou.myqcloud.com/guwo.txt",
+            "host": "http://117.50.204.35:520",
+            "hosturl": "",
             "key": "ca94b06ca3c7d80e",
             "iv": "ca94b06ca3c7d80e",
             "verify": "true"
