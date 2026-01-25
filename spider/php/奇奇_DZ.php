@@ -272,7 +272,7 @@ class Spider extends BaseSpider {
         return $this->pageResult($videos, $page, count($videos) * 10, 20); // 搜索无法获取总数，简单估算
     }
 
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         $playUrl = $id;
         if (strpos($id, '$') !== false) {
             $playUrl = explode('$', $id)[1];

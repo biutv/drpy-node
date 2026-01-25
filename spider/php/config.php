@@ -8,6 +8,21 @@ header('Content-Type: application/json; charset=utf-8');
 // ==================
 // 1. 生成 sites
 // ==================
+// 动态获取服务器地址
+$isHttps = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] == 1))
+    || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+$scheme = $isHttps ? 'https://' : 'http://';
+$host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_ADDR'] ?? '127.0.0.1';
+
+// 处理路径（适配子目录部署）
+$path = dirname($_SERVER['SCRIPT_NAME']);
+if ($path === '/' || $path === '\\') {
+    $path = '';
+}
+$path = str_replace('\\', '/', $path); // 统一转为 /
+
+$baseUrl = $scheme . $host . $path;
+
 $dir  = __DIR__;
 $self = basename(__FILE__);
 $files = scandir($dir);
@@ -29,7 +44,7 @@ foreach ($files as $file) {
         "key"          => "php_" . $filename,
         "name"         => $filename . "(PHP)",
         "type"         => 4,
-        "api"          => "http://127.0.0.1:9980/" . $filename . ".php",
+        "api"          => $baseUrl . "/" . $filename . ".php",
         "searchable"   => 1,
         "quickSearch"  => 1,
         "changeable"   => 0
@@ -37,9 +52,22 @@ foreach ($files as $file) {
 }
 
 // ==================
-// 2. 尝试加载 ../drpy-node/index.json
+// 2. 尝试加载 index.json (同级) 或 ../drpy-node/index.json 或 ../../drpy-node/index.json
 // ==================
-$indexJsonPath = realpath($dir . '/../drpy-node/index.json');
+$possiblePaths = [
+    $dir . '/index.json',
+    $dir . '/../drpy-node/index.json',
+    $dir . '/../../drpy-node/index.json'
+];
+
+$indexJsonPath = false;
+foreach ($possiblePaths as $path) {
+    $realPath = realpath($path);
+    if ($realPath && is_file($realPath)) {
+        $indexJsonPath = $realPath;
+        break;
+    }
+}
 
 if ($indexJsonPath && is_file($indexJsonPath)) {
     $content = file_get_contents($indexJsonPath);
@@ -52,7 +80,7 @@ if ($indexJsonPath && is_file($indexJsonPath)) {
 
         echo json_encode(
             $json,
-            JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+            JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
         );
         exit;
     }
@@ -63,5 +91,6 @@ if ($indexJsonPath && is_file($indexJsonPath)) {
 // ==================
 echo json_encode(
     ["sites" => $sites],
-    JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+    JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
 );
+

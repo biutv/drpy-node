@@ -231,7 +231,7 @@ class Spider extends BaseSpider {
         return $this->pageResult($videos, $page, count($videos) * 10, 20);
     }
 
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         // 壳子超级解析格式
         return [
             'parse' => 1,

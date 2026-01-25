@@ -199,7 +199,7 @@ class Spider extends BaseSpider {
         return $this->pageResult($list, $pg, $total, 30);
     }
 
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         // 格式: vodId@nid
         list($sid, $nid) = explode('@', $id);
         $params = [

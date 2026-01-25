@@ -168,7 +168,7 @@ class Spider extends BaseSpider {
         return $this->pageResult($list, $pg);
     }
 
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         $parts = explode('@', $id);
         $rawUrl = $parts[0];
         $parses = isset($parts[1]) ? explode(',', $parts[1]) : [];

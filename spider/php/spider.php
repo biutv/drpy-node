@@ -8,7 +8,9 @@
  * 旨在模仿 JS 版 TVBox Spider 的写法，简化 PHP 源开发
  */
 
-header('Content-Type: application/json; charset=utf-8');
+if (!headers_sent()) {
+    header('Content-Type: application/json; charset=utf-8');
+}
 // 屏蔽一般警告，避免污染 JSON 输出
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
@@ -86,7 +88,7 @@ abstract class BaseSpider {
      * @param array $vipFlags VIP标识
      * @return array
      */
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         return ['parse' => 0, 'url' => '', 'header' => []];
     }
 
@@ -256,7 +258,7 @@ abstract class BaseSpider {
             // 优先检测 play 参数或 ac=play
             if ($ac === 'play' || !empty($play)) {
                 $playId = !empty($play) ? $play : ($_GET['id'] ?? '');
-                echo json_encode($this->playContent($flag, $playId), JSON_UNESCAPED_UNICODE);
+                echo json_encode($this->playerContent($flag, $playId), JSON_UNESCAPED_UNICODE);
                 return;
             }
 

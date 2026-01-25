@@ -158,7 +158,7 @@ class Spider extends BaseSpider {
         return $this->pageResult($list, $pageNum);
     }
 
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         $url = $this->HOST . "/api/line/play/parse?lineId=" . urlencode($id);
         $data = json_decode($this->fetch($url, [], $this->getHeaders()), true);
         

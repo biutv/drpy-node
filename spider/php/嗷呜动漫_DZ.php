@@ -237,7 +237,7 @@ class Spider extends BaseSpider {
         return $this->pageResult($list, $pg, 0, 30);
     }
 
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         $url = $id;
         if (strpos($url, 'http') === false) $url = $this->fixUrl($url);
 

@@ -205,7 +205,7 @@ class Spider extends BaseSpider {
         return ['list' => [$vod]];
     }
 
-    public function playContent($flag, $id, $vipFlags = []) {
+    public function playerContent($flag, $id, $vipFlags = []) {
         if (strpos($id, '_') !== false) {
             list($avid, $cid) = explode('_', $id);
         } else {
