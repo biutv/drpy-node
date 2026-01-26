@@ -34,13 +34,21 @@ foreach ($files as $file) {
         continue;
     }
 
-    if (in_array($file, [$self, 'index.php', 'spider.php', 'example_t4.php', 'test_runner.php'])) {
+    // 排除特定文件：
+    // 1. 系统/框架文件 (index.php, spider.php 等)
+    // 2. 当前文件 ($self)
+    // 3. 以 _ 开头的文件 (如 _backup.php)
+    // 4. config 开头的文件 (如 config_old.php)
+    if (in_array($file, ['index.php', 'spider.php', 'example_t4.php', 'test_runner.php']) ||
+        $file === $self ||
+        strpos($file, '_') === 0 ||
+        fnmatch('config*.php', $file)) {
         continue;
     }
 
     $filename = pathinfo($file, PATHINFO_FILENAME);
 
-    $sites[] = [
+    $site = [
         "key"          => "php_" . $filename,
         "name"         => $filename . "(PHP)",
         "type"         => 4,
@@ -49,6 +57,14 @@ foreach ($files as $file) {
         "quickSearch"  => 1,
         "changeable"   => 0
     ];
+
+    if (strpos($filename, '[书]') !== false) {
+        $site['类型'] = '小说';
+    } elseif (strpos($filename, '[画]') !== false) {
+        $site['类型'] = '漫画';
+    }
+
+    $sites[] = $site;
 }
 
 // ==================

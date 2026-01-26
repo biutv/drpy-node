@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/spider.php';
+require_once __DIR__ . '/lib/spider.php';
 
 class Spider extends BaseSpider {
     private $HOST;

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/spider.php';
+require_once __DIR__ . '/lib/spider.php';
 
 // ================= 核心加解密类 =================
 class WawaCrypto {

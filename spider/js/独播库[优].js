@@ -87,8 +87,8 @@ var rule = {
     },
 
     搜索: async function() {
-        let data = await this.get(`/vodsearch?wd=${encodeURIComponent(this.KEY)}`);
-        let url = this.getSignedUrl('/vodsearch') + `&wd=${encodeURIComponent(this.KEY)}`;
+        let data = await this.get(`/vodsearch?wd=${this.KEY}`);
+        let url = this.getSignedUrl('/vodsearch') + `&wd=${this.KEY}`;
         let resp = await _fetch(url, { headers: this.headers });
         return setResult(this.format(JSON.parse(await resp.text())));
     },
@@ -115,7 +115,7 @@ var rule = {
         const len = Math.min(combined.length, ts.length);
         for (let i = 0; i < len; i++) interleaved += combined[i] + ts[i];
         interleaved += combined.substring(len) + ts.substring(len);
-        const ssid = this.base64Encode(interleaved).replace(/=/g, '.');
+        const ssid = base64Encode(interleaved).replace(/=/g, '.');
         const rStr = (l) => Array(l).fill(0).map(() => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.charAt(Math.floor(Math.random() * 62))).join('');
         return `${this.host}${path}${path.includes('?') ? '&' : '?'}sign=${rStr(60)}&token=${rStr(38)}&ssid=${ssid}`;
     },
@@ -128,30 +128,6 @@ var rule = {
         for (let i = 0; i < str.length; i += 10) {
             res += str.substring(i, i + 10).split('').reverse().join('');
         }
-        try { return this.base64Decode(res.replace(/\./g, '=')); } catch (e) { return ''; }
+        try { return base64Decode(res.replace(/\./g, '=')); } catch (e) { return ''; }
     },
-
-    base64Encode: function(t) {
-        const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-        let o = '', i = 0;
-        while (i < t.length) {
-            let n = (t.charCodeAt(i) << 16) | (t.charCodeAt(i + 1) << 8) | t.charCodeAt(i + 2);
-            o += c.charAt((n >> 18) & 63) + c.charAt((n >> 12) & 63) + c.charAt((n >> 6) & 63) + c.charAt(n & 63);
-            i += 3;
-        }
-        let m = t.length % 3;
-        return m ? o.slice(0, m - 3) + "===".substring(m) : o;
-    },
-
-    base64Decode: function(s) {
-        const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-        s = s.replace(/=/g, '');
-        let o = '', i = 0;
-        while (i < s.length) {
-            let n = (c.indexOf(s.charAt(i)) << 18) | (c.indexOf(s.charAt(i + 1)) << 12) | (c.indexOf(s.charAt(i + 2)) << 6) | c.indexOf(s.charAt(i + 3));
-            o += String.fromCharCode((n >> 16) & 255, (n >> 8) & 255, n & 255);
-            i += 4;
-        }
-        return o.replace(/\0/g, '');
-    }
 };

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/spider.php';
+require_once __DIR__ . '/lib/spider.php';
 
 class Spider extends BaseSpider {
     private $HOST = 'http://read.api.duodutek.com';
@@ -37,7 +37,8 @@ class Spider extends BaseSpider {
 
         return [
             'class' => $classes,
-            'list' => $list
+            'list' => $list,
+            'filters' => (object)[]
         ];
     }
 

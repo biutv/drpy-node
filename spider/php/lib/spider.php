@@ -15,6 +15,8 @@ if (!headers_sent()) {
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
+require_once __DIR__ . '/HtmlParser.php';
+
 abstract class BaseSpider {
     
     // 默认请求头
@@ -23,6 +25,15 @@ abstract class BaseSpider {
         'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language' => 'zh-CN,zh;q=0.9',
     ];
+
+    /**
+     * @var HtmlParser
+     */
+    protected $htmlParser;
+
+    public function __construct() {
+        $this->htmlParser = new HtmlParser();
+    }
 
     /**
      * 初始化方法
@@ -113,6 +124,51 @@ abstract class BaseSpider {
 
     // ================== 辅助方法 ==================
 
+    protected function pdfa($html, $rule) {
+        return $this->htmlParser->pdfa($html, $rule);
+    }
+    
+    protected function pdfh($html, $rule, $baseUrl = '') {
+        return $this->htmlParser->pdfh($html, $rule, $baseUrl);
+    }
+    
+    protected function pd($html, $rule, $baseUrl = '') {
+        if (empty($baseUrl)) {
+            $baseUrl = $this->tryGetHost();
+        }
+        return $this->htmlParser->pd($html, $rule, $baseUrl);
+    }
+
+    /**
+     * 尝试获取子类定义的 HOST 常量或属性
+     */
+    private function tryGetHost() {
+        try {
+            $ref = new ReflectionClass($this);
+
+            // 1. 尝试获取 HOST 属性 (优先)
+            if ($ref->hasProperty('HOST')) {
+                $prop = $ref->getProperty('HOST');
+                // PHP 8.1+ 默认可访问私有属性，只有旧版本需要手动开启
+                if (PHP_VERSION_ID < 80100) {
+                    $prop->setAccessible(true);
+                }
+                $val = $prop->getValue($this);
+                if (!empty($val)) {
+                    return $val;
+                }
+            }
+
+            // 2. 尝试获取 const HOST 常量
+            if ($ref->hasConstant('HOST')) {
+                return $ref->getConstant('HOST');
+            }
+        } catch (Exception $e) {
+            // ignore
+        }
+        return '';
+    }
+
     /**
      * 快速构建分页返回结果
      * @param array $list 视频列表
@@ -157,6 +213,12 @@ abstract class BaseSpider {
      * @return string|bool
      */
     protected function fetch($url, $options = [], $headers = []) {
+        // 支持从 options 中传递 headers
+        if (isset($options['headers'])) {
+            $headers = array_merge($headers, $options['headers']);
+            unset($options['headers']);
+        }
+
         $ch = curl_init();
         
         // 1. 解析自定义 header 为关联数组
@@ -181,7 +243,12 @@ abstract class BaseSpider {
         // 3. 转换回 CURL 所需的索引数组
         $mergedHeaders = [];
         foreach ($finalHeadersMap as $k => $v) {
-            $mergedHeaders[] = "$k: $v";
+            if ($v === "") {
+                // To send empty header in CURL, use "Header;" (no colon)
+                $mergedHeaders[] = $k . ";";
+            } else {
+                $mergedHeaders[] = "$k: $v";
+            }
         }
 
         $defaultOptions = [
@@ -221,6 +288,11 @@ abstract class BaseSpider {
         }
         
         return $result;
+    }
+
+    protected function fetchJson($url, $options = []) {
+        $resp = $this->fetch($url, $options);
+        return json_decode($resp, true) ?: [];
     }
 
     /**
