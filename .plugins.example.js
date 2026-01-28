@@ -35,14 +35,14 @@ const plugins = [
         path: 'plugins/pup-sniffer',         // 插件路径
         params: '-port 57573', // 启动参数：端口57573
         desc: 'drplayer嗅探服务',        // 插件描述：提供视频适配代理功能
-        active: true                    // 是否激活：true表示启用此插件
+        active: false                    // 是否激活：true表示启用此插件
     },
     {
         name: 'mediaProxy',                 // 插件名称
         path: 'plugins/mediaProxy',         // 插件路径
         params: '-port 57574', // 启动参数：端口57574
         desc: 'go媒体代理服务',        // 插件描述：提供视频适配代理功能
-        active: true                    // 是否激活：true表示启用此插件
+        active: false                    // 是否激活：true表示启用此插件
     },
 ]
 

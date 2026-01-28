@@ -71,6 +71,7 @@ foreach ($files as $file) {
 // 2. 尝试加载 index.json (同级) 或 ../drpy-node/index.json 或 ../../drpy-node/index.json
 // ==================
 $possiblePaths = [
+    $dir . '/config.json',
     $dir . '/index.json',
     $dir . '/../drpy-node/index.json',
     $dir . '/../../drpy-node/index.json'
