@@ -5,6 +5,7 @@ import {execFile} from 'child_process';
 import {promisify} from 'util';
 import {getSitesMap} from "../utils/sites-map.js";
 import {computeHash, deepCopy, getNowTime, urljoin} from "../utils/utils.js";
+import {prepareBinary} from "../utils/binHelper.js";
 import {md5} from "../libs_drpy/crypto-util.js";
 import {fastify} from "../controllers/fastlogger.js";
 // import dotenv from 'dotenv';
@@ -51,7 +52,14 @@ function json2Object(json) {
 
 // Execute PHP bridge
 const callPhpMethod = async (filePath, methodName, env, ...args) => {
-    const phpPath = process.env.PHP_PATH || 'php';
+    let phpPath = process.env.PHP_PATH || 'php';
+    
+    const validPath = prepareBinary(phpPath);
+    if (!validPath) {
+         throw new Error(`PHP executable not found or invalid: ${phpPath}`);
+    }
+    phpPath = validPath;
+
     const phpMethodName = methodMapping[methodName] || methodName;
 
     const cliArgs = [

@@ -172,7 +172,7 @@ class Spider extends BaseSpider {
         ];
         
         if (preg_match('/<h1[^>]*>(.*?)<\/h1>/', $html, $h1)) {
-            $vod['vod_name'] = $h1[1];
+            $vod['vod_name'] = trim(strip_tags($h1[1]));
         }
         
         $contentHtml = "";
@@ -258,6 +258,8 @@ class Spider extends BaseSpider {
                 foreach ($matches[1] as $src) {
                     $lowerSrc = strtolower($src);
                     if (strpos($lowerSrc, '.gif') !== false || strpos($lowerSrc, '.svg') !== false || strpos($lowerSrc, 'logo') !== false || strpos($lowerSrc, 'avatar') !== false || strpos($lowerSrc, 'icon') !== false) continue;
+                    if (strpos($lowerSrc, '/covers/') !== false) continue; // 过滤封面图推荐
+
                     
                     if (strpos($src, '//') === 0) $src = 'https:' . $src;
                     elseif (strpos($src, '/') === 0) $src = $this->baseUrl . $src;

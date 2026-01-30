@@ -79,6 +79,19 @@ export default (fastify, options, done) => {
         }
     });
 
+    // 注册PHP脚本文件服务 - 用于存放PHP相关的脚本文件
+    fastify.register(fastifyStatic, {
+        root: options.phpDir,             // PHP脚本根目录
+        prefix: '/php/',                  // URL访问前缀
+        decorateReply: false,             // 禁用 sendFile 装饰器
+        setHeaders: (res, path) => {
+            // 为PHP文件设置正确的Content-Type，确保浏览器以纯文本形式显示
+            if (path.endsWith('.php')) {
+                res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+            }
+        }
+    });
+
     // 注册CAT相关文件服务 - 用于存放CAT视频源相关文件
     fastify.register(fastifyStatic, {
         root: options.catDir,             // CAT文件根目录

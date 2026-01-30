@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import {spawn} from "child_process";
 import {fileURLToPath, pathToFileURL} from "url";
+import {ensureExecutable} from "./binHelper.js";
 
 // 获取 pluginManager.js 的目录
 const __filename = fileURLToPath(import.meta.url);
@@ -52,22 +53,6 @@ function getPluginBinary(rootDir, pluginPath, pluginName) {
     }
 
     return path.join(binDir, binaryName);
-}
-
-function ensureExecutable(filePath) {
-    if (process.platform === "win32") {
-        // Windows 不需要 chmod，直接返回
-        return;
-    }
-    try {
-        const stats = fs.statSync(filePath);
-        if (!(stats.mode & 0o111)) {
-            fs.chmodSync(filePath, 0o755);
-            console.log(`[pluginManager] 已为插件 ${filePath} 添加执行权限`);
-        }
-    } catch (err) {
-        console.error(`[pluginManager] 无法设置执行权限: ${filePath}`, err.message);
-    }
 }
 
 /**
