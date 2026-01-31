@@ -43,13 +43,28 @@ RUN cp /app/.env.development /app/.env && \
 # 但是，我们仍然需要安装Node.js运行时本身（除非drpys项目是一个纯静态资源服务，不需要Node.js运行时）
 RUN apk add --no-cache nodejs
 
+# 安装php8.3及其扩展
+RUN apk add --no-cache \
+    php83 \
+    php83-cli \
+    php83-curl \
+    php83-mbstring \
+    php83-xml \
+    php83-pdo \
+    php83-pdo_mysql \
+    php83-pdo_sqlite \
+    php83-openssl \
+    php83-sqlite3 \
+    php83-json
+RUN ln -sf /usr/bin/php83 /usr/bin/php
+
 # 安装python3依赖
 RUN apk add --no-cache python3 \
     py3-pip \
     py3-setuptools \
     py3-wheel
 
-# 激活python3虚拟环境并安装依pip3赖
+# 激活python3虚拟环境并安装requirements依赖
 RUN python3 -m venv /app/.venv && \
     . /app/.venv/bin/activate && \
     pip3 install -r /app/spider/py/base/requirements.txt

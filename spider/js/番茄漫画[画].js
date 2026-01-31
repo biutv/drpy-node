@@ -10,6 +10,7 @@
 })
 */
 
+
 var rule = {
     类型: '漫画',
     title: '番茄漫画',
@@ -29,12 +30,13 @@ var rule = {
     limit: 10,
     class_parse: async function () {
         let {input} = this;
+        // log('[class_parse] input:', input);
         let html = await request(input);
         let data = html.parseX.data;
         let d = data.filter(item => item.url.trim()).map((it) => {
             return {
                 type_name: it.title,
-                type_id: it.url,
+                type_id: gzip(it.url),
             }
         });
         return {class: d}
@@ -74,11 +76,15 @@ var rule = {
     推荐: async function () {
         let {HOST} = this;
         let url = HOST + '/api/discover?tab=漫画&type=7&gender=2&genre_type=110&page=1';
+        // log('[推荐]: url: ' + url);
         let html = await request(url);
         return this.parseList(html);
     },
     一级: async function (tid, pg, filter, extend) {
+        // log('[一级]: tid:', tid);
+        tid = ungzip(tid);
         input = jinja.render(tid, {page: pg});
+        // log('[一级]: input: ' + input);
         let html = await request(input);
         return this.parseList(html);
     },

@@ -27,7 +27,7 @@ RESOLVE_FINAL_URLS = True
 # PHP 命令路径
 PHP_CMD = "php"
 # 桥接脚本路径
-BRIDGE_SCRIPT = os.path.join(SCRIPT_DIR, "crawler_bridge.php")
+BRIDGE_SCRIPT = os.path.join(SCRIPT_DIR, "_crawler_bridge.php")
 
 # --- 数据库管理 (Database Manager) ---
 class DBManager:

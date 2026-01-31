@@ -30,6 +30,7 @@
     extension=mbstring
     extension=openssl
     extension=sockets
+    extension=sqlite3
     ```
 3.  **验证安装**:
     打开新的 CMD 或 PowerShell 窗口，输入 `php -v`。
@@ -73,6 +74,7 @@ php --ini
 cd /etc/php/8.3/cli
 vi php.ini
 # 找到 extension=sqlite3 并取消注释(用到下面安装命令安装完了会自动配置好，这里还是给注释掉)
+# 0.5.3已经包含了下面的命令，可以不管了
 apt-get install php8.3-sqlite3
 ```
 

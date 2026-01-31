@@ -419,6 +419,11 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         filterable: 1, // 固定值
                         quickSearch: 1, // 固定值
                     };
+                    if (baseName.includes('[画]')) {
+                        ruleObject.类型 = '漫画'
+                    } else if (baseName.includes('[书]')) {
+                        ruleObject.类型 = '小说'
+                    }
                     let ruleMeta = {...ruleObject};
                     const filePath = path.join(pyDir, file);
                     const header = await FileHeaderManager.readHeader(filePath);
@@ -516,6 +521,11 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         filterable: 1,
                         quickSearch: 1,
                     };
+                    if (baseName.includes('[画]')) {
+                        ruleObject.类型 = '漫画'
+                    } else if (baseName.includes('[书]')) {
+                        ruleObject.类型 = '小说'
+                    }
                     let ruleMeta = {...ruleObject};
                     const filePath = path.join(phpDir, file);
 
@@ -579,6 +589,11 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         filterable: 1, // 固定值
                         quickSearch: 1, // 固定值
                     };
+                    if (baseName.includes('[画]')) {
+                        ruleObject.类型 = '漫画'
+                    } else if (baseName.includes('[书]')) {
+                        ruleObject.类型 = '小说'
+                    }
                     let ruleMeta = {...ruleObject};
                     const filePath = path.join(catDir, file);
                     const header = await FileHeaderManager.readHeader(filePath);
