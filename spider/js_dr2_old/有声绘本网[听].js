@@ -1,14 +1,3 @@
-/*
-@header({
-  searchable: 2,
-  filterable: 0,
-  quickSearch: 0,
-  title: '有声绘本网',
-  '类型': '听书',
-  lang: 'ds'
-})
-*/
-
 var rule = {
     类型: '听书',
     title: '有声绘本网',

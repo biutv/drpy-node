@@ -5,6 +5,10 @@
   quickSearch: 0,
   title: '啊哈DJ[听]',
   '类型': '影视',
+  mergeList: true,
+  more: {
+    mergeList: 1
+  },
   lang: 'ds'
 })
 */

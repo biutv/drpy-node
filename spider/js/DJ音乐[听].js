@@ -6,6 +6,10 @@
   title: 'DJ音乐',
   author: 'EylinSir',
   '类型': '影视',
+  mergeList: true,
+  more: {
+    mergeList: 1
+  },
   logo: 'https://pic.289.com/up/2023-12/20231219154340126.png',
   lang: 'ds'
 })

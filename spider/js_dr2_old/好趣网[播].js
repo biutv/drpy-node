@@ -1,14 +1,3 @@
-/*
-@header({
-  searchable: 2,
-  filterable: 0,
-  quickSearch: 0,
-  title: '好趣网[播]',
-  '类型': '影视',
-  lang: 'ds'
-})
-*/
-
 var rule = {
     title: '好趣网[播]',
     编码: 'GBK',//不填就默认utf-8

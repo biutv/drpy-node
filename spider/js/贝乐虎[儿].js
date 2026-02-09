@@ -5,6 +5,10 @@
   quickSearch: 0,
   title: '贝乐虎[儿]',
   '类型': '影视',
+  mergeList: 1,
+  more: {
+    mergeList: 1
+  },
   lang: 'ds'
 })
 */
@@ -12,6 +16,7 @@
 var rule = {
     类型: '影视',//影视|听书|漫画|小说
     title: '贝乐虎[儿]',
+    mergeList: 1,
     host: 'https://vd.ubestkid.com',
     url: '/api/v1/bv/video#pg=fypage',
     homeUrl: '/api/v1/bv/video',

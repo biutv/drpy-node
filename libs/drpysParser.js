@@ -424,7 +424,7 @@ export async function homeParse(rule) {
     return context;
 }
 
-export async function homeParseAfter(d, _type, hikerListCol, hikerClassListCol, hikerSkipEr, injectVars) {
+export async function homeParseAfter(d, _type, hikerListCol, hikerClassListCol, mergeList, injectVars) {
     if (!d) {
         d = {};
     }
@@ -436,8 +436,9 @@ export async function homeParseAfter(d, _type, hikerListCol, hikerClassListCol, 
         d.hikerClassListCol = hikerClassListCol;
     }
     // 跳过形式二级
-    if (hikerSkipEr) {
-        d.hikerSkipEr = hikerSkipEr;
+    if (mergeList) {
+        d.hikerSkipEr = mergeList;
+        d.mergeList = mergeList;
     }
     const {
         classes,
@@ -1489,7 +1490,7 @@ export async function invokeWithInjectVars(rule, method, injectVars, args) {
             }
             break;
         case 'class_parse':
-            result = await homeParseAfter(result, rule.类型, rule.hikerListCol, rule.hikerClassListCol, rule.hikerSkipEr, injectVars);
+            result = await homeParseAfter(result, rule.类型, rule.hikerListCol, rule.hikerClassListCol, rule.mergeList, injectVars);
             break;
         case '一级':
             result = await cateParseAfter(rule, result, args[1]);

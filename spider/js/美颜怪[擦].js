@@ -4,9 +4,16 @@
   filterable: 0,
   quickSearch: 0,
   title: '美颜怪',
+  author: 'LoyDgIk',
+  '类型': '影视',
+  mergeList: 1,
+  more: {
+    mergeList: 1
+  },
   lang: 'ds'
 })
 */
+
 
 class Rule {
     类型 = "影视";

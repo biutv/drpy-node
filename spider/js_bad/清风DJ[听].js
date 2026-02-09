@@ -1,14 +1,3 @@
-/*
-@header({
-  searchable: 0,
-  filterable: 1,
-  quickSearch: 0,
-  title: '清风DJ[听]',
-  '类型': '影视',
-  lang: 'ds'
-})
-*/
-
 var rule = {
     title: '清风DJ[听]',
     host: 'https://www.vvvdj.com',

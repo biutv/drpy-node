@@ -5,6 +5,10 @@
   quickSearch: 0,
   title: '兔小贝[儿]',
   '类型': '影视',
+  mergeList: 1,
+  more: {
+    mergeList: 1
+  },
   lang: 'ds'
 })
 */
@@ -12,6 +16,7 @@
 var rule = {
     title: '兔小贝[儿]',
     host: 'https://www.tuxiaobei.com',
+    mergeList: 1,
     homeUrl: '',
     url: '/list/mip-data?typeId=fyclass&page=fypage&callback=',
     detailUrl: '/play/fyid',

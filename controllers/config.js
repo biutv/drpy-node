@@ -190,6 +190,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         title: ruleObject.title,
                         author: ruleObject.author,
                         类型: ruleObject.类型 || '影视',
+                        mergeList: ruleObject.二级 === '*' || ruleObject.mergeList,
                         searchable: ruleObject.searchable,
                         filterable: ruleObject.filterable,
                         quickSearch: ruleObject.quickSearch,
@@ -197,6 +198,13 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         logo: ruleObject.logo,
                         lang: 'ds',
                     });
+                    if (ruleMeta.mergeList) {
+                        if (ruleMeta.more && typeof ruleMeta.more === 'object') {
+                            ruleMeta.more.mergeList = 1;
+                        } else {
+                            ruleMeta.more = {mergeList: 1};
+                        }
+                    }
                     // console.log('ds ruleMeta:', ruleMeta);
                     await FileHeaderManager.writeHeader(filePath, ruleMeta);
                 } else {
@@ -293,6 +301,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                             title: ruleObject.title,
                             author: ruleObject.author,
                             类型: ruleObject.类型 || '影视',
+                            mergeList: ruleObject.二级 === '*' || ruleObject.mergeList,
                             searchable: ruleObject.searchable,
                             filterable: ruleObject.filterable,
                             quickSearch: ruleObject.quickSearch,
@@ -300,6 +309,13 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                             logo: ruleObject.logo,
                             lang: 'dr2',
                         });
+                        if (ruleMeta.mergeList) {
+                            if (ruleMeta.more && typeof ruleMeta.more === 'object') {
+                                ruleMeta.more.mergeList = 1;
+                            } else {
+                                ruleMeta.more = {mergeList: 1};
+                            }
+                        }
                         // console.log('dr2 ruleMeta:', ruleMeta);
                         await FileHeaderManager.writeHeader(filePath, ruleMeta);
                     } else {
