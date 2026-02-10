@@ -416,9 +416,10 @@ export async function init(filePath, env = {}, refresh) {
         // ruleScript.runInContext(context);
         // const result = await ruleScript.runInContext(context);
         const executeWithTimeout = (script, context, timeout) => {
+            let timer;
             return Promise.race([
                 new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Code execution timed out')), timeout)
+                    timer = setTimeout(() => reject(new Error('Code execution timed out')), timeout)
                 ),
                 new Promise((resolve, reject) => {
                     try {
@@ -434,7 +435,9 @@ export async function init(filePath, env = {}, refresh) {
                         reject(error);
                     }
                 })
-            ]);
+            ]).finally(() => {
+                if (timer) clearTimeout(timer);
+            });
         };
         const result = await executeWithTimeout(ruleScript, context, 30000);
         // log('result:', result);

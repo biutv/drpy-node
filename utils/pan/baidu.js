@@ -42,6 +42,10 @@ class BaiduHandler {
         this.cleanupInterval = setInterval(() => {
             this.clearSaveDir();
         }, 2 * 60 * 60 * 1000);
+        // 不阻止进程退出
+        if (this.cleanupInterval.unref) {
+            this.cleanupInterval.unref();
+        }
     }
 
     /**
