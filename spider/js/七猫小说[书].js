@@ -113,18 +113,20 @@ var rule = {
     },
     二级: async function () {
         let {input, pdfa, pdfh, pd} = this;
+        // console.log('Detail Input:', input);
         let html = await this.request(input);
+        // console.log('Detail HTML Length:', html.length);
         let VOD = {};
-        VOD.vod_name = pdfh(html, 'span.txt&&Text');
+        VOD.vod_name = pdfh(html, '.book-detail-info .title .txt&&Text');
         VOD.type_name = pdfh(html, '.qm-tag:eq(-1)&&Text');
         VOD.vod_pic = pd(html, '.wrap-pic&&img&&src');
-        VOD.vod_content = pdfh(html, '.book-introduction-item&&.qm-with-title-tb&&Text');
+        VOD.vod_content = pdfh(html, '.intro&&Text');
         VOD.vod_remarks = pdfh(html, '.qm-tag&&Text');
         VOD.vod_year = '';
         VOD.vod_area = '';
         VOD.vod_actor = pdfh(html, '.sub-title&&span:eq(1)&&Text');
         VOD.vod_director = pdfh(html, '.sub-title&&span&&a&&Text');
-        VOD.vod_play_from = pdfh(html, '.qm-sheader&&img&&alt');
+        VOD.vod_play_from = '七猫小说';
         let book_id = input.match(/shuku\/(\d+)/)[1];
         let listUrl = buildUrl(rule.listUrl2, {
             book_id: book_id

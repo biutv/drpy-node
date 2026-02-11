@@ -7,7 +7,6 @@ import re
 EXCLUDE_DIRS = ['.git', '.idea', 'soft', 'examples', 'apps/cat', 'plugins/pvideo', 'plugins/req-proxy',
                 'plugins/pup-sniffer', 'plugins/mediaProxy',
                 'pyTools', 'drop_code',
-                'jstest',
                 'local', 'logs',
                 '对话1.txt',
                 'vod_cache', 'data/mv']
