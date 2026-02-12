@@ -1,10 +1,9 @@
 /*
 @header({
-  searchable: 0,
+  searchable: 1,
   filterable: 1,
-  quickSearch: 0,
+  quickSearch: 1,
   title: 'yikm[游戏]',
-  logo: "https://file.yikm.net/logo.png"
   lang: 'cat'
 })
 */

@@ -2,6 +2,8 @@
 import http from 'http';
 import https from 'https';
 import axios from 'axios';
+import {getSystemProxy, resolveDoh} from './dns_doh.js';
+import {HttpsProxyAgent} from 'https-proxy-agent';
 
 /**
  * 创建配置了代理的 axios 实例
@@ -44,7 +46,7 @@ export function createAxiosInstance(options = {}) {
         httpsAgent,
     });
 
-    _axios.interceptors.request.use(config => {
+    _axios.interceptors.request.use(async config => {
         if (config && config.headers) {
             const headers = config.headers;
             const keys = Object.keys(headers);
@@ -55,6 +57,56 @@ export function createAxiosInstance(options = {}) {
                 }
             }
         }
+
+        // System Proxy & DOH Injection
+        try {
+            const proxy = await getSystemProxy();
+            if (proxy) {
+                // Apply System Proxy
+                const agent = new HttpsProxyAgent(proxy);
+                config.httpsAgent = agent;
+                config.proxy = false; // Disable axios internal proxy handling to use agent
+            } else {
+                // Apply DOH if no proxy
+                let urlObj;
+                try {
+                    urlObj = new URL(config.url, config.baseURL);
+                } catch (e) {
+                    // Invalid URL, skip DOH
+                }
+
+                if (urlObj && urlObj.hostname && !/^(\d{1,3}\.){3}\d{1,3}$/.test(urlObj.hostname) && urlObj.hostname !== 'localhost') {
+                    const ip = await resolveDoh(urlObj.hostname);
+                    if (ip && ip !== urlObj.hostname) {
+                        // Set Host header if missing
+                        let hasHost = false;
+                        const headerKeys = Object.keys(config.headers || {});
+                        for (const k of headerKeys) {
+                            if (k.toLowerCase() === 'host') {
+                                hasHost = true;
+                                break;
+                            }
+                        }
+                        if (!hasHost) {
+                            config.headers = config.headers || {};
+                            config.headers['Host'] = urlObj.hostname;
+                        }
+
+                        // Replace hostname with IP
+                        urlObj.hostname = ip;
+                        config.url = urlObj.toString();
+
+                        // Clear baseURL to avoid confusion if it was used
+                        if (config.baseURL) {
+                            delete config.baseURL;
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore errors to ensure request proceeds (fallback to default)
+        }
+
         return config;
     });
 

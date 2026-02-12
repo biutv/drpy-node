@@ -459,6 +459,14 @@ export async function homeParseAfter(d, _type, hikerListCol, hikerClassListCol, 
         d.type_flag = home_flag;
     }
     d.class = d.class.filter(it => !cate_exclude || !(new RegExp(cate_exclude).test(it.type_name)));
+    if (d.filters && Object.keys(d.filters).length === 1 && Object.keys(d.filters)[0] === '*') {
+        const common_filters = d.filters['*'];
+        const show_filters = {};
+        d.class.forEach(it => {
+            show_filters[it.type_id] = common_filters;
+        });
+        d.filters = show_filters;
+    }
     return d
 }
 

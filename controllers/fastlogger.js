@@ -6,114 +6,131 @@ import {fileURLToPath} from 'url';
 import {createStream} from 'rotating-file-stream';
 import dotenv from 'dotenv';
 
-dotenv.config();
-
-const LOG_WITH_FILE = Number(process.env.LOG_WITH_FILE) || 0;
-const LOG_LEVEL = process.env.LOG_LEVEL && ['trace', 'debug', 'info', 'warn', 'error', 'fatal'].includes(process.env.LOG_LEVEL) ? process.env.LOG_LEVEL : 'info';
-const COOKIE_AUTH_CODE = process.env.COOKIE_AUTH_CODE || 'drpys';
-// console.log('LOG_WITH_FILE:', LOG_WITH_FILE);
-// console.log('LOG_LEVEL:', LOG_LEVEL);
-// console.log('COOKIE_AUTH_CODE:', COOKIE_AUTH_CODE);
-let _logger = true;
-let logStream = null;
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const logDirectory = path.join(__dirname, '../logs');
 
-// 检测操作系统
-const isWindows = process.platform === 'win32';
+// 使用 Symbol 作为全局键，防止命名冲突
+const FASTIFY_INSTANCE_KEY = Symbol.for('drpy-node.fastify.instances');
 
-// 自定义时间戳函数
-const customTimestamp = () => {
-    const now = new Date();
-    return `,"time":"${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}"`;
-};
-
-// 安全的文件路径生成函数
-const safeFileNameGenerator = (time, index) => {
-    if (!time) return "output.log";
-
-    // 确保文件名中不包含路径分隔符
-    const dateStr = `${time.getFullYear()}-${String(time.getMonth() + 1).padStart(2, '0')}-${String(time.getDate()).padStart(2, '0')}`;
-    return `output-${dateStr}.log.${index || 1}`;
-};
-
-
-if (LOG_WITH_FILE) {
-    if (!fs.existsSync(logDirectory)) {
-        fs.mkdirSync(logDirectory, {recursive: true});
+// 初始化函数，仅执行一次
+function initializeFastify() {
+    if (globalThis[FASTIFY_INSTANCE_KEY]) {
+        return globalThis[FASTIFY_INSTANCE_KEY];
     }
 
-    // 配置选项
-    const streamOptions = {
-        size: '500M',
-        // compress: isWindows ? false : 'gzip', // Windows 上禁用压缩
-        compress: false,
-        interval: '1d',
-        path: logDirectory,
-        maxFiles: 30
+    dotenv.config();
+
+    const LOG_WITH_FILE = Number(process.env.LOG_WITH_FILE) || 0;
+    const LOG_LEVEL = process.env.LOG_LEVEL && ['trace', 'debug', 'info', 'warn', 'error', 'fatal'].includes(process.env.LOG_LEVEL) ? process.env.LOG_LEVEL : 'info';
+
+    let _logger = true;
+    let logStream = null;
+    const logDirectory = path.join(__dirname, '../logs');
+
+    // 自定义时间戳函数
+    const customTimestamp = () => {
+        const now = new Date();
+        return `,"time":"${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}"`;
     };
 
+    // 安全的文件路径生成函数
+    const safeFileNameGenerator = (time, index) => {
+        if (!time) return "output.log";
+        const dateStr = `${time.getFullYear()}-${String(time.getMonth() + 1).padStart(2, '0')}-${String(time.getDate()).padStart(2, '0')}`;
+        return `output-${dateStr}.log.${index || 1}`;
+    };
 
-    // 创建日志流
-    logStream = createStream(safeFileNameGenerator, streamOptions);
+    if (LOG_WITH_FILE) {
+        if (!fs.existsSync(logDirectory)) {
+            try {
+                fs.mkdirSync(logDirectory, {recursive: true});
+            } catch (e) {
+                console.error('[FastLogger] Failed to create log directory:', e);
+            }
+        }
 
-    // 添加错误处理
-    logStream.on('error', (err) => {
-        // console.error('日志流错误:', err);
+        const streamOptions = {
+            size: '500M',
+            compress: false,
+            interval: '1d',
+            path: logDirectory,
+            maxFiles: 30
+        };
+
+        try {
+            logStream = createStream(safeFileNameGenerator, streamOptions);
+            logStream.on('error', (err) => {
+                // console.error('日志流错误:', err);
+            });
+            logStream.on('rotated', (filename) => {
+                console.log('日志轮转完成:', filename);
+            });
+
+            _logger = pino({
+                level: LOG_LEVEL,
+                serializers: {
+                    req: pino.stdSerializers.req,
+                    res: pino.stdSerializers.res,
+                },
+                timestamp: customTimestamp,
+            }, logStream);
+            console.log('日志输出到文件');
+        } catch (error) {
+            console.error('[FastLogger] Failed to initialize file logger, falling back to console:', error);
+            _logger = pino({
+                level: LOG_LEVEL,
+                timestamp: customTimestamp,
+            });
+        }
+    } else {
+        _logger = pino({
+            level: LOG_LEVEL,
+            serializers: {
+                req: pino.stdSerializers.req,
+                res: pino.stdSerializers.res,
+            },
+            timestamp: customTimestamp,
+        });
+        console.log('日志输出到控制台');
+    }
+
+    const _fastify = Fastify({
+        logger: _logger,
     });
 
-    logStream.on('rotated', (filename) => {
-        console.log('日志轮转完成:', filename);
+    const _wsApp = Fastify({
+        logger: _logger,
     });
 
-    _logger = pino({
-        level: LOG_LEVEL,
-        serializers: {
-            req: pino.stdSerializers.req,
-            res: pino.stdSerializers.res,
-        },
-        timestamp: customTimestamp,
-    }, logStream);
+    // 添加CORS支持的钩子
+    [_fastify, _wsApp].forEach(server => {
+        server.addHook('onRequest', async (request, reply) => {
+            reply.header('Access-Control-Allow-Origin', '*');
+            reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+            reply.header('Access-Control-Allow-Credentials', 'true');
 
-    console.log('日志输出到文件');
-} else {
-    _logger = pino({
-        level: LOG_LEVEL,
-        serializers: {
-            req: pino.stdSerializers.req,
-            res: pino.stdSerializers.res,
-        },
-        timestamp: customTimestamp,
+            if (request.method === 'OPTIONS') {
+                reply.status(200).send();
+                return;
+            }
+        });
     });
-    console.log('日志输出到控制台');
+
+    const instances = {
+        fastify: _fastify,
+        wsApp: _wsApp,
+        logger: _logger
+    };
+
+    globalThis[FASTIFY_INSTANCE_KEY] = instances;
+    return instances;
 }
 
-export const fastify = Fastify({
-    logger: _logger,
-});
+const {fastify: fastifyInstance, wsApp: wsAppInstance} = initializeFastify();
 
-export const wsApp = Fastify({
-    logger: _logger,
-});
-
-// 添加CORS支持的钩子
-[fastify, wsApp].forEach(server => {
-    server.addHook('onRequest', async (request, reply) => {
-        // 设置CORS头部
-        reply.header('Access-Control-Allow-Origin', '*');
-        reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-        reply.header('Access-Control-Allow-Credentials', 'true');
-
-        // 处理预检请求
-        if (request.method === 'OPTIONS') {
-            reply.status(200).send();
-            return;
-        }
-    });
-});
+export const fastify = fastifyInstance;
+export const wsApp = wsAppInstance;
 
 // 安全的轮转测试端点
 // if (LOG_WITH_FILE && logStream) {

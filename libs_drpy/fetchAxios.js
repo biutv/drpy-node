@@ -5,6 +5,8 @@
 import FormData from 'form-data';
 import https from "https";
 import diagnosticsChannel from 'diagnostics_channel';
+import {resolveDoh, getSystemProxy} from '../utils/dns_doh.js';
+import {ProxyAgent} from 'undici';
 
 let undiciStripUASubscribed = false;
 
@@ -127,6 +129,64 @@ class FetchAxios {
             }
         }
 
+        // Proxy and DOH Handling
+        let fetchDispatcher = undefined;
+        try {
+            const proxy = await getSystemProxy();
+            if (proxy) {
+                // If proxy detected, use it via Undici ProxyAgent
+                fetchDispatcher = new ProxyAgent(proxy);
+                // When using proxy, we generally rely on the proxy for DNS, so we can skip DOH 
+                // unless we want to force DOH even with Proxy (which is complex).
+                // "Python requests" logic usually means: if proxy env var, use proxy.
+            } else {
+                // Only use DOH if NO proxy is configured
+                // DOH / DNS over HTTPS handling
+                let fullUrl = finalConfig.url;
+                // Handle relative URLs if baseURL is provided - though finalConfig.url usually has it already
+                if (finalConfig.baseURL && !/^https?:\/\//i.test(fullUrl)) {
+                    try {
+                        const parsed = new URL(fullUrl, finalConfig.baseURL);
+                        fullUrl = parsed.toString();
+                    } catch (e) {
+                    }
+                }
+                const urlObj = new URL(fullUrl);
+                const hostname = urlObj.hostname;
+
+                if (hostname && !/^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) && hostname !== 'localhost') {
+                    const ip = await resolveDoh(hostname);
+                    if (ip && ip !== hostname) {
+                        // Set Host header if missing
+                        let hasHost = false;
+                        const headerKeys = Object.keys(finalConfig.headers || {});
+                        for (const k of headerKeys) {
+                            if (k.toLowerCase() === 'host') {
+                                hasHost = true;
+                                break;
+                            }
+                        }
+                        if (!hasHost) {
+                            finalConfig.headers = finalConfig.headers || {};
+                            finalConfig.headers['Host'] = hostname;
+                        }
+
+                        // Replace hostname with IP
+                        urlObj.hostname = ip;
+                        finalConfig.url = urlObj.toString();
+
+                        // Clear baseURL to avoid double-prefixing issues if url became absolute
+                        if (finalConfig.baseURL) {
+                            delete finalConfig.baseURL;
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore URL parse/Proxy errors
+            // console.error('[fetchAxios] Proxy/DOH setup error:', e);
+        }
+
         // 拼接查询参数
         if (finalConfig.params) {
             const query = new URLSearchParams(finalConfig.params).toString();
@@ -167,7 +227,9 @@ class FetchAxios {
         }
 
         try {
-            // console.log(`[fetchAxios] finalConfig.url:${finalConfig.url} fetchOptions:`, fetchOptions);
+            if (fetchDispatcher) {
+                fetchOptions.dispatcher = fetchDispatcher;
+            }
             // 发送HTTP请求
             let response = await fetch(finalConfig.url, fetchOptions);
 

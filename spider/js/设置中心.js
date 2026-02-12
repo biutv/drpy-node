@@ -435,6 +435,10 @@ var rule = {
                     vod_pic: images.lives,
                     vod_desc: "流式代理mp4等视频"
                 });
+                d.push(genMultiInput('enable_doh', '设置DOH启用状态', '设置为1开启(默认0关闭)', images.settings));
+                d.push(getInput('get_enable_doh', '查看DOH启用状态', images.settings));
+                d.push(genMultiInput('enable_system_proxy', '设置系统代理启用状态', '设置为0关闭(默认1开启)', images.settings));
+                d.push(getInput('get_enable_system_proxy', '查看系统代理启用状态', images.settings));
                 break;
             case 'apiLink':
                 d.push(genMultiInput('link_url', '设置挂载地址', '可以挂载t4配置链接如 hipy-t4、不夜t4', images.settings));
@@ -1275,6 +1279,8 @@ var rule = {
             'thread',
             'play_local_proxy_type',
             'play_proxy_mode',
+            'enable_doh',
+            'enable_system_proxy',
             'enable_dr2',
             'enable_py',
             'enable_php',
@@ -1311,6 +1317,8 @@ var rule = {
             'get_thread',
             'play_local_proxy_type',
             'get_play_proxy_mode',
+            'get_enable_doh',
+            'get_enable_system_proxy',
             'get_enable_dr2',
             'get_enable_py',
             'get_enable_php',

@@ -2,6 +2,7 @@ import path from "path";
 import {fileURLToPath} from "url";
 import {existsSync, readFileSync, writeFileSync, unlinkSync} from "fs";
 import {LRUCache} from "lru-cache";
+import {fastify} from "../controllers/fastlogger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const _envPath = path.join(__dirname, "../config/env.json");
@@ -35,7 +36,7 @@ export const ENV = {
             const content = readFileSync(this._envPath, "utf-8");
             return JSON.parse(content);
         } catch (e) {
-            console.error(`[_readEnvFile] Failed to read or parse env file: ${e.message}`);
+            fastify.log.error(`[_readEnvFile] Failed to read or parse env file: ${e.message}`);
             return {};
         }
     },
@@ -48,7 +49,7 @@ export const ENV = {
     _writeEnvFile(envObj) {
         // 尝试创建锁文件
         if (existsSync(this._lockPath)) {
-            console.error("[_writeEnvFile] Another process is currently writing to the env file.");
+            fastify.log.error("[_writeEnvFile] Another process is currently writing to the env file.");
             throw new Error("File is locked. Please retry later.");
         }
 
@@ -59,7 +60,7 @@ export const ENV = {
             // 写入环境变量文件
             writeFileSync(this._envPath, JSON.stringify(envObj, null, 2), "utf-8");
         } catch (e) {
-            console.error(`[_writeEnvFile] Failed to write to env file: ${e.message}`);
+            fastify.log.error(`[_writeEnvFile] Failed to write to env file: ${e.message}`);
         } finally {
             // 移除锁文件
             if (existsSync(this._lockPath)) {
@@ -92,7 +93,8 @@ export const ENV = {
             // console.log(`从内存缓存中读取: ${key}`);
             return cache.get(key);
         }
-        console.log(`[get] 从文件中读取: ${key}`);
+        // console.log(`[get] 从文件中读取: ${key}`);
+        fastify.log.info(`[get] 从文件中读取: ${key}`);
         const envObj = this._readEnvFile();
         let value = envObj[key] || _value;
 
@@ -102,7 +104,7 @@ export const ENV = {
                 value = JSON.parse(value);
             } catch (e) {
                 value = {};
-                console.error(`[get] Failed to parse value for key "${key}" as object: ${e.message}`);
+                fastify.log.error(`[get] Failed to parse value for key "${key}" as object: ${e.message}`);
             }
         }
 
@@ -130,7 +132,7 @@ export const ENV = {
                 value = JSON.parse(value);
             } catch (e) {
                 value = {};
-                console.error(`[set] Failed to parse value for key "${key}" as object: ${e.message}`);
+                fastify.log.error(`[set] Failed to parse value for key "${key}" as object: ${e.message}`);
             }
         }
 
@@ -161,7 +163,7 @@ export const ENV = {
             cache.delete(key);
             cache.delete(FULL_ENV_CACHE_KEY);
         } else {
-            console.warn(`[delete] Key "${key}" does not exist in env file.`);
+            fastify.log.warn(`[delete] Key "${key}" does not exist in env file.`);
         }
     },
 };
