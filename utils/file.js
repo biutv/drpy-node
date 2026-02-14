@@ -16,14 +16,28 @@ import '../libs_drpy/jinja.js'
 // 获取当前模块的目录路径
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function resolvePath(dir, relativePath) {
+    let p = path.join(dir, relativePath);
+    if (existsSync(p)) return p;
+    let fixedRelative = relativePath.replace(/^\.\.[\\\/]/, './');
+    let p2 = path.join(dir, fixedRelative);
+    if (existsSync(p2)) return p2;
+    // Try going up one more level (useful for dist/ bundle)
+    if (relativePath.startsWith('..')) {
+        let p3 = path.join(dir, '../' + relativePath);
+        if (existsSync(p3)) return p3;
+    }
+    return p;
+}
+
 // 定义核心路径常量
-const _data_path = path.join(__dirname, '../data');      // 数据文件存储路径
-const _lib_path = path.join(__dirname, '../spider/js');  // 库文件路径
-const _jx_path = path.join(__dirname, '../jx');          // 解析文件路径
+const _data_path = resolvePath(__dirname, '../data');      // 数据文件存储路径
+const _lib_path = resolvePath(__dirname, '../spider/js');  // 库文件路径
+const _jx_path = resolvePath(__dirname, '../jx');          // 解析文件路径
 
 export {getSitesMap} from "./sites-map.js";
 // ES6扩展代码路径和内容
-const es6JsPath = path.join(__dirname, '../libs_drpy/es6-extend.js');
+const es6JsPath = resolvePath(__dirname, '../libs_drpy/es6-extend.js');
 /**
  * ES6扩展代码
  * 包含ES6语法扩展和兼容性代码
@@ -31,7 +45,7 @@ const es6JsPath = path.join(__dirname, '../libs_drpy/es6-extend.js');
 export const es6_extend_code = readFileSync(es6JsPath, 'utf8');
 
 // 网络请求扩展代码路径和内容
-const reqJsPath = path.join(__dirname, '../libs_drpy/req-extend.js');
+const reqJsPath = resolvePath(__dirname, '../libs_drpy/req-extend.js');
 /**
  * 网络请求扩展代码
  * 包含HTTP请求相关的扩展功能

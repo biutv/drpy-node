@@ -2,13 +2,13 @@
 //
 
 const keystr =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 /**
  * Implementation of atob() according to the HTML and Infra specs, except that
  * instead of throwing INVALID_CHARACTER_ERR we return null.
  */
-function atob(data) {
+export function atob(data) {
     if (arguments.length === 0) {
         throw new TypeError('1 argument required, but only 0 present.');
     }
@@ -56,14 +56,14 @@ function atob(data) {
     //
     // "While position does not point past the end of data:"
     for (let i = 0; i < data.length; i++) {
-    // "Find the code point pointed to by position in the second column of
-    // Table 1: The Base 64 Alphabet of RFC 4648. Let n be the number given in
-    // the first cell of the same row.
-    //
-    // "Append to buffer the six bits corresponding to n, most significant bit
-    // first."
-    //
-    // atobLookup() implements the table from RFC 4648.
+        // "Find the code point pointed to by position in the second column of
+        // Table 1: The Base 64 Alphabet of RFC 4648. Let n be the number given in
+        // the first cell of the same row.
+        //
+        // "Append to buffer the six bits corresponding to n, most significant bit
+        // first."
+        //
+        // atobLookup() implements the table from RFC 4648.
         buffer <<= 6;
         buffer |= atobLookup(data[i]);
         accumulatedBits += 6;
@@ -77,7 +77,7 @@ function atob(data) {
             output += String.fromCharCode(buffer & 0xff);
             buffer = accumulatedBits = 0;
         }
-    // "Advance position by 1."
+        // "Advance position by 1."
     }
 
     // "If buffer is not empty, it contains either 12 or 18 bits. If it contains
@@ -115,7 +115,7 @@ function atobLookup(chr) {
  * btoa() as defined by the HTML and Infra specs, which mostly just references
  * RFC 4648.
  */
-function btoa(s) {
+export function btoa(s) {
     if (arguments.length === 0) {
         throw new TypeError('1 argument required, but only 0 present.');
     }
@@ -139,7 +139,7 @@ function btoa(s) {
     let out = '';
 
     for (i = 0; i < s.length; i += 3) {
-        const groupsOfSix = [ undefined, undefined, undefined, undefined ];
+        const groupsOfSix = [undefined, undefined, undefined, undefined];
 
         groupsOfSix[0] = s.charCodeAt(i) >> 2;
         groupsOfSix[1] = (s.charCodeAt(i) & 0x03) << 4;

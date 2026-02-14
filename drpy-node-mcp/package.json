@@ -1,0 +1,14 @@
+{
+  "name": "drpy-node-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for drpy-node",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1",
+    "fs-extra": "^11.2.0",
+    "node-sqlite3-wasm": "^0.8.53",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.25.1"
+  }
+}

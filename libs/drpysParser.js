@@ -61,6 +61,8 @@ class PageRequestCache {
             this.delete(key);
             console.log(`[PageRequestCache] 自动清理过期缓存: ${key}`);
         }, this.maxAge);
+        // 让定时器不阻止进程退出
+        if (timer.unref) timer.unref();
         this.timers.set(key, timer);
 
         console.log(`[PageRequestCache] 缓存已设置: ${key}, 当前缓存数量: ${this.cache.size}`);

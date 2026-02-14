@@ -6,7 +6,7 @@
     Released under the MulanPSL2 License.
 */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('pako')) :
+  typeof exports === 'object' && typeof module !== 'undefined' ? (module.exports = factory(require('pako')), (typeof globalThis !== 'undefined' ? globalThis : global || self).CryptoJSWasm = module.exports) :
   typeof define === 'function' && define.amd ? define(['pako'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.CryptoJSWasm = factory(global.pako));
 })(this, (function (pako) { 'use strict';
