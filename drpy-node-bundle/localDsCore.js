@@ -80,15 +80,38 @@ async function getEngine(moduleName, query, inject_env) {
      * @returns {Object} 环境对象，包含各种URL和配置
      */
     function getEnv(moduleName) {
-        const proxyUrl = inject_env.proxyUrl || "http://127.0.0.1:9978/proxy?do=node";
+        // const proxyUrl = inject_env.proxyUrl || "http://127.0.0.1:9978/proxy?do=node";
+        const {
+            jsonUrl = "http://127.0.0.1:9978/json",
+            publicUrl = "http://127.0.0.1:9978/public",
+            requestHost = "http://127.0.0.1:9978",
+            hostname = "127.0.0.1:9978",
+            hostUrl = "127.0.0.1",
+            proxyUrl = `http://127.0.0.1:9978/proxy?do=node&siteKey=${moduleName}`,
+            httpUrl, imageApi, mediaProxyUrl, webdavProxyUrl, ftpProxyUrl,
+            wsName, fServer,
+        } = inject_env;
         const getProxyUrl = function () {
             return proxyUrl
         };
         return {
+            httpUrl,
+            imageApi,
+            mediaProxyUrl,
+            webdavProxyUrl,
+            ftpProxyUrl,
+            wsName,
+            fServer,
+            // 下面这些很常用
+            hostUrl,
+            jsonUrl,
+            publicUrl,
+            requestHost,
+            hostname,
             proxyUrl,
             getProxyUrl,
             ext: moduleExt,
-            moduleName: moduleName
+            moduleName: moduleName,
         }
     }
 
