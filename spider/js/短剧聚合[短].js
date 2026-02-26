@@ -5,7 +5,7 @@
   quickSearch: 1,
   title: '聚合短剧[短]',
   author: 'EylinSir',
-  '类型': '聚合短剧',
+  '类型': '短剧',
   lang: 'ds'
 })
 */
@@ -84,7 +84,7 @@ async function getHeaderX() {
 
 // === 主规则 ===
 var rule = {
-  类型: '聚合短剧',
+  类型: '短剧',
   title: '聚合短剧[短]',
   author: 'EylinSir',
   host: '',

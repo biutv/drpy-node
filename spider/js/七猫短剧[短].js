@@ -4,7 +4,7 @@
   filterable: 1,
   quickSearch: 0,
   title: '七猫短剧',
-  '类型': '影视',
+  '类型': '短剧',
   lang: 'ds'
 })
 */
@@ -77,6 +77,7 @@ async function getHeaderX() {
 
 var rule = {
     title: '七猫短剧',
+    类型: '短剧',
     host: h_ost,
     homeUrl: '/api/v1/playlet/index?tag_id=0&playlet_privacy=1&operation=1',
     searchUrl: '/api/v1/playlet/search?keyword=fykey&page=fypage',

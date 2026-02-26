@@ -5,7 +5,7 @@
   quickSearch: 0,
   title: '番茄短剧',
   logo: 'https://www.18zf.net/d/file/p/2023/1107/3ty5orktxrc.jpg',
-  '类型': '影视',
+  '类型': '短剧',
   lang: 'ds'
 })
 */
@@ -13,6 +13,7 @@
 //搜索结果为书籍
 var rule = {
     title: '番茄短剧',
+    '类型': '短剧',
     host: 'http://fqgo.52dns.cc',
     url: '/catalog?book_id=fyclass',
     searchUrl: '/search?query=**&tab_type=12&offset=fypage',

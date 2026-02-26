@@ -4,13 +4,14 @@
   filterable: 1,
   quickSearch: 0,
   title: '西饭短剧[短]',
-  '类型': '影视',
+  '类型': '短剧',
   lang: 'ds'
 })
 */
 
 var rule = {
     title: '西饭短剧[短]',
+    类型:'短剧',
     host: 'https://xifan-api-cn.youlishipin.com',
     homeUrl: '/xifan/drama/portalPage?reqType=duanjuCategory&version=2001001&androidVersionCode=28',
     searchUrl: '**',

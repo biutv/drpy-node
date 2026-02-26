@@ -4,6 +4,7 @@
   filterable: 1,
   quickSearch: 1,
   title: '星芽短剧',
+  类型: '短剧',
   lang: 'ds'
 })
 */
@@ -13,7 +14,7 @@
 // http://localhost:5757/api/星芽短剧?wd=龙王&pg=1
 // http://localhost:5757/api/星芽短剧?play=http://qcapp.xingya.com.cn/h265/wz_mp40905dingtianhou01.mp4?sign=4db245c4e9cd5bd3d3026e2e0f6147a6&t=674ee966&flag=星芽短剧
 var rule = {
-    类型: '影视',
+    类型: '短剧',
     title: '星芽短剧',
     desc: '星芽短剧纯js版本',
     host: 'https://app.whjzjx.cn',

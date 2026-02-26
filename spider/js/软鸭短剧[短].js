@@ -4,13 +4,14 @@
   filterable: 1,
   quickSearch: 0,
   title: '软鸭短剧',
-  '类型': '影视',
+  '类型': '短剧',
   lang: 'ds'
 })
 */
 
 var rule = {
     title: '软鸭短剧',
+    类型: '短剧',
     host: 'https://api.xingzhige.com',
     homeUrl: '/API/playlet/?keyword=擦边&page=1',
     searchUrl: '/API/playlet/?keyword=fykey&page=fypage',

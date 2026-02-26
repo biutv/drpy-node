@@ -4,13 +4,14 @@
   filterable: 1,
   quickSearch: 0,
   title: '牛牛短句[短]',
-  '类型': '影视',
+  '类型': '短剧',
   lang: 'ds'
 })
 */
 
 var rule = {
     title: '牛牛短句[短]',
+    类型: '短剧',
     host: 'https://new.tianjinzhitongdaohe.com',
     homeUrl: '/api/v1/app/screen/screenType',
     searchUrl: '/api/v1/app/search/searchMovie',
@@ -98,7 +99,7 @@ var rule = {
     },
 
     二级: async function () {
-        const { orId } = this;
+        const {orId} = this;
         let did = orId;
         let bofang = '';
         let xianlu = '';
