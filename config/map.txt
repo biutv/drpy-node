@@ -67,3 +67,4 @@ AppYqk@@{"host":"https://gapi0725.5p8jcjc.com/config.json,https://gapi0725.olrv5
 php@@{"host":"https://www.baidu.com"}@@php测试
 TG频道@@?type=url&params=../json/TG频道配置.json@@TG频道[优]
 TG频道@@?type=url&params=../json/TG短剧频道.json@@短剧频道[优]
+Emby[优]@@{"host":"https://emby.bangumi.ca","userId":"80e861cbff1343bfa0bedcea78895b91","token":"8b0b16aae7e8403cb3d19969b82c3902","deviceId":"ea27caf7-9a51-4209-b1a5-374bf30c2ffd","clientVersion":"4.9.0.31","pageSize":30}@@Emby[优]

@@ -4718,6 +4718,148 @@
         return { start, stop };
     })();
 
+    /**
+     * CSS 选择器生成工具
+     * 提供简易模式和全路径模式
+     */
+
+    /**
+     * 检查选择器在文档中是否唯一
+     * @param {string} selector 
+     * @returns {boolean}
+     */
+    function isUnique(selector) {
+        try {
+            return document.querySelectorAll(selector).length === 1;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * 转义 CSS 特殊字符
+     * @param {string} str 
+     * @returns {string}
+     */
+    function escape(str) {
+        if (typeof CSS !== 'undefined' && CSS.escape) {
+            return CSS.escape(str);
+        }
+        return str.replace(/([!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+    }
+
+    /**
+     * 生成全路径选择器 (原有逻辑优化)
+     * 倾向于使用层级结构: div > div:nth-of-type(2) > span
+     * @param {HTMLElement} el 
+     * @returns {string}
+     */
+    function generateFullPathSelector(el) {
+        if (el.id) return `#${escape(el.id)}`;
+        
+        const path = [];
+        let current = el;
+        
+        while (current && current.nodeType === Node.ELEMENT_NODE) {
+            let selector = current.nodeName.toLowerCase();
+            
+            if (current.id) {
+                selector = '#' + escape(current.id);
+                path.unshift(selector);
+                break;
+            } else {
+                let sib = current, nth = 1;
+                while (sib = sib.previousElementSibling) {
+                    if (sib.nodeName.toLowerCase() == selector)
+                       nth++;
+                }
+                if (nth != 1)
+                    selector += ":nth-of-type("+nth+")";
+            }
+            path.unshift(selector);
+            current = current.parentNode;
+        }
+        return path.join(" > ");
+    }
+
+    /**
+     * 生成简易选择器
+     * 优先使用 ID > 唯一Class > 唯一Tag > Tag+Class > 组合Class > 属性 > 短路径
+     * @param {HTMLElement} el 
+     * @returns {string}
+     */
+    function generateSimpleSelector(el) {
+        const tagName = el.tagName.toLowerCase();
+
+        // 1. ID
+        if (el.id) {
+            const selector = `#${escape(el.id)}`;
+            if (isUnique(selector)) return selector;
+        }
+
+        // 2. Class handling (improved for SVG support and combinations)
+        const classAttr = el.getAttribute('class');
+        if (classAttr) {
+            const classes = classAttr.split(/\s+/).filter(c => c.trim());
+            
+            // 2.1 Single Class
+            for (const cls of classes) {
+                const selector = `.${escape(cls)}`;
+                if (isUnique(selector)) return selector;
+                
+                // Tag + Single Class
+                const tagSelector = `${tagName}${selector}`;
+                if (isUnique(tagSelector)) return tagSelector;
+            }
+
+            // 2.2 Two Classes Combination
+            if (classes.length >= 2) {
+                 for (let i = 0; i < classes.length; i++) {
+                    for (let j = i + 1; j < classes.length; j++) {
+                        const selector = `.${escape(classes[i])}.${escape(classes[j])}`;
+                        if (isUnique(selector)) return selector;
+                        
+                        const tagSelector = `${tagName}${selector}`;
+                        if (isUnique(tagSelector)) return tagSelector;
+                    }
+                 }
+            }
+            
+            // 2.3 All Classes (if more than 2)
+            if (classes.length > 2) {
+                const comboSelector = `.${classes.map(escape).join('.')}`;
+                if (isUnique(comboSelector)) return comboSelector;
+                const tagComboSelector = `${tagName}${comboSelector}`;
+                if (isUnique(tagComboSelector)) return tagComboSelector;
+            }
+        }
+
+        // 3. 唯一 Tag
+        if (isUnique(tagName)) return tagName;
+
+        // 4. 常见属性 (name, type, alt, title, aria-label)
+        const attrs = ['name', 'type', 'alt', 'title', 'aria-label', 'placeholder', 'data-id', 'data-test-id'];
+        for (const attr of attrs) {
+            const val = el.getAttribute(attr);
+            if (val) {
+                const selector = `${tagName}[${attr}="${escape(val)}"]`;
+                if (isUnique(selector)) return selector;
+            }
+        }
+        
+        // 5. 如果是链接，尝试 href
+        if (tagName === 'a' && el.href) {
+            const href = el.getAttribute('href');
+            if (href) {
+                 const selector = `a[href="${escape(href)}"]`;
+                 if (isUnique(selector)) return selector;
+            }
+        }
+
+        // 6. 降级到全路径
+        return generateFullPathSelector(el);
+    }
+
     const ElementPicker = (() => {
         let active = false;
         let overlay = null;
@@ -4841,34 +4983,13 @@
 
         // 生成唯一的 CSS 选择器
         function generateSelector(el) {
-            if (el.id) return `#${el.id}`;
-            
-            const path = [];
-            let current = el;
-            
-            while (current && current.nodeType === Node.ELEMENT_NODE) {
-                let selector = current.nodeName.toLowerCase();
-                
-                if (current.id) {
-                    selector = '#' + current.id;
-                    path.unshift(selector);
-                    break;
-                } else {
-                    let sib = current, nth = 1;
-                    while (sib = sib.previousElementSibling) {
-                        if (sib.nodeName.toLowerCase() == selector)
-                           nth++;
-                    }
-                    if (nth != 1)
-                        selector += ":nth-of-type("+nth+")";
-                }
-                path.unshift(selector);
-                current = current.parentNode;
-                
-                // 限制长度，避免生成的选择器过长
-                if (path.length >= 4) break; 
+            // 0: simple (default), 1: full
+            const mode = store.get('element_picker_mode', 0);
+            if (mode === 0) {
+                return generateSimpleSelector(el);
+            } else {
+                return generateFullPathSelector(el);
             }
-            return path.join(" > ");
         }
 
         return { start, stop };
@@ -4896,6 +5017,132 @@
     function initGrayMode() {
         const enabled = store.get('gray_mode_enabled', 0) === 1;
         setGrayMode(enabled);
+    }
+
+    let styleEl = null;
+
+    // 针对特定事件的处理器，确保允许默认行为
+    const allowHandler = (e) => {
+        e.stopImmediatePropagation(); // 阻止其他监听器执行
+        return true;
+    };
+
+    function setUnlockCopy(enable) {
+        // 定义需要拦截的事件列表
+        const events = ['copy', 'cut', 'paste', 'selectstart', 'contextmenu', 'dragstart', 'mousedown', 'mouseup', 'keydown', 'keyup'];
+
+        if (enable) {
+            // 1. 注入 CSS
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.innerHTML = `
+                * {
+                    -webkit-user-select: text !important;
+                    -moz-user-select: text !important;
+                    -ms-user-select: text !important;
+                    user-select: text !important;
+                }
+            `;
+                document.head.appendChild(styleEl);
+            }
+
+            // 2. 拦截事件
+            // 使用捕获阶段，阻止事件向下一级传播，防止网页JS拦截
+            events.forEach(evt => {
+                window.addEventListener(evt, allowHandler, true);
+                document.addEventListener(evt, allowHandler, true);
+            });
+
+            // 3. 定时清理内联属性 (暴力清除)
+            window._unlockTimer = setInterval(() => {
+                try {
+                    const targets = [document, document.body];
+                    const props = ['oncopy', 'oncut', 'onpaste', 'onselectstart', 'oncontextmenu'];
+                    targets.forEach(t => {
+                        if(!t) return;
+                        props.forEach(p => {
+                            t[p] = null;
+                        });
+                    });
+                } catch(e) {}
+            }, 1000);
+            
+            Toast.show('提示', '已开启解除复制限制\n现在可以尝试选择文本并复制');
+        } else {
+            // 1. 移除 CSS
+            if (styleEl) {
+                styleEl.remove();
+                styleEl = null;
+            }
+
+            // 2. 移除事件监听
+            events.forEach(evt => {
+                window.removeEventListener(evt, allowHandler, true);
+                document.removeEventListener(evt, allowHandler, true);
+            });
+            
+            // 3. 清除定时器
+            if (window._unlockTimer) {
+                clearInterval(window._unlockTimer);
+                window._unlockTimer = null;
+            }
+
+            Toast.show('提示', '已关闭解除复制限制');
+        }
+    }
+
+
+
+    // 强制复制选中文本
+    async function forceCopySelection() {
+        const selection = window.getSelection();
+        const text = selection.toString();
+        
+        if (!text) {
+            Toast.show('提示', '请先选择要复制的文本');
+            return;
+        }
+
+        // 优先使用 GM_setClipboard (它不依赖页面事件，也不受拦截器影响)
+        if (typeof GM_setClipboard !== 'undefined') {
+            try {
+                GM_setClipboard(text, 'text');
+                Toast.show('成功', '已强制复制选中内容到剪切板');
+                return;
+            } catch (e) {
+                console.error('GM_setClipboard 失败，降级尝试:', e);
+            }
+        }
+
+        // 如果必须使用 navigator.clipboard.writeText
+        // 临时禁用拦截器，确保复制操作能通过
+        const wasEnabled = styleEl !== null; // 通过 styleEl 判断是否开启
+        const events = ['copy', 'cut', 'paste', 'selectstart', 'contextmenu', 'dragstart', 'mousedown', 'mouseup', 'keydown', 'keyup'];
+
+        try {
+            if (wasEnabled) {
+                events.forEach(evt => {
+                    window.removeEventListener(evt, allowHandler, true);
+                    document.removeEventListener(evt, allowHandler, true);
+                });
+            }
+
+            await navigator.clipboard.writeText(text);
+            Toast.show('成功', '已复制选中内容');
+
+        } catch (err) {
+            console.error('复制失败:', err);
+            Toast.show('错误', '复制失败: ' + err.message);
+        } finally {
+            // 恢复拦截器 (放在 finally 块中确保总是执行)
+            // 重新检查 styleEl 状态，因为在此期间可能被关闭
+            if (styleEl !== null) {
+                events.forEach(evt => {
+                    window.addEventListener(evt, allowHandler, true);
+                    document.addEventListener(evt, allowHandler, true);
+                });
+            }
+        }
     }
 
     function toggleLog() {
@@ -5194,6 +5441,17 @@
         setGrayMode(enable);
         const label = enable ? '开灰度' : '关灰度';
         Logger.append(`[开关集] ${label}`);
+    }
+
+    function toggleUnlockCopy(enable) {
+        setUnlockCopy(enable);
+        const label = enable ? '开复制' : '关复制';
+        Logger.append(`[开关集] ${label}`);
+    }
+
+    function copySelection() {
+        forceCopySelection();
+        Logger.append(`[工具] 强制复制选中文本`);
     }
 
     async function configSafeCode() {
@@ -5622,6 +5880,7 @@
         
         // 第4列：定时任务、推送文本
         { id: 'schedule-open', label: '定时任务', column: 4, handler: toggleScheduleManager },
+        { id: 'force-copy', label: '复制选中', column: 4, handler: copySelection },
         
         // 第5列：配置集、开关集、指令集
         { id: 'cfg-open', label: '配置集', column: 5, handler: toggleGroup('配置集') },
@@ -5653,6 +5912,14 @@
             storeKey: 'gray_mode_enabled',
             handler: makeToggle('gray-mode', '开灰度', '关灰度', 'gray_mode_enabled', (enabled) => toggleGrayMode(enabled))
         },
+        {
+            id: 'unlock-copy',
+            label: '开复制',
+            group: '开关集',
+            isToggle: true,
+            storeKey: 'unlock_copy_enabled',
+            handler: makeToggle('unlock-copy', '开复制', '关复制', 'unlock_copy_enabled', (enabled) => toggleUnlockCopy(enabled))
+        },
 
         // 分组：配置集
         {
@@ -5680,6 +5947,14 @@
             isToggle: true,
             storeKey: 'remote_commands_enabled',
             handler: makeToggle('cfg-remote-enable', '启用远程指令', '禁用远程指令', 'remote_commands_enabled')
+        },
+        {
+            id: 'cfg-picker-mode',
+            label: '模式: 简易',
+            group: '配置集',
+            isToggle: true,
+            storeKey: 'element_picker_mode',
+            handler: makeToggle('cfg-picker-mode', '模式: 简易', '模式: 全路径', 'element_picker_mode')
         },
         // 组内按钮：推送文本
         {

@@ -146,7 +146,9 @@ const init = async function (filePath, env = {}, refresh) {
         // console.log('globalThis.ENV:', globalThis.ENV);
         // console.log('globalThis.getProxyUrl:', globalThis.getProxyUrl);
         // 加载 init
-        await rule.init(default_init_cfg);
+        if (typeof rule.init === 'function') {
+            await rule.init(default_init_cfg);
+        }
         let t2 = getNowTime();
         const moduleObject = deepCopy(rule);
         moduleObject.cost = t2 - t1;

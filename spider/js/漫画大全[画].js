@@ -42,7 +42,7 @@ var rule = {
     double: true,
     一级: async function (tid, pg, filter, extend) {
         let [url, params] = this.input.split('?');
-        let html = await post(url, {body: params});
+        let html = await post(url, {body: params, headers: rule.headers});
         let items = html.parseX.itemsList;
         let d = [];
         items.forEach(function (item) {
@@ -58,7 +58,7 @@ var rule = {
     },
     二级: async function (ids) {
         let [url, params] = this.input.split('?');
-        let html = await post(url, {body: params});
+        let html = await post(url, {body: params, headers: rule.headers});
         let json = html.parseX;
         let vod = {
             "vod_name": json.title,
@@ -78,7 +78,7 @@ var rule = {
     },
     搜索: async function (wd, quick, pg) {
         let [url, params] = this.input.split('?');
-        let html = await post(url, {body: params});
+        let html = await post(url, {body: params, headers: rule.headers});
         let items = html.parseX.searchList;
         let d = [];
         items.forEach(function (item) {
