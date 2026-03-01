@@ -9,7 +9,7 @@ const SECURITY_CODE = process.env.CLIPBOARD_SECURITY_CODE || '';
 
 // 接口basic验证
 export const validateBasicAuth = (request, reply, done) => {
-    if (!process.env.hasOwnProperty('API_AUTH_NAME') && !process.env.hasOwnProperty('API_AUTH_CODE')) {
+    if (!('API_AUTH_NAME' in process.env) && !('API_AUTH_CODE' in process.env)) {
         done();
         return
     }

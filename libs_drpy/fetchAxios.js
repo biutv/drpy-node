@@ -6,7 +6,7 @@ import FormData from 'form-data';
 import https from "https";
 import diagnosticsChannel from 'diagnostics_channel';
 import {resolveDoh, getSystemProxy} from '../utils/dns_doh.js';
-import {ProxyAgent} from 'undici';
+import {ProxyAgent, Agent} from 'undici';
 
 let undiciStripUASubscribed = false;
 
@@ -130,12 +130,15 @@ class FetchAxios {
         }
 
         // Proxy and DOH Handling
-        let fetchDispatcher = undefined;
+        let fetchDispatcher = new Agent({connect: {rejectUnauthorized: false}});
         try {
             const proxy = await getSystemProxy();
             if (proxy) {
                 // If proxy detected, use it via Undici ProxyAgent
-                fetchDispatcher = new ProxyAgent(proxy);
+                fetchDispatcher = new ProxyAgent({
+                    uri: proxy,
+                    connect: {rejectUnauthorized: false}
+                });
                 // When using proxy, we generally rely on the proxy for DNS, so we can skip DOH 
                 // unless we want to force DOH even with Proxy (which is complex).
                 // "Python requests" logic usually means: if proxy env var, use proxy.

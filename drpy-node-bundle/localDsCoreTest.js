@@ -1,4 +1,5 @@
 // import * as localtDsCore from './localDsCore.js';
+const start = performance.now();
 import * as localtDsCore from './libs/localDsCore.bundled.js';
 
 console.log(getEngine)
@@ -12,3 +13,6 @@ console.log(getEngine)
 // console.log(d)
 const e = await getEngine('B站 ᵈᶻ', {do: 'php'})
 console.log(e)
+const end = performance.now();
+
+console.log(`耗时: ${end - start} ms`);

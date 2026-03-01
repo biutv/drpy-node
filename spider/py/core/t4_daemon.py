@@ -11,7 +11,7 @@
 import hashlib
 import importlib
 import importlib.util
-import ujson
+import json
 import logging
 import os
 import pickle
@@ -131,7 +131,7 @@ def recv_packet(rfile) -> dict:
         raise ValueError("invalid length")
     payload = recv_exact(rfile, length)
     try:
-        return ujson.loads(payload.decode("utf-8"))
+        return json.loads(payload.decode("utf-8"))
     except Exception:
         return pickle.loads(payload)
 
@@ -257,8 +257,8 @@ class SpiderManager:
         # 标准化为 dict
         if isinstance(env_str, str):
             try:
-                data = ujson.loads(env_str)
-            except (ujson.JSONDecodeError, TypeError):
+                data = json.loads(env_str)
+            except (json.JSONDecodeError, TypeError):
                 return "", ""
         elif isinstance(env_str, dict):
             data = env_str
@@ -270,7 +270,7 @@ class SpiderManager:
 
         # 如果 ext 是 dict 或 list，转为 JSON 字符串
         if isinstance(ext, (dict, list)):
-            ext = ujson.dumps(ext, ensure_ascii=False)
+            ext = json.dumps(ext, ensure_ascii=False)
 
         if proxy_url and not '&extend=' in proxy_url:
             proxy_url += f'&extend={quote(ext)}'
@@ -678,7 +678,7 @@ class SpiderManager:
                 parsed_args.append(a)
             elif isinstance(a, str):
                 try:
-                    parsed_args.append(ujson.loads(a))
+                    parsed_args.append(json.loads(a))
                 except Exception:
                     parsed_args.append(a)
             else:

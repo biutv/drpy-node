@@ -53,7 +53,8 @@ class BaseSpider(metaclass=ABCMeta):  # 元类 默认的元类 type
         self.extend = ''
         self.ENV = _ENV
         self._cache = {}
-        self.log(f'BaseSpider __init__ t4_api:{t4_api}')
+        # self.log(f'BaseSpider __init__ t4_api:{t4_api}')
+        print(f'BaseSpider __init__ t4_api:{t4_api}')
 
     def __new__(cls, *args, **kwargs):
         if cls._instance:

@@ -198,7 +198,7 @@ var rule = {
         return setResult(extractVideos(json));
     },
 
-    // 二级详情：按功能模块拆分，每个模块空行分隔
+// 二级详情：按功能模块拆分，每个模块空行分隔
     二级: async function (ids) {
         // 1. 获取基础信息
         const detailUrl = `${config.host}/emby/Users/${config.userId}/Items/${ids}?` +
@@ -270,8 +270,13 @@ var rule = {
                     `Fields=Overview,PrimaryImageAspectRatio&Limit=1000`;
                 const episodes = (JSON.parse(await fetchApi(episodesUrl))).Items || [];
 
+                // 仅新增：添加第几集的序号显示
                 result.push(episodes.map(function (item) {
-                    return `${item.Name}$${item.Id}`;
+                    // 获取集序号，兜底处理
+                    const episodeNum = item.IndexNumber ? `第${item.IndexNumber}集` : "未知集数";
+                    // 拼接序号和原名称
+                    const fullName = item.Name ? `${episodeNum} ${item.Name}` : episodeNum;
+                    return `${fullName}$${item.Id}`;
                 }).join("#"));
             }
 
@@ -284,7 +289,6 @@ var rule = {
 
         return VOD;
     },
-
     // 搜索：URL拆分，逻辑简洁清晰
     搜索: async function (wd, quick, pg = 1) {
         const url = `${config.host}/emby/Users/${config.userId}/Items?` +

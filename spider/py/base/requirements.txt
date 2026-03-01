@@ -2,7 +2,6 @@
 requests
 lxml
 pycryptodome
-ujson
 pyquery
 jsonpath
 json5

@@ -11,6 +11,7 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 ### 常用超链接
 
 * [本项目主页-免翻](https://git-proxy.playdreamer.cn/hjdhnx/drpy-node)
+* [DS源仓库-去中心化](http://183.87.133.60:5678/)
 * ~~[最新DS本地包-适配皮卡丘](/gh/release)~~
 * [DS本地包下载中心](/admin/download)
 * [接口文档](docs/apidoc.md) | [接口列表如定时任务](docs/apiList.md) |
@@ -69,6 +70,10 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [皮卡丘](https://github.com/ingriddaleusag-dotcom/PeekPiliRelease)
 
 ## 更新记录
+
+### 20260301
+
+更新至V1.3.27
 
 ### 20260228
 
