@@ -87,20 +87,32 @@ const restartService = async () => {
   restarting.value = true
   try {
     const result = await systemStore.restartService()
-    // Parse MCP response format: { content: [{ type: "text", text: '{"success":true,"message":"..."}' }] }
+    
     let message = '操作已完成'
-    try {
-      // MCP 响应格式
-      if (result?.content?.[0]?.text) {
-        const parsed = JSON.parse(result.content[0].text)
-        message = parsed.message || message
-      } else if (typeof result === 'string') {
+    
+    if (result && typeof result === 'object') {
+      if (result.message) {
+        message = result.message
+      } else if (result.error) {
+        message = '操作失败: ' + result.error
+      } else if (result.content && result.content[0] && result.content[0].text) {
+        // 兼容旧版 MCP 响应格式
+        try {
+          const parsed = JSON.parse(result.content[0].text)
+          message = parsed.message || message
+        } catch {
+          // ignore
+        }
+      }
+    } else if (typeof result === 'string') {
+      try {
         const parsed = JSON.parse(result)
         message = parsed.message || result
+      } catch {
+        message = result
       }
-    } catch {
-      message = '操作已完成，请检查服务状态'
     }
+    
     alert(message)
   } catch (e) {
     alert('重启失败: ' + e.message)
@@ -359,6 +371,13 @@ const restartService = async () => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
           </svg>
           <span class="text-sm font-medium">插件管理</span>
+        </RouterLink>
+
+        <RouterLink to="/crypto" class="flex flex-col items-center justify-center gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span class="text-sm font-medium">加解密</span>
         </RouterLink>
 
         <RouterLink v-if="isTerminalAvailable" to="/terminal" class="flex flex-col items-center justify-center gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
