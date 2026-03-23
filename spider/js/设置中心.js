@@ -282,7 +282,7 @@ var rule = {
             'bili': urljoin(publicUrl, './images/icon_cookie/哔哩.png'),
             'cloud': urljoin(publicUrl, './images/icon_cookie/天翼.png'),
             'baidu': urljoin(publicUrl, './images/icon_cookie/百度.png'),
-            'xun': urljoin(publicUrl,'./images/icon_cookie/迅雷.jpg'),
+            'xun': urljoin(publicUrl, './images/icon_cookie/迅雷.jpg'),
             'adult': urljoin(publicUrl, './images/icon_cookie/chat.webp'),
             'test': urljoin(publicUrl, './icon.svg'),
             'lives': urljoin(publicUrl, './images/lives.jpg'),
@@ -520,12 +520,14 @@ var rule = {
         if (orId === 'proxyStream') {
             let media_url = 'https://vdse.bdstatic.com/628ca08719cef5987ea2ae3c6f0d2386.mp4';
             let m3u8_url = 'http://kjsp.aikan.miguvideo.com/PLTV/88888888/224/3221236432/1.m3u8';
+            let dz_url = `http://127.0.0.1:5575/proxy?thread=${ENV.get('thread') || 6}&chunkSize=256&url=` + encodeURIComponent(media_url);
+            log('dz_url', dz_url);
             return {
                 vod_id: 'proxyStream',
                 vod_name: '测试代理流',
                 vod_play_from: 'drpyS本地流代理',
                 // vod_play_url: '测试播放流$' + getProxyUrl().split('?')[0] + media_url + '#不代理直接播$' + media_url + '#8k播放$' + m3u8_url,
-                vod_play_url: '测试播放流$' + getProxyUrl().split('?')[0] + media_url + '#不代理直接播$' + media_url
+                vod_play_url: '测试播放流$' + getProxyUrl().split('?')[0] + media_url + '#道长GO$' + dz_url + '#不代理直接播$' + media_url
             }
         }
     },
@@ -550,21 +552,21 @@ var rule = {
     },
     action: async function (action, value) {
         let {httpUrl, imageApi, requestHost, publicUrl} = this;
-        if (action === '迅雷登录'){
-            if(ENV.get('xun_username')!==''){
+        if (action === '迅雷登录') {
+            if (ENV.get('xun_username') !== '') {
                 await Xun.getVerifyCode()
                 return {action: getVerify('verify', '验证码', '请输入验证码').vod_id}
-            }else {
+            } else {
                 return '账号不能为空！'
             }
         }
-        if (action === 'verify' && value){
-            ENV.set('xun_auth','')
+        if (action === 'verify' && value) {
+            ENV.set('xun_auth', '')
             let verification_code = JSON.parse(value).verify;
             await Xun.getVerify(verification_code)
-            if(ENV.get('xun_auth')!==''){
+            if (ENV.get('xun_auth') !== '') {
                 return '登录成功'
-            }else {
+            } else {
                 return '登录失败'
             }
         }

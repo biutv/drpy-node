@@ -604,8 +604,7 @@ class XunDriver {
                     if (this.host === '') {
                         this.host = new URL(it.link.url).host
                     }
-                    urls.push(it.media_name, it.link.url + "#isVideo=true##fastPlayMode##threads=20#")
-                    urls.push("猫画" + it.media_name, `http://127.0.0.1:5575/proxy?thread=${ENV.get('thread') || 6}&chunkSize=256&url=` + encodeURIComponent(it.link.url))
+                    urls.push(it.media_name, 'https://web-vod-xdrive.xunlei.com/ts_downloader?url=' + encodeURIComponent(it.link.url))
                 }
             })
             return urls
@@ -933,6 +932,7 @@ class XunDriver {
             await this.deleteFile()
             await this.saveFile(fileId, share_id, pass_code_token)
             let vodID = await this.getVodId()
+
             let x_captcha_token = await this.getDownload_CAPTCHA_TOKEN()
             let config = {
                 method: 'GET',
