@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:  # 添加这行，允许手动触发
+    inputs:           # 可选：添加输入参数
+      tag_name:
+        description: 'Tag name to use (if not using push tag)'
+        required: false
+        default: ''
 
 env:
   NODE_VERSION: '22'  # 使用 Node.js 22 版本
