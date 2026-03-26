@@ -6,6 +6,12 @@ on:
       - main
     tags:
       - v*
+  workflow_dispatch:  # 添加这行，支持手动触发
+    inputs:
+      version_override:
+        description: 'Override version (optional)'
+        required: false
+        default: ''
 
 env:
   REGISTRY: ghcr.io
